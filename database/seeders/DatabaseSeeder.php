@@ -21,5 +21,8 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        // Seed akun admin default MABIPRO
+        $this->call(AdminSeeder::class);
     }
 }
