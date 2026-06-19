@@ -5,7 +5,7 @@ use App\Livewire\PaymentReport;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('marketing.dashboard');
 });
 
 Route::get('/dashboard', MarketingDashboard::class)->name('marketing.dashboard');

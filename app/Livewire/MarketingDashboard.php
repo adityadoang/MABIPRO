@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Block;
 use App\Models\Unit;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Computed;
 use Livewire\WithFileUploads;
 
 #[Layout('layouts.app')]
@@ -13,63 +14,239 @@ class MarketingDashboard extends Component
 {
     use WithFileUploads;
 
+    // Modal state
     public $isPaymentModalOpen = false;
     public $selectedUnitId;
+
+    // Metode pembayaran
     public $paymentMethod;
-    public $kprDurationMonths;
-    public $amountPaid;
+
+    // ── Cash ──
+    public $amountPaid;       // Nominal yang sudah diterima developer (DP / Lunas)
     public $paymentProof;
+
+    // ── KPR: Info Unit ──
+    public $hargaUnit;
+    public $kprType        = 'non_subsidi';   // subsidi / non_subsidi
+    public $bankName;
+    public $akadDate;
+
+    // ── KPR: Down Payment ──
+    public $dpAmount;
+    public $dpPercentage;
+
+    // ── KPR: Kredit ──
+    public $kprDurationMonths;
+    public $interestRate;
+    public $interestType   = 'anuitas';       // anuitas / flat
+
+    // ── KPR: Read-only computed display ──
+    public $pokokKredit         = 0;
+    public $monthlyInstallment  = 0;
+    public $totalPayment        = 0;
+    public $totalInterest       = 0;
+    public $sisaTagihan         = 0;
+
+    // ─────────────────────────────────────────────────────────────
+    // Status Update
+    // ─────────────────────────────────────────────────────────────
 
     public function updateStatus($unitId, $newStatus)
     {
         $validStatuses = ['Belum Terjual', 'Sudah DP', 'Terjual'];
-        
+
         if (in_array($newStatus, $validStatuses)) {
             $unit = Unit::findOrFail($unitId);
-            
-            // Jika dikembalikan ke 'Belum Terjual', reset data pembayaran agar tidak nyangkut
+
             if ($newStatus === 'Belum Terjual') {
                 $unit->update([
-                    'sales_status' => $newStatus,
-                    'payment_method' => null,
+                    'status_penjualan'    => $newStatus,
+                    'payment_method'      => null,
                     'kpr_duration_months' => null,
-                    'amount_paid' => null,
-                    'payment_proof_path' => null,
+                    'amount_paid'         => null,
+                    'payment_proof_path'  => null,
+                    'harga_unit'          => null,
+                    // Reset KPR fields
+                    'kpr_type'            => null,
+                    'bank_name'           => null,
+                    'akad_date'           => null,
+                    'dp_amount'           => null,
+                    'dp_percentage'       => null,
+                    'pokok_kredit'        => null,
+                    'interest_rate'       => null,
+                    'interest_type'       => null,
+                    'monthly_installment' => null,
                 ]);
             } else {
-                $unit->update(['sales_status' => $newStatus]);
+                $unit->update(['status_penjualan' => $newStatus]);
             }
-            
+
             session()->flash('message', "Status unit {$unit->unit_number} berhasil diperbarui menjadi {$newStatus}.");
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // Modal
+    // ─────────────────────────────────────────────────────────────
+
     public function openPaymentModal($unitId)
     {
         $unit = Unit::findOrFail($unitId);
-        $this->selectedUnitId = $unit->id;
-        $this->paymentMethod = $unit->payment_method;
-        $this->kprDurationMonths = $unit->kpr_duration_months;
-        $this->amountPaid = $unit->amount_paid;
-        $this->paymentProof = null; 
+        $this->selectedUnitId     = $unit->id;
+        $this->paymentMethod      = $unit->payment_method;
+        $this->amountPaid         = $unit->amount_paid;
+        $this->paymentProof       = null;
+
+        // KPR fields
+        $this->hargaUnit          = $unit->harga_unit;
+        $this->kprType            = $unit->kpr_type       ?? 'non_subsidi';
+        $this->bankName           = $unit->bank_name;
+        $this->akadDate           = $unit->akad_date;
+        $this->dpAmount           = $unit->dp_amount;
+        $this->dpPercentage       = $unit->dp_percentage;
+        $this->kprDurationMonths  = $unit->kpr_duration_months;
+        $this->interestRate       = $unit->interest_rate;
+        $this->interestType       = $unit->interest_type  ?? 'anuitas';
+
+        $this->recalculate();
         $this->isPaymentModalOpen = true;
     }
 
     public function closePaymentModal()
     {
         $this->isPaymentModalOpen = false;
-        $this->reset(['selectedUnitId', 'paymentMethod', 'kprDurationMonths', 'amountPaid', 'paymentProof']);
+        $this->reset([
+            'selectedUnitId', 'paymentMethod', 'amountPaid', 'paymentProof',
+            'hargaUnit', 'kprType', 'bankName', 'akadDate',
+            'dpAmount', 'dpPercentage',
+            'kprDurationMonths', 'interestRate', 'interestType',
+            'pokokKredit', 'monthlyInstallment', 'totalPayment', 'totalInterest', 'sisaTagihan'
+        ]);
+        $this->kprType      = 'non_subsidi';
+        $this->interestType = 'anuitas';
         $this->resetValidation();
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // Live Watchers — kalkulasi otomatis saat field berubah
+    // ─────────────────────────────────────────────────────────────
+
+    public function updatedHargaUnit($value)
+    {
+        // Jika sudah ada dp_percentage, hitung ulang dp_amount dari persentase
+        if ($this->dpPercentage && $value > 0) {
+            $this->dpAmount = round(($this->dpPercentage / 100) * $value, 0);
+        }
+        $this->recalculate();
+    }
+
+    public function updatedAmountPaid($value)
+    {
+        $this->recalculate();
+    }
+
+    public function updatedPaymentMethod($value)
+    {
+        $this->recalculate();
+    }
+
+    public function updatedDpAmount($value)
+    {
+        if ($this->hargaUnit > 0 && $value >= 0) {
+            $this->dpPercentage = round(($value / $this->hargaUnit) * 100, 2);
+        }
+        $this->recalculate();
+    }
+
+    public function updatedDpPercentage($value)
+    {
+        if ($this->hargaUnit > 0 && $value >= 0) {
+            $this->dpAmount = round(($value / 100) * $this->hargaUnit, 0);
+        }
+        $this->recalculate();
+    }
+
+    public function updatedKprDurationMonths() { $this->recalculate(); }
+    public function updatedInterestRate()       { $this->recalculate(); }
+    public function updatedInterestType()       { $this->recalculate(); }
+    public function updatedKprType()            { $this->recalculate(); }
+
+    // ─────────────────────────────────────────────────────────────
+    // Kalkulasi Cicilan KPR
+    // ─────────────────────────────────────────────────────────────
+
+    public function recalculate()
+    {
+        $harga   = (float) ($this->hargaUnit         ?? 0);
+        $dp      = (float) ($this->dpAmount          ?? 0);
+        $paid    = (float) ($this->amountPaid        ?? 0);
+        $n       = (int)   ($this->kprDurationMonths ?? 0);
+        $rTahunan = (float) ($this->interestRate      ?? 0);
+
+        if ($this->paymentMethod === 'Cash') {
+            $this->sisaTagihan = max(0, $harga - $paid);
+        }
+
+        // Pokok kredit
+        $pokok = max(0, $harga - $dp);
+        $this->pokokKredit = $pokok;
+
+        if ($pokok <= 0 || $n <= 0 || $rTahunan <= 0) {
+            $this->monthlyInstallment = 0;
+            $this->totalPayment       = 0;
+            $this->totalInterest      = 0;
+            return;
+        }
+
+        if ($this->interestType === 'flat') {
+            // Cicilan Flat: pokok rata + bunga flat dari pokok awal
+            $bungaBulanan  = ($rTahunan / 100 / 12) * $pokok;
+            $pokokBulanan  = $pokok / $n;
+            $cicilan       = $pokokBulanan + $bungaBulanan;
+        } else {
+            // Cicilan Anuitas (efektif): M = P × r(1+r)^n / [(1+r)^n − 1]
+            $r       = $rTahunan / 100 / 12;
+            $cicilan = $pokok * ($r * pow(1 + $r, $n)) / (pow(1 + $r, $n) - 1);
+        }
+
+        $totalBayar  = $cicilan * $n;
+        $totalBunga  = $totalBayar - $pokok;
+
+        $this->monthlyInstallment = round($cicilan, 0);
+        $this->totalPayment       = round($totalBayar, 0);
+        $this->totalInterest      = round($totalBunga, 0);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Save
+    // ─────────────────────────────────────────────────────────────
+
     public function savePaymentDetails()
     {
-        $this->validate([
-            'paymentMethod' => 'nullable|in:Cash,KPR',
-            'kprDurationMonths' => 'nullable|integer|min:0',
-            'amountPaid' => 'nullable|numeric|min:0',
-            'paymentProof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
-        ]);
+        $isKpr = $this->paymentMethod === 'KPR';
+
+        $rules = [
+            'paymentMethod' => 'required|in:Cash,KPR',
+            'paymentProof'  => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'hargaUnit'     => 'required|numeric|min:1',
+        ];
+
+        if ($isKpr) {
+            $rules = array_merge($rules, [
+                'kprType'            => 'required|in:subsidi,non_subsidi',
+                'bankName'           => 'required|string|max:100',
+                'akadDate'           => 'nullable|date',
+                'dpAmount'           => 'required|numeric|min:0',
+                'dpPercentage'       => 'required|numeric|min:0|max:100',
+                'kprDurationMonths'  => 'required|integer|min:12|max:360',
+                'interestRate'       => 'required|numeric|min:0.1|max:30',
+                'interestType'       => 'required|in:anuitas,flat',
+            ]);
+        } else {
+            $rules['amountPaid'] = 'required|numeric|min:0';
+        }
+
+        $this->validate($rules);
 
         $unit = Unit::findOrFail($this->selectedUnitId);
         $path = $unit->payment_proof_path;
@@ -78,25 +255,59 @@ class MarketingDashboard extends Component
             $path = $this->paymentProof->store('payment_proofs', 'public');
         }
 
-        $duration = $this->paymentMethod === 'Cash' ? null : $this->kprDurationMonths;
+        $this->recalculate();
 
-        $unit->update([
-            'payment_method' => $this->paymentMethod,
-            'kpr_duration_months' => $duration,
-            'amount_paid' => $this->amountPaid,
-            'payment_proof_path' => $path,
-        ]);
+        if ($isKpr) {
+            $unit->update([
+                'payment_method'      => 'KPR',
+                'amount_paid'         => $this->dpAmount,   // DP yang sudah diterima developer
+                'payment_proof_path'  => $path,
+                'harga_unit'          => $this->hargaUnit,
+                'kpr_type'            => $this->kprType,
+                'bank_name'           => $this->bankName,
+                'akad_date'           => $this->akadDate ?: null,
+                'dp_amount'           => $this->dpAmount,
+                'dp_percentage'       => $this->dpPercentage,
+                'pokok_kredit'        => $this->pokokKredit,
+                'kpr_duration_months' => $this->kprDurationMonths,
+                'interest_rate'       => $this->interestRate,
+                'interest_type'       => $this->interestType,
+                'monthly_installment' => $this->monthlyInstallment,
+            ]);
+        } else {
+            $unit->update([
+                'payment_method'      => 'Cash',
+                'amount_paid'         => $this->amountPaid,
+                'payment_proof_path'  => $path,
+                'harga_unit'          => $this->hargaUnit,
+                // Reset KPR-specific fields
+                'kpr_type'            => null,
+                'bank_name'           => null,
+                'akad_date'           => null,
+                'dp_amount'           => null,
+                'dp_percentage'       => null,
+                'pokok_kredit'        => null,
+                'kpr_duration_months' => null,
+                'interest_rate'       => null,
+                'interest_type'       => null,
+                'monthly_installment' => null,
+            ]);
+        }
 
         $this->closePaymentModal();
         session()->flash('message', "Detail pembayaran unit {$unit->unit_number} berhasil disimpan.");
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // Render
+    // ─────────────────────────────────────────────────────────────
+
     public function render()
     {
         $blocks = Block::with('units')->get();
-        
+
         return view('livewire.marketing-dashboard', [
-            'blocks' => $blocks
+            'blocks' => $blocks,
         ]);
     }
 }

@@ -47,10 +47,10 @@
     {{-- ── Blocks ── --}}
     <div class="blocks-container">
         @forelse($blocks as $block)
-            <div wire:key="block-{{ $block->id }}" class="block-card">
+            <div wire:key="block-{{ $block->id }}" class="block-card" x-data="{ expanded: false }">
 
                 {{-- Block Header --}}
-                <div class="block-header">
+                <div class="block-header" @click="expanded = !expanded" style="cursor: pointer;">
                     <div class="block-header-left">
                         <div class="block-icon">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,27 +58,32 @@
                                       d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                             </svg>
                         </div>
-                        <h2 class="block-title">{{ $block->name }}</h2>
+                        <h2 class="block-title">{{ $block->nama_blok }}</h2>
                     </div>
-                    <span class="block-badge">{{ $block->units->count() }} Unit</span>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span class="block-badge">{{ $block->units->count() }} Unit</span>
+                        <svg :class="{'rotate-180': expanded}" class="w-5 h-5 text-white transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
                 </div>
 
                 {{-- Units Grid --}}
-                <div class="units-grid-wrapper">
+                <div class="units-grid-wrapper" x-show="expanded" x-collapse style="display: none;">
                     <div class="units-grid">
                         @foreach($block->units as $unit)
                             @php
-                                $statusColor = match($unit->sales_status) {
+                                $statusColor = match($unit->status_penjualan) {
                                     'Terjual'  => 'status-green',
                                     'Sudah DP' => 'status-yellow',
                                     default    => 'status-red',
                                 };
-                                $dotColor = match($unit->sales_status) {
+                                $dotColor = match($unit->status_penjualan) {
                                     'Terjual'  => 'dot-green',
                                     'Sudah DP' => 'dot-yellow',
                                     default    => 'dot-red',
                                 };
-                                $borderAccent = match($unit->sales_status) {
+                                $borderAccent = match($unit->status_penjualan) {
                                     'Terjual'  => 'unit-card-green',
                                     'Sudah DP' => 'unit-card-yellow',
                                     default    => 'unit-card-red',
@@ -94,7 +99,7 @@
                                     </div>
                                     <span class="status-badge {{ $statusColor }}">
                                         <span class="legend-dot {{ $dotColor }}"></span>
-                                        {{ $unit->sales_status }}
+                                        {{ $unit->status_penjualan }}
                                     </span>
                                 </div>
 
@@ -125,12 +130,12 @@
                                         class="status-select"
                                         id="status-select-{{ $unit->id }}"
                                     >
-                                        <option value="Belum Terjual" {{ $unit->sales_status === 'Belum Terjual' ? 'selected' : '' }}>Belum Terjual</option>
-                                        <option value="Sudah DP"     {{ $unit->sales_status === 'Sudah DP'     ? 'selected' : '' }}>Sudah DP</option>
-                                        <option value="Terjual"      {{ $unit->sales_status === 'Terjual'      ? 'selected' : '' }}>Terjual</option>
+                                        <option value="Belum Terjual" {{ $unit->status_penjualan === 'Belum Terjual' ? 'selected' : '' }}>Belum Terjual</option>
+                                        <option value="Sudah DP"     {{ $unit->status_penjualan === 'Sudah DP'     ? 'selected' : '' }}>Sudah DP</option>
+                                        <option value="Terjual"      {{ $unit->status_penjualan === 'Terjual'      ? 'selected' : '' }}>Terjual</option>
                                     </select>
 
-                                    @if(in_array($unit->sales_status, ['Sudah DP', 'Terjual']))
+                                    @if(in_array($unit->status_penjualan, ['Sudah DP', 'Terjual']))
                                         <button
                                             wire:click="openPaymentModal({{ $unit->id }})"
                                             id="detail-btn-{{ $unit->id }}"
@@ -167,7 +172,7 @@
     @if($isPaymentModalOpen)
     <div class="modal-overlay" id="payment-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="modal-backdrop" wire:click="closePaymentModal"></div>
-        <div class="modal-panel">
+        <div class="modal-panel modal-panel-wide">
             <form wire:submit.prevent="savePaymentDetails">
 
                 {{-- Modal Header --}}
@@ -181,7 +186,7 @@
                         </div>
                         <div>
                             <h3 class="modal-title" id="modal-title">Detail Pembayaran Unit</h3>
-                            <p class="modal-subtitle">Lengkapi informasi metode pembayaran dan nominal.</p>
+                            <p class="modal-subtitle">Lengkapi informasi metode dan simulasi pembayaran.</p>
                         </div>
                     </div>
                     <button type="button" wire:click="closePaymentModal" class="modal-close" id="modal-close-btn" aria-label="Tutup modal">
@@ -194,44 +199,234 @@
                 {{-- Modal Body --}}
                 <div class="modal-body">
 
-                    {{-- Metode --}}
+                    {{-- ── Harga Unit ── --}}
+                    <div class="form-group">
+                        <label class="form-label" for="harga-unit">Harga Unit (Rp) <span class="required-mark">*</span></label>
+                        <div class="input-with-addon">
+                            <span class="input-addon addon-left-label">Rp</span>
+                            <input id="harga-unit" type="number" wire:model.live="hargaUnit"
+                                   class="form-input" placeholder="500000000" min="1">
+                        </div>
+                        @error('hargaUnit') <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+
+                    {{-- ── Metode Pembayaran ── --}}
                     <div class="form-group">
                         <label class="form-label" for="payment-method-select">Metode Pembayaran</label>
                         <select id="payment-method-select" wire:model.live="paymentMethod" class="form-select">
                             <option value="">— Pilih Metode —</option>
                             <option value="Cash">Cash / Tunai</option>
-                            <option value="KPR">KPR</option>
+                            <option value="KPR">KPR (Kredit Pemilikan Rumah)</option>
                         </select>
                         @error('paymentMethod') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
 
-                    {{-- KPR Duration --}}
-                    @if($paymentMethod === 'KPR')
-                        <div class="form-group">
-                            <label class="form-label" for="kpr-duration">Lama KPR (Bulan)</label>
-                            <div class="input-with-addon">
-                                <input id="kpr-duration" type="number" wire:model="kprDurationMonths"
-                                       class="form-input" placeholder="Contoh: 120">
-                                <span class="input-addon">Bulan</span>
+                    {{-- ══════════════════════════════ CASH ══════════════════════════════ --}}
+                    @if($paymentMethod === 'Cash')
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                Pembayaran Tunai
                             </div>
-                            @error('kprDurationMonths') <p class="form-error">{{ $message }}</p> @enderror
+                            <div class="form-group">
+                                <label class="form-label" for="amount-paid">Jumlah Terbayar (Rp)</label>
+                                <div class="input-with-addon">
+                                    <span class="input-addon addon-left-label">Rp</span>
+                                    <input id="amount-paid" type="number" wire:model.live="amountPaid"
+                                           class="form-input" placeholder="0" min="0">
+                                </div>
+                                @error('amountPaid') <p class="form-error">{{ $message }}</p> @enderror
+                            </div>
+
+                            @if($sisaTagihan > 0)
+                            <div class="calc-info-row" style="margin-top: 1rem; display: flex; justify-content: space-between; padding: 0.75rem 1rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                <span class="calc-info-label" style="font-weight: 600; color: #64748b;">Sisa Tagihan</span>
+                                <span class="calc-info-value" style="font-weight: 800; color: #ef4444;">Rp {{ number_format($sisaTagihan, 0, ',', '.') }}</span>
+                            </div>
+                            @elseif($amountPaid > 0 && $sisaTagihan == 0)
+                            <div class="calc-info-row" style="margin-top: 1rem; display: flex; justify-content: space-between; padding: 0.75rem 1rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
+                                <span class="calc-info-label" style="font-weight: 600; color: #15803d;">Status</span>
+                                <span class="calc-info-value" style="font-weight: 800; color: #16a34a;">Lunas</span>
+                            </div>
+                            @endif
                         </div>
                     @endif
 
-                    {{-- Amount --}}
-                    <div class="form-group">
-                        <label class="form-label" for="amount-paid">Jumlah Terbayar</label>
-                        <div class="input-with-addon">
-                            <span class="input-addon addon-left-label">Rp</span>
-                            <input id="amount-paid" type="number" wire:model="amountPaid"
-                                   class="form-input" placeholder="0">
-                        </div>
-                        @error('amountPaid') <p class="form-error">{{ $message }}</p> @enderror
-                    </div>
+                    {{-- ══════════════════════════════ KPR ══════════════════════════════ --}}
+                    @if($paymentMethod === 'KPR')
 
-                    {{-- File Upload --}}
+                        {{-- Section 1: Info Unit --}}
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                                Informasi Unit &amp; KPR
+                            </div>
+
+                            <div class="form-grid-2">
+                                {{-- Jenis KPR --}}
+                                <div class="form-group">
+                                    <label class="form-label" for="kpr-type">Jenis KPR <span class="required-mark">*</span></label>
+                                    <select id="kpr-type" wire:model.live="kprType" class="form-select">
+                                        <option value="non_subsidi">Non-Subsidi (Komersial)</option>
+                                        <option value="subsidi">Subsidi (BTN — FLPP)</option>
+                                    </select>
+                                    @error('kprType') <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
+
+                                {{-- Bank --}}
+                                <div class="form-group">
+                                    <label class="form-label" for="bank-name">Bank / Lembaga Pembiayaan <span class="required-mark">*</span></label>
+                                    <input id="bank-name" type="text" wire:model="bankName"
+                                           class="form-input" placeholder="Contoh: Bank BTN, BRI, Mandiri...">
+                                    @error('bankName') <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
+
+                                {{-- Tanggal Akad --}}
+                                <div class="form-group">
+                                    <label class="form-label" for="akad-date">Tanggal Akad Kredit</label>
+                                    <input id="akad-date" type="date" wire:model="akadDate" class="form-input">
+                                    @error('akadDate') <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Section 2: Down Payment --}}
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Down Payment (DP)
+                                <span class="section-note">Nominal ↔ Persentase dihitung otomatis</span>
+                            </div>
+
+                            <div class="form-grid-2">
+                                {{-- Nominal DP --}}
+                                <div class="form-group">
+                                    <label class="form-label" for="dp-amount">Nominal DP (Rp) <span class="required-mark">*</span></label>
+                                    <div class="input-with-addon">
+                                        <span class="input-addon addon-left-label">Rp</span>
+                                        <input id="dp-amount" type="number" wire:model.live="dpAmount"
+                                               class="form-input" placeholder="0" min="0">
+                                    </div>
+                                    @error('dpAmount') <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
+
+                                {{-- Persentase DP --}}
+                                <div class="form-group">
+                                    <label class="form-label" for="dp-percentage">Persentase DP (%) <span class="required-mark">*</span></label>
+                                    <div class="input-with-addon">
+                                        <input id="dp-percentage" type="number" wire:model.live="dpPercentage"
+                                               class="form-input" placeholder="10" min="0" max="100" step="0.01">
+                                        <span class="input-addon">%</span>
+                                    </div>
+                                    @error('dpPercentage') <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
+                            </div>
+
+                            {{-- Pokok Kredit (read-only) --}}
+                            @if($pokokKredit > 0)
+                            <div class="calc-info-row">
+                                <span class="calc-info-label">Pokok Kredit (Harga − DP)</span>
+                                <span class="calc-info-value">Rp {{ number_format($pokokKredit, 0, ',', '.') }}</span>
+                            </div>
+                            @endif
+                        </div>
+
+                        {{-- Section 3: Kredit & Bunga --}}
+                        <div class="form-section">
+                            <div class="form-section-title">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                Kredit &amp; Bunga
+                            </div>
+
+                            <div class="form-grid-2">
+                                {{-- Tenor --}}
+                                <div class="form-group">
+                                    <label class="form-label" for="kpr-duration">Tenor <span class="required-mark">*</span></label>
+                                    <div class="input-with-addon">
+                                        <input id="kpr-duration" type="number" wire:model.live="kprDurationMonths"
+                                               class="form-input" placeholder="120" min="12" max="360">
+                                        <span class="input-addon">Bulan</span>
+                                    </div>
+                                    @if($kprDurationMonths >= 12)
+                                        <p class="form-hint">= {{ round($kprDurationMonths / 12, 1) }} Tahun</p>
+                                    @endif
+                                    @error('kprDurationMonths') <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
+
+                                {{-- Suku Bunga --}}
+                                <div class="form-group">
+                                    <label class="form-label" for="interest-rate">Suku Bunga p.a. (%) <span class="required-mark">*</span></label>
+                                    <div class="input-with-addon">
+                                        <input id="interest-rate" type="number" wire:model.live="interestRate"
+                                               class="form-input" placeholder="7.5" min="0.1" max="30" step="0.01">
+                                        <span class="input-addon">%/Thn</span>
+                                    </div>
+                                    @error('interestRate') <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
+
+                                {{-- Jenis Bunga --}}
+                                <div class="form-group" style="grid-column: 1 / -1">
+                                    <label class="form-label">Jenis Perhitungan Bunga <span class="required-mark">*</span></label>
+                                    <div class="radio-group">
+                                        <label class="radio-card {{ $interestType === 'anuitas' ? 'radio-card-active' : '' }}" for="type-anuitas">
+                                            <input id="type-anuitas" type="radio" wire:model.live="interestType" value="anuitas" class="sr-only">
+                                            <div class="radio-card-icon">📊</div>
+                                            <div>
+                                                <p class="radio-card-title">Anuitas (Efektif)</p>
+                                                <p class="radio-card-desc">Cicilan tetap, porsi bunga menurun tiap bulan. Umum digunakan bank.</p>
+                                            </div>
+                                        </label>
+                                        <label class="radio-card {{ $interestType === 'flat' ? 'radio-card-active' : '' }}" for="type-flat">
+                                            <input id="type-flat" type="radio" wire:model.live="interestType" value="flat" class="sr-only">
+                                            <div class="radio-card-icon">📈</div>
+                                            <div>
+                                                <p class="radio-card-title">Flat</p>
+                                                <p class="radio-card-desc">Bunga dihitung dari pokok awal, cicilan lebih besar di awal.</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    @error('interestType') <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Section 4: Hasil Simulasi (read-only) --}}
+                        @if($monthlyInstallment > 0)
+                        <div class="simulation-result">
+                            <div class="simulation-header">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                Hasil Simulasi KPR
+                            </div>
+                            <div class="simulation-grid">
+                                <div class="sim-item sim-main">
+                                    <p class="sim-label">Cicilan / Bulan</p>
+                                    <p class="sim-value sim-value-main">Rp {{ number_format($monthlyInstallment, 0, ',', '.') }}</p>
+                                </div>
+                                <div class="sim-item">
+                                    <p class="sim-label">Pokok Kredit</p>
+                                    <p class="sim-value">Rp {{ number_format($pokokKredit, 0, ',', '.') }}</p>
+                                </div>
+                                <div class="sim-item">
+                                    <p class="sim-label">Total Pembayaran</p>
+                                    <p class="sim-value">Rp {{ number_format($totalPayment, 0, ',', '.') }}</p>
+                                </div>
+                                <div class="sim-item">
+                                    <p class="sim-label">Total Bunga</p>
+                                    <p class="sim-value sim-value-interest">Rp {{ number_format($totalInterest, 0, ',', '.') }}</p>
+                                </div>
+                            </div>
+                            <p class="sim-note">
+                                * Simulasi menggunakan metode <strong>{{ $interestType === 'anuitas' ? 'Anuitas (Efektif)' : 'Flat' }}</strong>, suku bunga {{ $interestRate }}% per tahun, tenor {{ $kprDurationMonths }} bulan.
+                            </p>
+                        </div>
+                        @endif
+
+                    @endif
+
+                    {{-- ── Upload Bukti (selalu tampil jika ada metode dipilih) ── --}}
+                    @if($paymentMethod)
                     <div class="form-group">
-                        <label class="form-label">Upload Bukti Pembayaran</label>
+                        <label class="form-label">Upload Bukti / Dokumen</label>
                         <label for="file-upload" class="file-upload-area">
                             <svg class="file-upload-icon" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
@@ -240,7 +435,7 @@
                             @if($paymentProof)
                                 <p class="file-upload-ready">✓ {{ $paymentProof->getClientOriginalName() }}</p>
                             @else
-                                <p class="file-upload-hint"><span class="file-upload-link">Pilih File</span> atau drag & drop</p>
+                                <p class="file-upload-hint"><span class="file-upload-link">Pilih File</span> atau drag &amp; drop</p>
                                 <p class="file-upload-meta">PNG, JPG, PDF — maks. 5 MB</p>
                             @endif
                             <input id="file-upload" wire:model="paymentProof" type="file" class="sr-only">
@@ -269,6 +464,8 @@
                             </div>
                         @endif
                     </div>
+                    @endif
+
                 </div>
 
                 {{-- Modal Footer --}}
@@ -798,4 +995,131 @@
     transition: all 0.2s ease;
 }
 .btn-secondary:hover { background: #f1f5f9; border-color: #cbd5e1; color: #1e293b; }
+
+/* ── Wide modal for KPR form ── */
+.modal-panel-wide { max-width: 640px; }
+
+/* ── Form sections ── */
+.form-section {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    overflow: hidden;
+}
+.form-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #374151;
+}
+.form-section-title svg { width: 15px; height: 15px; color: #64748b; flex-shrink: 0; }
+.form-section > .form-grid-2,
+.form-section > .form-group,
+.form-section > .calc-info-row { padding: 0.875rem 1rem; }
+.form-section > .form-grid-2 { padding-bottom: 0; }
+.form-section > .calc-info-row { border-top: 1px solid #f1f5f9; margin-top: 0; }
+
+.section-note {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #94a3b8;
+    margin-left: auto;
+}
+.required-mark { color: #ef4444; margin-left: 1px; }
+.form-hint { font-size: 0.72rem; color: #64748b; margin-top: 0.25rem; font-weight: 500; }
+
+/* ── 2-column grid in form ── */
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.875rem;
+    padding-bottom: 0.875rem;
+}
+@media (max-width: 480px) { .form-grid-2 { grid-template-columns: 1fr; } }
+
+/* ── Calc info row (read-only result) ── */
+.calc-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.625rem 1rem;
+    background: #eff6ff;
+    border-top: 1px solid #dbeafe;
+    border-radius: 0 0 12px 12px;
+}
+.calc-info-label { font-size: 0.78rem; font-weight: 600; color: #3b82f6; }
+.calc-info-value { font-size: 0.9rem; font-weight: 800; color: #1d4ed8; }
+
+/* ── Radio cards for interest type ── */
+.radio-group { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.radio-card {
+    flex: 1;
+    min-width: 180px;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #f8fafc;
+}
+.radio-card:hover { border-color: #93c5fd; background: #eff6ff; }
+.radio-card-active {
+    border-color: #3b82f6 !important;
+    background: #eff6ff !important;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+.radio-card-icon { font-size: 1.25rem; flex-shrink: 0; }
+.radio-card-title { font-size: 0.8125rem; font-weight: 700; color: #1e293b; margin-bottom: 0.25rem; }
+.radio-card-desc  { font-size: 0.72rem; color: #64748b; line-height: 1.5; }
+
+/* ── Simulation result panel ── */
+.simulation-result {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 60%, #2563eb 100%);
+    border-radius: 14px;
+    padding: 1.25rem;
+    color: #fff;
+}
+.simulation-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: rgba(255,255,255,0.9);
+}
+.simulation-header svg { width: 16px; height: 16px; opacity: 0.8; }
+.simulation-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 0.875rem;
+}
+@media (max-width: 420px) { .simulation-grid { grid-template-columns: 1fr; } }
+.sim-item {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 0.75rem;
+    backdrop-filter: blur(4px);
+}
+.sim-main {
+    grid-column: 1 / -1;
+    background: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.3);
+}
+.sim-label { font-size: 0.72rem; font-weight: 600; color: rgba(255,255,255,0.7); margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.sim-value { font-size: 0.9375rem; font-weight: 800; color: #fff; }
+.sim-value-main { font-size: 1.375rem; }
+.sim-value-interest { color: #fca5a5; }
+.sim-note { font-size: 0.68rem; color: rgba(255,255,255,0.6); line-height: 1.5; }
 </style>
+

@@ -11,4 +11,14 @@ class Unit extends Model {
     public function block(): BelongsTo {
         return $this->belongsTo(Block::class);
     }
+
+    public function legalDocuments()
+    {
+        return $this->hasMany(LegalDocument::class);
+    }
+
+    public function progressPhotos()
+    {
+        return $this->hasMany(ProgressPhoto::class);
+    }
 }
