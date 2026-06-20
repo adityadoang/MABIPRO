@@ -5,12 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class LegalDocument extends Model
+class ProgressPhoto extends Model
 {
     protected $fillable = [
         'unit_id',
-        'document_name',
-        'document_number',
         'file_path',
         'uploaded_by',
     ];
