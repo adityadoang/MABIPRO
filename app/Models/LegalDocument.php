@@ -10,6 +10,7 @@ class LegalDocument extends Model
     protected $fillable = [
         'unit_id',
         'document_name',
+        'document_number',
         'file_path',
         'uploaded_by',
     ];

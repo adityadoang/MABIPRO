@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('blocks', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama_blok');
-            $table->timestamps();
+        Schema::table('legal_documents', function (Blueprint $table) {
+            $table->string('document_number')->default('-')->after('document_name');
         });
     }
 
@@ -23,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('blocks');
+        Schema::table('legal_documents', function (Blueprint $table) {
+            $table->dropColumn('document_number');
+        });
     }
 };

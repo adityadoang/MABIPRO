@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\LegalitasController;
 use App\Livewire\MarketingDashboard;
 use App\Livewire\PaymentReport;
 use Illuminate\Support\Facades\Route;
@@ -29,14 +30,26 @@ Route::post('/logout', [LoginController::class, 'logout'])
     ->name('logout');
 
 // ============================================================
-// MARKETING / PRODUKSI ROUTES (dari origin/main)
+// MARKETING ROUTES (dari origin/main)
 // ============================================================
 
 Route::get('/dashboard', MarketingDashboard::class)->name('marketing.dashboard');
 Route::get('/laporan-pembayaran', PaymentReport::class)->name('payment.report');
 
 // ============================================================
-// ADMIN ROUTES (dari ezra)
+// LEGALITAS ROUTES (dari pasha)
+// ============================================================
+
+Route::prefix('legalitas')->group(function () {
+    Route::get('/dashboard', [LegalitasController::class, 'index'])->name('legalitas.dashboard');
+    Route::post('/upload/{unit_id}', [LegalitasController::class, 'upload'])->name('legalitas.upload');
+    Route::get('/download/{document_id}', [LegalitasController::class, 'download'])->name('legalitas.download');
+    Route::get('/preview/{document_id}', [LegalitasController::class, 'preview'])->name('legalitas.preview');
+    Route::post('/complete/{unit_id}', [LegalitasController::class, 'markAsComplete'])->name('legalitas.complete');
+});
+
+// ============================================================
+// ADMIN ROUTES (dari origin/main — ezra)
 // ============================================================
 
 Route::middleware(['auth', 'role:Admin'])

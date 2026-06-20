@@ -6,15 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
+        // Tabel Blok
+        Schema::create('blocks', function (Blueprint $table) {
+            $table->id();
+            $table->string('nama_blok');
+            $table->timestamps();
+        });
+
+        // Tabel Unit Rumah
         Schema::create('units', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('block_id')->constrained('blocks')->cascadeOnDelete();
-            $table->string('unit_number');
+            $table->foreignId('block_id')->constrained('blocks')->onDelete('cascade');
+            $table->string('unit_number'); 
             $table->enum('status_penjualan', ['Belum Terjual', 'Sudah DP', 'Terjual'])->default('Belum Terjual');
             $table->integer('progres_pembangunan')->default(0);
             $table->string('status_legalitas')->default('Belum Lengkap');
@@ -34,13 +39,32 @@ return new class extends Migration
             $table->decimal('monthly_installment', 15, 2)->nullable();
             $table->timestamps();
         });
+
+        // Tabel Dokumen Legalitas (FR-010)
+        Schema::create('legal_documents', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('unit_id')->constrained('units')->onDelete('cascade');
+            $table->string('document_name'); 
+            $table->string('file_path'); 
+            $table->foreignId('uploaded_by')->nullable()->constrained('users')->onDelete('cascade');
+            $table->timestamps();
+        });
+
+        // Tabel Progress Photos
+        Schema::create('progress_photos', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('unit_id')->constrained('units')->onDelete('cascade');
+            $table->string('file_path');
+            $table->foreignId('uploaded_by')->nullable()->constrained('users')->onDelete('cascade');
+            $table->timestamps();
+        });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
+        Schema::dropIfExists('progress_photos');
+        Schema::dropIfExists('legal_documents');
         Schema::dropIfExists('units');
+        Schema::dropIfExists('blocks');
     }
 };

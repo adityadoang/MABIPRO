@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Block;
+use App\Models\LegalDocument;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -16,7 +17,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // --- User test default ---
-        User::firstOrCreate(
+        $user = User::firstOrCreate(
             ['email' => 'test@example.com'],
             [
                 'name'              => 'Test User',
@@ -30,43 +31,66 @@ class DatabaseSeeder extends Seeder
         $this->call(AdminSeeder::class);
 
         // --- Blocks ---
-        $blokA = Block::firstOrCreate(['nama_blok' => 'Blok A']);
-        $blokB = Block::firstOrCreate(['nama_blok' => 'Blok B']);
+        $blokA = Block::firstOrCreate(['nama_blok' => 'A - Riverside']);
+        $blokB = Block::firstOrCreate(['nama_blok' => 'B - Mountain View']);
 
-        // --- Units Blok A ---
-        $unitsBlokA = [
-            ['unit_number' => 'A-01', 'status_penjualan' => 'Terjual',       'payment_method' => 'KPR', 'kpr_duration_months' => 149, 'amount_paid' => 10000000.00, 'payment_proof_path' => 'payment_proofs/8JOHSPzTm1XhQs5jJPERb39BhVdRlSJD5Bf2LV4K.png'],
-            ['unit_number' => 'A-02', 'status_penjualan' => 'Sudah DP',      'amount_paid' => 500000000.00],
-            ['unit_number' => 'A-03', 'status_penjualan' => 'Terjual'],
-            ['unit_number' => 'A-04', 'status_penjualan' => 'Belum Terjual'],
-            ['unit_number' => 'A-05', 'status_penjualan' => 'Belum Terjual'],
-        ];
+        // --- Unit A-01 (Terjual, legalitas lengkap) ---
+        $unit1 = Unit::firstOrCreate(
+            ['block_id' => $blokA->id, 'unit_number' => 'A-01'],
+            [
+                'status_penjualan'    => 'Terjual',
+                'progres_pembangunan' => 100,
+                'status_legalitas'    => 'Lengkap',
+            ]
+        );
 
-        foreach ($unitsBlokA as $data) {
-            Unit::firstOrCreate(
-                ['block_id' => $blokA->id, 'unit_number' => $data['unit_number']],
-                array_merge([
-                    'progres_pembangunan' => 0,
-                    'status_legalitas'    => 'Belum Lengkap',
-                ], $data)
-            );
-        }
+        // --- Unit A-02 (Sudah DP, legalitas belum lengkap) ---
+        $unit2 = Unit::firstOrCreate(
+            ['block_id' => $blokA->id, 'unit_number' => 'A-02'],
+            [
+                'status_penjualan'    => 'Sudah DP',
+                'progres_pembangunan' => 45,
+                'status_legalitas'    => 'Belum Lengkap',
+            ]
+        );
 
-        // --- Units Blok B ---
-        $unitsBlokB = [
-            ['unit_number' => 'B-01', 'status_penjualan' => 'Sudah DP'],
-            ['unit_number' => 'B-02', 'status_penjualan' => 'Sudah DP'],
-            ['unit_number' => 'B-03', 'status_penjualan' => 'Sudah DP'],
-        ];
+        // --- Unit B-01 (Belum Terjual) ---
+        Unit::firstOrCreate(
+            ['block_id' => $blokB->id, 'unit_number' => 'B-01'],
+            [
+                'status_penjualan'    => 'Belum Terjual',
+                'progres_pembangunan' => 0,
+                'status_legalitas'    => 'Belum Lengkap',
+            ]
+        );
 
-        foreach ($unitsBlokB as $data) {
-            Unit::firstOrCreate(
-                ['block_id' => $blokB->id, 'unit_number' => $data['unit_number']],
-                array_merge([
-                    'progres_pembangunan' => 0,
-                    'status_legalitas'    => 'Belum Lengkap',
-                ], $data)
-            );
-        }
+        // --- Dokumen Legalitas untuk A-01 (lengkap) ---
+        LegalDocument::firstOrCreate(
+            ['unit_id' => $unit1->id, 'document_name' => 'Sertifikat Tanah (SHM)'],
+            [
+                'document_number' => 'SHM.12345.01',
+                'file_path'       => 'dummy/path/shm.pdf',
+                'uploaded_by'     => $user->id,
+            ]
+        );
+
+        LegalDocument::firstOrCreate(
+            ['unit_id' => $unit1->id, 'document_name' => 'Izin Bangunan (IMB)'],
+            [
+                'document_number' => 'IMB.12345.01',
+                'file_path'       => 'dummy/path/imb.pdf',
+                'uploaded_by'     => $user->id,
+            ]
+        );
+
+        // --- Dokumen Legalitas untuk A-02 (belum lengkap, hanya satu dokumen) ---
+        LegalDocument::firstOrCreate(
+            ['unit_id' => $unit2->id, 'document_name' => 'Sertifikat Tanah (SHM)'],
+            [
+                'document_number' => 'SHM.12345.02',
+                'file_path'       => 'dummy/path/shm2.pdf',
+                'uploaded_by'     => $user->id,
+            ]
+        );
     }
 }
