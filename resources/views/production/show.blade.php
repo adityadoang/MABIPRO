@@ -10,7 +10,6 @@
     </a>
 </div>
 
-<!-- Header Unit -->
 <div class="card-industrial mb-6 relative">
     <span class="corner-rivet" style="top: 8px; left: 8px;"></span>
     <span class="corner-rivet" style="top: 8px; right: 8px;"></span>
@@ -33,7 +32,6 @@
         </a>
     </div>
     
-    <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 divide-x-2 divide-y-2 md:divide-y-0 divide-industrial-700">
         <div class="p-4">
             <p class="font-mono text-xs text-industrial-700 tracking-wider">STATUS PENJUALAN</p>
@@ -70,7 +68,6 @@
     @endif
 </div>
 
-<!-- Diagram Progress -->
 <div class="card-industrial mb-6 relative">
     <div class="bg-industrial-900 text-industrial-50 px-6 py-3 flex items-center gap-2">
         <span class="rivet"></span>
@@ -81,7 +78,6 @@
     </div>
 </div>
 
-<!-- Histori Timeline -->
 <div class="card-industrial mb-6 relative">
     <div class="bg-industrial-900 text-industrial-50 px-6 py-3 flex items-center gap-2">
         <span class="rivet"></span>
@@ -92,7 +88,6 @@
     <div class="p-6 space-y-4">
         @foreach($progressHistory as $progress)
             <div class="timeline-line pl-6 py-2 relative">
-                <!-- Dot -->
                 <div class="absolute -left-[11px] top-3 w-5 h-5 bg-rust border-2 border-industrial-900 rounded-full"></div>
                 
                 <div class="bg-industrial-50 border-2 border-industrial-700 p-4">
@@ -132,7 +127,6 @@
     </div>
 </div>
 
-<!-- Generate Report -->
 <div class="card-industrial relative">
     <div class="bg-industrial-900 text-industrial-50 px-6 py-3 flex items-center gap-2">
         <span class="rivet"></span>
@@ -157,11 +151,18 @@
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: {!! json_encode($progressHistory->pluck('tahap')) !!},
+            labels: {!! json_encode($chartDataFormatted->pluck('tahap')) !!},
             datasets: [{
-                label: 'Progress (%)',
-                data: {!! json_encode($progressHistory->pluck('persentase')) !!},
-                backgroundColor: '#BF360C',
+                label: 'Progress per Tahap (%)',
+                data: {!! json_encode($chartDataFormatted->pluck('persentase')) !!},
+                backgroundColor: [
+                    '#BF360C',  // Persiapan Lahan
+                    '#E64A19',  // Pondasi
+                    '#FF5722',  // Struktur & Dinding
+                    '#FF7043',  // Pengecatan
+                    '#FF8A65',  // Finishing
+                    '#FFAB91'   // Serah Terima
+                ],
                 borderColor: '#3E2723',
                 borderWidth: 2
             }]
@@ -173,6 +174,13 @@
                     labels: { 
                         font: { family: 'Roboto Mono', size: 12 }
                     }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Progress: ' + context.parsed.y + '%';
+                        }
+                    }
                 }
             },
             scales: {
@@ -180,7 +188,12 @@
                     beginAtZero: true,
                     max: 100,
                     grid: { color: '#BCAAA4' },
-                    ticks: { font: { family: 'Roboto Mono' } }
+                    ticks: { 
+                        font: { family: 'Roboto Mono' },
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
                 },
                 x: {
                     grid: { color: '#BCAAA4' },
