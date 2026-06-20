@@ -26,29 +26,39 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
     }
 
-    // Method helper: Cek apakah admin
+    // ── Relasi ─────────────────────────────────────────────
+
+    public function uploadedLegalDocuments()
+    {
+        return $this->hasMany(LegalDocument::class, 'uploaded_by');
+    }
+
+    public function uploadedProgressPhotos()
+    {
+        return $this->hasMany(ProgressPhoto::class, 'uploaded_by');
+    }
+
+    // ── Helper methods (dari Produksi) ──────────────────────
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
     }
 
-    // Method helper: Cek apakah produksi
     public function isProduksi(): bool
     {
         return $this->role === 'produksi';
     }
 
-    // Method helper: Cek apakah marketing
     public function isMarketing(): bool
     {
         return $this->role === 'marketing';
     }
 
-    // Method helper: Cek apakah legalitas
     public function isLegalitas(): bool
     {
         return $this->role === 'legalitas';
