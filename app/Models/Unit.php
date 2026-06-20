@@ -12,4 +12,9 @@ class Unit extends Model
     {
         return $this->hasMany(LegalDocument::class);
     }
+
+    public function block()
+    {
+        return $this->belongsTo(Block::class);
+    }
 }

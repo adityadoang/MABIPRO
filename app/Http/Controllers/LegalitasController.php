@@ -14,7 +14,7 @@ class LegalitasController extends Controller
     // FR-009: Dashboard Legalitas
     public function index()
     {
-        $units = Unit::with('legalDocuments')->get();
+        $units = Unit::with(['legalDocuments', 'block'])->get();
         return view('legalitas.dashboard', compact('units'));
     }
 
