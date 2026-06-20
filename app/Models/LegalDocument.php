@@ -7,7 +7,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LegalDocument extends Model
 {
-    protected $guarded = [];
+    protected $fillable = [
+        'unit_id',
+        'document_name',
+        'file_path',
+        'uploaded_by',
+    ];
 
     public function unit(): BelongsTo
     {

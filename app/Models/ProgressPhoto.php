@@ -7,7 +7,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProgressPhoto extends Model
 {
-    protected $guarded = [];
+    protected $fillable = [
+        'unit_id',
+        'file_path',
+        'uploaded_by',
+    ];
 
     public function unit(): BelongsTo
     {
