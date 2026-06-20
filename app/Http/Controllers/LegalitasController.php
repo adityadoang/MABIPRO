@@ -23,6 +23,7 @@ class LegalitasController extends Controller
     {
         $request->validate([
             'document_name' => 'required|string',
+            'document_number' => 'required|string|max:100',
             'file_legalitas' => 'required|mimes:pdf|max:5120', // NFR-P03: Maks 5MB
         ]);
 
@@ -41,13 +42,21 @@ class LegalitasController extends Controller
         LegalDocument::create([
             'unit_id' => $unit->id,
             'document_name' => $request->document_name,
+            'document_number' => $request->document_number,
             'file_path' => $path,
             'uploaded_by' => Auth::id() ?? 1, // Fallback ke user ID 1 jika auth belum disetup
         ]);
 
-        $unit->update(['status_legalitas' => 'Lengkap']);
+        return redirect()->back()->with('success', 'Dokumen berhasil diunggah dengan aman.');
+    }
 
-        return back()->with('success', 'Dokumen berhasil dienkripsi dan diunggah!');
+    // Menandai unit sebagai Lengkap secara manual
+    public function markAsComplete($unit_id)
+    {
+        $unit = Unit::findOrFail($unit_id);
+        $unit->update(['status_legalitas' => 'Lengkap']);
+        
+        return redirect()->back()->with('success', 'Status unit ' . $unit->unit_number . ' berhasil ditandai sebagai Lengkap.');
     }
 
     public function download($document_id)
@@ -66,5 +75,24 @@ class LegalitasController extends Controller
         return response($decryptedContent)
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'attachment; filename="' . $originalFilename . '"');
+    }
+
+    // FR-011: Preview Dokumen PDF langsung di browser
+    public function preview($document_id)
+    {
+        $document = LegalDocument::findOrFail($document_id);
+        
+        if (!Storage::exists($document->file_path)) {
+            abort(404);
+        }
+
+        $encryptedContent = Storage::get($document->file_path);
+        $decryptedContent = Crypt::decryptString($encryptedContent);
+        
+        $originalFilename = str_replace('.enc', '', basename($document->file_path));
+
+        return response($decryptedContent)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="' . $originalFilename . '"');
     }
 }

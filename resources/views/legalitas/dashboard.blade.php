@@ -25,7 +25,12 @@
     @php
         $totalUnits = $units->count();
         $compliant = $units->where('status_legalitas', 'Lengkap')->count();
-        $missing = $totalUnits - $compliant;
+        $inProgress = $units->filter(function($unit) {
+            return $unit->status_legalitas != 'Lengkap' && $unit->legalDocuments->count() > 0;
+        })->count();
+        $missing = $units->filter(function($unit) {
+            return $unit->status_legalitas != 'Lengkap' && $unit->legalDocuments->count() == 0;
+        })->count();
         $completionRate = $totalUnits > 0 ? round(($compliant / $totalUnits) * 100) : 0;
     @endphp
 
@@ -62,15 +67,15 @@
         <!-- Stat Card 3 -->
         <div class="bg-white border border-gray-200 rounded-xl p-5 card-shadow">
             <div class="flex justify-between items-start">
-                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Pending Review</h3>
-                <div class="p-1.5 bg-blue-100 text-blue-600 rounded-md">
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">In Progress</h3>
+                <div class="p-1.5 bg-amber-100 text-amber-600 rounded-md">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
             </div>
             <div class="mt-2">
-                <span class="text-4xl font-bold text-[#1d4ed8]">0</span>
+                <span class="text-4xl font-bold text-amber-600">{{ $inProgress }}</span>
             </div>
-            <p class="text-xs text-[#1d4ed8] mt-2 font-medium">Awaiting verification</p>
+            <p class="text-xs text-amber-600 mt-2 font-medium">Partially uploaded</p>
         </div>
 
         <!-- Stat Card 4 -->
@@ -154,54 +159,93 @@
                                 </div>
                                 <div>
                                     <p class="text-sm font-semibold text-gray-800 leading-tight">{{ $doc->document_name }}</p>
-                                    <p class="text-[10px] text-gray-500 mt-0.5">Uploaded: {{ $doc->created_at ? $doc->created_at->format('d M Y') : '-' }}</p>
+                                    <p class="text-xs text-gray-600 font-medium mt-0.5">No: {{ $doc->document_number ?? '-' }}</p>
+                                    <p class="text-[10px] text-gray-400 mt-0.5">Uploaded: {{ $doc->created_at ? $doc->created_at->format('d M Y') : '-' }}</p>
                                 </div>
                             </div>
-                            <a href="{{ route('legalitas.download', $doc->id) }}" class="text-gray-400 hover:text-emerald-600 p-1">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                            </a>
+                            <div class="flex gap-1">
+                                <a href="{{ route('legalitas.preview', $doc->id) }}" target="_blank" class="text-gray-400 hover:text-blue-600 p-1 transition-colors" title="Preview PDF">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                </a>
+                                <a href="{{ route('legalitas.download', $doc->id) }}" class="text-gray-400 hover:text-emerald-600 p-1 transition-colors" title="Download File">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                </a>
+                            </div>
                         </div>
                     @endforeach
 
-                    @if(!$isComplete)
-                        <!-- Missing Document Indicator -->
-                        <div class="border border-dashed border-red-300 rounded-lg p-3 bg-red-50/50 flex flex-col gap-2">
-                            <div class="flex items-start gap-2">
-                                <div class="bg-white p-1 rounded border border-red-100 text-red-500 shadow-sm mt-0.5">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-bold text-red-800">Required document missing</p>
-                                    <p class="text-[10px] text-red-600 mt-0.5">Please upload certificates or permits.</p>
-                                </div>
+                    <!-- Upload Form Container -->
+                    <div class="border border-dashed {{ $isComplete ? 'border-gray-300 bg-gray-50' : 'border-red-300 bg-red-50/50' }} rounded-lg p-3 flex flex-col gap-2 mt-2">
+                        @if(!$isComplete)
+                        <div class="flex items-start gap-2">
+                            <div class="bg-white p-1 rounded border border-red-100 text-red-500 shadow-sm mt-0.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-red-800">Required document missing</p>
+                                <p class="text-[10px] text-red-600 mt-0.5">Please upload certificates or permits.</p>
+                            </div>
+                        </div>
+                        @else
+                        <div class="flex items-start gap-2 mb-1">
+                            <div class="bg-white p-1 rounded border border-emerald-100 text-emerald-500 shadow-sm mt-0.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-700">Add more documents</p>
+                                <p class="text-[10px] text-gray-500 mt-0.5">You can upload additional files to this unit.</p>
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- Upload Form -->
+                        <form action="{{ route('legalitas.upload', $unit->id) }}" method="POST" enctype="multipart/form-data" class="mt-2 bg-white p-3 rounded-md border {{ $isComplete ? 'border-gray-200' : 'border-red-200' }}">
+                            @csrf
+                            
+                            <div class="mb-3">
+                                <label class="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Jenis Dokumen <span class="text-red-500">*</span></label>
+                                <input type="text" name="document_name" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none" placeholder="Contoh: SHM / IMB / PBB" value="Sertifikat Tanah / IMB" required>
                             </div>
 
-                            <!-- Upload Form -->
-                            <form action="{{ route('legalitas.upload', $unit->id) }}" method="POST" enctype="multipart/form-data" class="mt-2">
-                                @csrf
-                                <div class="relative group cursor-pointer">
-                                    <input type="file" name="file_legalitas" accept="application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" required onchange="this.form.submit()">
-                                    <input type="hidden" name="document_name" value="Sertifikat Tanah / IMB">
-                                    <div class="border border-gray-300 bg-white rounded-md p-3 text-center transition-colors group-hover:border-emerald-500 group-hover:bg-emerald-50 flex flex-col items-center justify-center gap-1">
-                                        <svg class="w-4 h-4 text-gray-400 group-hover:text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                                        <p class="text-[10px] font-semibold text-gray-600 group-hover:text-emerald-700">Click to upload <span class="font-normal text-gray-400">or drag PDF</span></p>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    @endif
+                            <div class="mb-3">
+                                <label class="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">Nomor Dokumen <span class="text-red-500">*</span></label>
+                                <input type="text" name="document_number" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none" placeholder="Masukkan No. Dokumen" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="block text-[10px] font-bold text-gray-700 mb-1 uppercase tracking-wider">File PDF <span class="text-red-500">*</span></label>
+                                <input type="file" name="file_legalitas" accept="application/pdf" class="w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" required>
+                            </div>
+                            
+                            <button type="submit" class="w-full {{ $isComplete ? 'bg-gray-800 hover:bg-gray-900' : 'bg-emerald-600 hover:bg-emerald-700' }} text-white text-xs font-semibold py-1.5 rounded transition-colors flex items-center justify-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                Upload Dokumen
+                            </button>
+                        </form>
+                    </div>
 
                 </div>
                 
                 <!-- Card Footer -->
-                @if($isComplete)
-                <div class="px-5 pb-4 pt-2 flex-shrink-0 flex justify-end">
-                    <a href="#" class="text-xs font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        View History
-                    </a>
+                <div class="px-5 pb-4 pt-2 flex-shrink-0 flex justify-between items-center mt-2">
+                    @if($isComplete)
+                        <span class="text-xs font-bold text-gray-400">All docs verified</span>
+                        <a href="#" class="text-xs font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            History
+                        </a>
+                    @else
+                        <span class="text-[10px] text-gray-500">Awaiting completion</span>
+                        @if($unit->legalDocuments->count() > 0)
+                        <form action="{{ route('legalitas.complete', $unit->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="text-[10px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded transition-colors shadow-sm">
+                                Tandai Selesai
+                            </button>
+                        </form>
+                        @endif
+                    @endif
                 </div>
-                @endif
             </div>
         @endforeach
     </div>

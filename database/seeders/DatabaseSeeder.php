@@ -58,6 +58,7 @@ class DatabaseSeeder extends Seeder
         \App\Models\LegalDocument::create([
             'unit_id' => $unit1->id,
             'document_name' => 'Sertifikat Tanah (SHM)',
+            'document_number' => 'SHM.12345.01',
             'file_path' => 'dummy/path/shm.pdf',
             'uploaded_by' => $user->id,
         ]);
@@ -65,6 +66,7 @@ class DatabaseSeeder extends Seeder
         \App\Models\LegalDocument::create([
             'unit_id' => $unit1->id,
             'document_name' => 'Izin Bangunan (IMB)',
+            'document_number' => 'IMB.12345.01',
             'file_path' => 'dummy/path/imb.pdf',
             'uploaded_by' => $user->id,
         ]);
@@ -73,6 +75,7 @@ class DatabaseSeeder extends Seeder
         \App\Models\LegalDocument::create([
             'unit_id' => $unit2->id,
             'document_name' => 'Sertifikat Tanah (SHM)',
+            'document_number' => 'SHM.12345.02',
             'file_path' => 'dummy/path/shm2.pdf',
             'uploaded_by' => $user->id,
         ]);
