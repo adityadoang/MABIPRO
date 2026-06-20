@@ -279,6 +279,35 @@
                 </svg>
                 Kelola Pengguna
             </a>
+
+            {{-- Nav Produksi (dari feature/modul-produksi) --}}
+            @if(Auth::check() && (Auth::user()->isProduksi() || Auth::user()->isAdmin()))
+            <div class="sidebar-section-label">Produksi</div>
+
+            <a href="{{ route('admin.blocks.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.blocks.*') ? 'active' : '' }}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+                Blok
+            </a>
+
+            <a href="{{ route('admin.units.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.units.*') ? 'active' : '' }}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                Unit
+            </a>
+
+            <a href="{{ route('production.index') }}"
+               class="sidebar-link {{ request()->routeIs('production.*') ? 'active' : '' }}">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                Progres Produksi
+            </a>
+            @endif
         </nav>
 
         <div class="sidebar-footer">
