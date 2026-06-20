@@ -1,57 +1,122 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Produksi - MABIPRO</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-8">Dashboard Produksi</h1>
+@extends('layouts.production')
 
-        @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                {{ session('success') }}
-            </div>
-        @endif
+@section('title', 'Dashboard Produksi')
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach($blocks as $block)
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-2">{{ $block->nama_blok }}</h2>
-                    <p class="text-gray-600 mb-4">{{ $block->deskripsi ?? 'Tidak ada deskripsi' }}</p>
-                    
-                    <div class="space-y-3">
-                        @foreach($block->units as $unit)
-                            <a href="{{ route('production.show', $unit->id) }}" 
-                               class="block border border-gray-200 rounded p-3 hover:bg-gray-50 transition">
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="font-semibold text-gray-800">Unit {{ $unit->unit_number }}</span>
-                                    <span class="text-sm px-2 py-1 rounded 
-                                        @if($unit->status_penjualan == 'Terjual') bg-green-100 text-green-800
-                                        @elseif($unit->status_penjualan == 'Sudah DP') bg-yellow-100 text-yellow-800
-                                        @else bg-gray-100 text-gray-800
-                                        @endif">
-                                        {{ $unit->status_penjualan }}
-                                    </span>
-                                </div>
-                                
-                                <div class="flex items-center">
-                                    <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
-                                        <div class="bg-blue-600 h-2 rounded-full" 
-                                             style="width: {{ $unit->progres_pembangunan }}%"></div>
-                                    </div>
-                                    <span class="text-sm font-semibold text-gray-700">
-                                        {{ $unit->progres_pembangunan }}%
-                                    </span>
-                                </div>
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-            @endforeach
-        </div>
+@section('content')
+<div class="mb-8">
+    <div class="flex items-center gap-3 mb-2">
+        <span class="label-tag">MODULE</span>
+        <span class="label-tag bg-rust">DASHBOARD</span>
     </div>
-</body>
-</html>
+    <h2 class="font-display text-4xl font-bold text-industrial-900 tracking-wide">
+        PRODUCTION OVERVIEW
+    </h2>
+    <p class="font-mono text-sm text-industrial-700 mt-2">
+        // Monitoring progres pembangunan seluruh unit
+    </p>
+</div>
+
+@if(session('success'))
+    <div class="bg-rust text-industrial-50 px-4 py-3 mb-6 industrial-border-sm font-mono text-sm">
+        <span class="font-bold">[OK]</span> {{ session('success') }}
+    </div>
+@endif
+
+<!-- Summary Stats -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+    @php
+        $totalUnits = $blocks->sum(fn($b) => $b->units->count());
+        $avgProgress = $totalUnits > 0 
+            ? round($blocks->sum(fn($b) => $b->units->sum('progres_pembangunan')) / $totalUnits) 
+            : 0;
+        $terjual = $blocks->sum(fn($b) => $b->units->where('status_penjualan', 'Terjual')->count());
+    @endphp
+    
+    <div class="card-industrial p-4 relative">
+        <span class="corner-rivet" style="top: 4px; left: 4px;"></span>
+        <span class="corner-rivet" style="top: 4px; right: 4px;"></span>
+        <span class="corner-rivet" style="bottom: 4px; left: 4px;"></span>
+        <span class="corner-rivet" style="bottom: 4px; right: 4px;"></span>
+        <p class="font-mono text-xs text-industrial-700 tracking-wider">TOTAL BLOK</p>
+        <p class="font-display text-4xl font-bold text-industrial-900">{{ $blocks->count() }}</p>
+    </div>
+    
+    <div class="card-industrial p-4 relative">
+        <span class="corner-rivet" style="top: 4px; left: 4px;"></span>
+        <span class="corner-rivet" style="top: 4px; right: 4px;"></span>
+        <span class="corner-rivet" style="bottom: 4px; left: 4px;"></span>
+        <span class="corner-rivet" style="bottom: 4px; right: 4px;"></span>
+        <p class="font-mono text-xs text-industrial-700 tracking-wider">TOTAL UNIT</p>
+        <p class="font-display text-4xl font-bold text-industrial-900">{{ $totalUnits }}</p>
+    </div>
+    
+    <div class="card-industrial p-4 relative">
+        <span class="corner-rivet" style="top: 4px; left: 4px;"></span>
+        <span class="corner-rivet" style="top: 4px; right: 4px;"></span>
+        <span class="corner-rivet" style="bottom: 4px; left: 4px;"></span>
+        <span class="corner-rivet" style="bottom: 4px; right: 4px;"></span>
+        <p class="font-mono text-xs text-industrial-700 tracking-wider">TERJUAL</p>
+        <p class="font-display text-4xl font-bold text-rust">{{ $terjual }}</p>
+    </div>
+    
+    <div class="card-industrial p-4 relative">
+        <span class="corner-rivet" style="top: 4px; left: 4px;"></span>
+        <span class="corner-rivet" style="top: 4px; right: 4px;"></span>
+        <span class="corner-rivet" style="bottom: 4px; left: 4px;"></span>
+        <span class="corner-rivet" style="bottom: 4px; right: 4px;"></span>
+        <p class="font-mono text-xs text-industrial-700 tracking-wider">AVG PROGRESS</p>
+        <p class="font-display text-4xl font-bold text-industrial-900">{{ $avgProgress }}%</p>
+    </div>
+</div>
+
+<!-- Blok Cards -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    @foreach($blocks as $block)
+        <div class="card-industrial relative">
+            <!-- Header Blok -->
+            <div class="bg-industrial-900 text-industrial-50 px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <span class="rivet"></span>
+                    <h3 class="font-display text-xl font-bold tracking-wider">{{ strtoupper($block->nama_blok) }}</h3>
+                </div>
+                <span class="label-tag bg-rust">{{ $block->units->count() }} UNIT</span>
+            </div>
+            
+            <!-- Body -->
+            <div class="p-4 space-y-3">
+                @forelse($block->units as $unit)
+                    <a href="{{ route('production.show', $unit->id) }}" 
+                       class="block bg-industrial-50 border-2 border-industrial-700 p-3 hover:bg-industrial-100 transition group">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-display text-lg font-bold text-industrial-900 tracking-wide">
+                                UNIT {{ $unit->unit_number }}
+                            </span>
+                            <span class="font-mono text-xs px-2 py-1 border-2 border-industrial-900
+                                @if($unit->status_penjualan == 'Terjual') bg-rust text-industrial-50 border-rust-dark
+                                @elseif($unit->status_penjualan == 'Sudah DP') bg-industrial-700 text-industrial-50
+                                @else bg-industrial-100 text-industrial-900
+                                @endif">
+                                {{ strtoupper($unit->status_penjualan) }}
+                            </span>
+                        </div>
+                        
+                        <!-- Progress Bar Industrial -->
+                        <div class="progress-bar-industrial">
+                            <div class="fill" style="width: {{ $unit->progres_pembangunan }}%"></div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center mt-2 font-mono text-xs text-industrial-700">
+                            <span>PROGRESS: {{ $unit->progres_pembangunan }}%</span>
+                            <span class="group-hover:text-rust transition">→ DETAIL</span>
+                        </div>
+                    </a>
+                @empty
+                    <p class="font-mono text-sm text-industrial-600 italic">
+                        // Belum ada unit di blok ini
+                    </p>
+                @endforelse
+            </div>
+        </div>
+    @endforeach
+</div>
+@endsection

@@ -1,124 +1,193 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail Unit {{ $unit->unit_number }} - MABIPRO</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
-        <a href="{{ route('production.index') }}" class="text-blue-600 hover:underline mb-4 inline-block">
-            ← Kembali ke Dashboard
+@extends('layouts.production')
+
+@section('title', 'Detail Unit ' . $unit->unit_number)
+
+@section('content')
+<div class="mb-6">
+    <a href="{{ route('production.index') }}" 
+       class="font-mono text-sm text-rust hover:text-rust-dark inline-flex items-center gap-2">
+        ← KEMBALI KE DASHBOARD
+    </a>
+</div>
+
+<!-- Header Unit -->
+<div class="card-industrial mb-6 relative">
+    <span class="corner-rivet" style="top: 8px; left: 8px;"></span>
+    <span class="corner-rivet" style="top: 8px; right: 8px;"></span>
+    <span class="corner-rivet" style="bottom: 8px; left: 8px;"></span>
+    <span class="corner-rivet" style="bottom: 8px; right: 8px;"></span>
+    
+    <div class="bg-industrial-900 text-industrial-50 px-6 py-4 flex justify-between items-center">
+        <div>
+            <span class="label-tag bg-rust mb-2">UNIT DETAIL</span>
+            <h1 class="font-display text-4xl font-bold tracking-wider mt-2">
+                UNIT {{ $unit->unit_number }}
+            </h1>
+            <p class="font-mono text-sm text-industrial-300 mt-1">
+                {{ strtoupper($unit->block->nama_blok) }} // MABIPRO
+            </p>
+        </div>
+        <a href="{{ route('production.edit', $unit->id) }}" 
+           class="btn-industrial bg-rust text-industrial-50 px-6 py-3 hover:bg-rust-dark">
+            + UPDATE PROGRESS
         </a>
-
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <div class="flex justify-between items-start mb-4">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-800">Unit {{ $unit->unit_number }}</h1>
-                    <p class="text-gray-600">{{ $unit->block->nama_blok }}</p>
-                </div>
-                <a href="{{ route('production.edit', $unit->id) }}" 
-                   class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                    Update Progres
-                </a>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="bg-blue-50 p-4 rounded">
-                    <p class="text-sm text-gray-600">Status Penjualan</p>
-                    <p class="text-xl font-bold text-gray-800">{{ $unit->status_penjualan }}</p>
-                </div>
-                <div class="bg-green-50 p-4 rounded">
-                    <p class="text-sm text-gray-600">Progres Total</p>
-                    <p class="text-xl font-bold text-gray-800">{{ $unit->progres_pembangunan }}%</p>
-                </div>
-                <div class="bg-purple-50 p-4 rounded">
-                    <p class="text-sm text-gray-600">Status Legalitas</p>
-                    <p class="text-xl font-bold text-gray-800">{{ $unit->status_legalitas }}</p>
-                </div>
-            </div>
-
-            @if($latestProgress)
-                <div class="border-t pt-4">
-                    <h3 class="text-lg font-semibold mb-2">Tahap Saat Ini</h3>
-                    <p class="text-gray-800">{{ $latestProgress->tahap }}</p>
-                    <p class="text-sm text-gray-600">{{ $latestProgress->catatan }}</p>
-                </div>
-            @endif
+    </div>
+    
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 divide-x-2 divide-y-2 md:divide-y-0 divide-industrial-700">
+        <div class="p-4">
+            <p class="font-mono text-xs text-industrial-700 tracking-wider">STATUS PENJUALAN</p>
+            <p class="font-display text-2xl font-bold text-industrial-900 mt-1">
+                {{ strtoupper($unit->status_penjualan) }}
+            </p>
         </div>
-
-        <!-- Diagram Progress -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Diagram Progress</h2>
-            <canvas id="progressChart" height="100"></canvas>
+        <div class="p-4">
+            <p class="font-mono text-xs text-industrial-700 tracking-wider">TOTAL PROGRESS</p>
+            <p class="font-display text-2xl font-bold text-rust mt-1">
+                {{ $unit->progres_pembangunan }}%
+            </p>
         </div>
+        <div class="p-4">
+            <p class="font-mono text-xs text-industrial-700 tracking-wider">STATUS LEGALITAS</p>
+            <p class="font-display text-2xl font-bold text-industrial-900 mt-1">
+                {{ strtoupper($unit->status_legalitas) }}
+            </p>
+        </div>
+    </div>
+    
+    @if($latestProgress)
+        <div class="border-t-2 border-industrial-700 px-6 py-4 bg-industrial-100">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="label-tag">CURRENT STAGE</span>
+            </div>
+            <p class="font-display text-xl font-bold text-industrial-900">
+                {{ strtoupper($latestProgress->tahap) }}
+            </p>
+            <p class="font-mono text-sm text-industrial-700 mt-1">
+                // {{ $latestProgress->catatan ?? 'Tidak ada catatan' }}
+            </p>
+        </div>
+    @endif
+</div>
 
-        <!-- Histori Progress -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Histori Progress</h2>
-            <div class="space-y-4">
-                @foreach($progressHistory as $progress)
-                    <div class="border-l-4 border-blue-500 pl-4 py-2">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-semibold text-gray-800">{{ $progress->tahap }}</h3>
-                                <p class="text-sm text-gray-600">{{ $progress->catatan }}</p>
-                                <p class="text-xs text-gray-500 mt-1">
-                                    Oleh: {{ $progress->updater->name ?? 'Unknown' }} | 
-                                    {{ $progress->created_at->format('d M Y H:i') }}
-                                </p>
-                            </div>
-                            <span class="text-2xl font-bold text-blue-600">{{ $progress->persentase }}%</span>
+<!-- Diagram Progress -->
+<div class="card-industrial mb-6 relative">
+    <div class="bg-industrial-900 text-industrial-50 px-6 py-3 flex items-center gap-2">
+        <span class="rivet"></span>
+        <h2 class="font-display text-xl font-bold tracking-wider">PROGRESS CHART</h2>
+    </div>
+    <div class="p-6 bg-industrial-50">
+        <canvas id="progressChart" height="80"></canvas>
+    </div>
+</div>
+
+<!-- Histori Timeline -->
+<div class="card-industrial mb-6 relative">
+    <div class="bg-industrial-900 text-industrial-50 px-6 py-3 flex items-center gap-2">
+        <span class="rivet"></span>
+        <h2 class="font-display text-xl font-bold tracking-wider">CONSTRUCTION LOG</h2>
+        <span class="label-tag bg-rust ml-auto">{{ $progressHistory->count() }} ENTRIES</span>
+    </div>
+    
+    <div class="p-6 space-y-4">
+        @foreach($progressHistory as $progress)
+            <div class="timeline-line pl-6 py-2 relative">
+                <!-- Dot -->
+                <div class="absolute -left-[11px] top-3 w-5 h-5 bg-rust border-2 border-industrial-900 rounded-full"></div>
+                
+                <div class="bg-industrial-50 border-2 border-industrial-700 p-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="label-tag">{{ $progress->tahap }}</span>
                         </div>
-
-                        @if($progress->photos->count() > 0)
-                            <div class="flex gap-2 mt-2">
+                        <span class="font-display text-3xl font-bold text-rust">
+                            {{ $progress->persentase }}%
+                        </span>
+                    </div>
+                    
+                    <p class="font-mono text-sm text-industrial-800 mt-2">
+                        // {{ $progress->catatan ?? 'Tidak ada catatan' }}
+                    </p>
+                    
+                    <div class="flex justify-between items-center mt-3 pt-3 border-t border-industrial-300 font-mono text-xs text-industrial-700">
+                        <span>BY: {{ strtoupper($progress->updater->name ?? 'UNKNOWN') }}</span>
+                        <span>{{ $progress->created_at->format('d.m.Y // H:i') }}</span>
+                    </div>
+                    
+                    @if($progress->photos->count() > 0)
+                        <div class="mt-3 pt-3 border-t border-industrial-300">
+                            <p class="font-mono text-xs text-industrial-700 mb-2">DOCUMENTATION:</p>
+                            <div class="flex gap-2 flex-wrap">
                                 @foreach($progress->photos as $photo)
                                     <img src="{{ asset('storage/' . $photo->file_path) }}" 
                                          alt="Foto progress" 
-                                         class="w-20 h-20 object-cover rounded">
+                                         class="w-24 h-24 object-cover border-2 border-industrial-900 shadow-[3px_3px_0px_#3E2723]">
                                 @endforeach
                             </div>
-                        @endif
-                    </div>
-                @endforeach
+                        </div>
+                    @endif
+                </div>
             </div>
-        </div>
-
-        <!-- Generate Report -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <a href="{{ route('production.report', $unit->id) }}" 
-               class="bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700 inline-block">
-                📄 Generate Laporan PDF
-            </a>
-        </div>
+        @endforeach
     </div>
+</div>
 
-    <script>
-        const ctx = document.getElementById('progressChart').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: {!! json_encode($progressHistory->pluck('tahap')) !!},
-                datasets: [{
-                    label: 'Persentase Progress',
-                    data: {!! json_encode($progressHistory->pluck('persentase')) !!},
-                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                    borderColor: 'rgba(59, 130, 246, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100
+<!-- Generate Report -->
+<div class="card-industrial relative">
+    <div class="bg-industrial-900 text-industrial-50 px-6 py-3 flex items-center gap-2">
+        <span class="rivet"></span>
+        <h2 class="font-display text-xl font-bold tracking-wider">REPORT GENERATOR</h2>
+    </div>
+    <div class="p-6 flex justify-between items-center bg-industrial-50">
+        <div>
+            <p class="font-display text-lg font-bold text-industrial-900">GENERATE PDF REPORT</p>
+            <p class="font-mono text-xs text-industrial-700 mt-1">
+                // Laporan lengkap progres pembangunan
+            </p>
+        </div>
+        <a href="{{ route('production.report', $unit->id) }}" 
+           class="btn-industrial bg-industrial-900 text-industrial-50 px-6 py-3 hover:bg-industrial-800">
+            📄 GENERATE PDF
+        </a>
+    </div>
+</div>
+
+<script>
+    const ctx = document.getElementById('progressChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode($progressHistory->pluck('tahap')) !!},
+            datasets: [{
+                label: 'Progress (%)',
+                data: {!! json_encode($progressHistory->pluck('persentase')) !!},
+                backgroundColor: '#BF360C',
+                borderColor: '#3E2723',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { 
+                    labels: { 
+                        font: { family: 'Roboto Mono', size: 12 }
                     }
                 }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: { color: '#BCAAA4' },
+                    ticks: { font: { family: 'Roboto Mono' } }
+                },
+                x: {
+                    grid: { color: '#BCAAA4' },
+                    ticks: { font: { family: 'Roboto Mono', size: 10 } }
+                }
             }
-        });
-    </script>
-</body>
-</html>
+        }
+    });
+</script>
+@endsection

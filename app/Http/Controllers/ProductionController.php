@@ -43,42 +43,45 @@ class ProductionController extends Controller
     }
 
     public function updateProgress(Request $request, $unitId)
-    {
-        $request->validate([
-            'tahap' => 'required|in:Persiapan Lahan,Pondasi,Struktur & Dinding,Pengecatan,Finishing,Serah Terima',
-            'persentase' => 'required|integer|min:0|max:100',
-            'catatan' => 'nullable|string|max:500',
+{
+    $request->validate([
+        'tahap' => 'required|in:Persiapan Lahan,Pondasi,Struktur & Dinding,Pengecatan,Finishing,Serah Terima',
+        'persentase' => 'required|integer|min:0|max:100',
+        'catatan' => 'nullable|string|max:500',
+    ]);
+
+    $unit = Unit::findOrFail($unitId);
+
+    // FIX: Hardcode user_id = 1 (sementara, sampai ada sistem login)
+    $userId = auth()->id() ?? 1;
+
+    $progress = ConstructionProgress::create([
+        'unit_id' => $unit->id,
+        'tahap' => $request->tahap,
+        'persentase' => $request->persentase,
+        'catatan' => $request->catatan,
+        'updated_by' => $userId,
+    ]);
+
+    $unit->update([
+        'progres_pembangunan' => $request->persentase,
+        'tanggal_akhir_progres' => now(),
+    ]);
+
+    if ($request->hasFile('foto')) {
+        $path = $request->file('foto')->store('progress_photos', 'public');
+        
+        ProgressPhoto::create([
+            'progress_id' => $progress->id,
+            'file_path' => $path,
+            'keterangan' => $request->tahap,
+            'uploaded_by' => $userId,
         ]);
-
-        $unit = Unit::findOrFail($unitId);
-
-        $progress = ConstructionProgress::create([
-            'unit_id' => $unit->id,
-            'tahap' => $request->tahap,
-            'persentase' => $request->persentase,
-            'catatan' => $request->catatan,
-            'updated_by' => auth()->id(),
-        ]);
-
-        $unit->update([
-            'progres_pembangunan' => $request->persentase,
-            'tanggal_akhir_progres' => now(),
-        ]);
-
-        if ($request->hasFile('foto')) {
-            $path = $request->file('foto')->store('progress_photos', 'public');
-            
-            ProgressPhoto::create([
-                'progress_id' => $progress->id,
-                'file_path' => $path,
-                'keterangan' => $request->tahap,
-                'uploaded_by' => auth()->id(),
-            ]);
-        }
-
-        return redirect()->route('production.show', $unitId)
-                        ->with('success', 'Progres pembangunan berhasil diupdate!');
     }
+
+    return redirect()->route('production.show', $unitId)
+                    ->with('success', 'Progres pembangunan berhasil diupdate!');
+}
 
     public function generateReport($unitId)
     {
