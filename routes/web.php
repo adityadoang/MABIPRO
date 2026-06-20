@@ -3,6 +3,8 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
+use App\Livewire\MarketingDashboard;
+use App\Livewire\PaymentReport;
 use Illuminate\Support\Facades\Route;
 
 // ============================================================
@@ -10,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 // ============================================================
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('marketing.dashboard');
 });
 
 // ============================================================
@@ -27,7 +29,14 @@ Route::post('/logout', [LoginController::class, 'logout'])
     ->name('logout');
 
 // ============================================================
-// ADMIN ROUTES
+// MARKETING / PRODUKSI ROUTES (dari origin/main)
+// ============================================================
+
+Route::get('/dashboard', MarketingDashboard::class)->name('marketing.dashboard');
+Route::get('/laporan-pembayaran', PaymentReport::class)->name('payment.report');
+
+// ============================================================
+// ADMIN ROUTES (dari ezra)
 // ============================================================
 
 Route::middleware(['auth', 'role:Admin'])
@@ -35,7 +44,7 @@ Route::middleware(['auth', 'role:Admin'])
     ->name('admin.')
     ->group(function () {
 
-        // Dashboard
+        // Dashboard Admin
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         // CRUD Users

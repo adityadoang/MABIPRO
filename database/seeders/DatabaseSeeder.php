@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // --- Users ---
+        // --- User test default ---
         User::firstOrCreate(
             ['email' => 'test@example.com'],
             [
@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Seed akun admin default MABIPRO
+        // --- Akun admin default MABIPRO ---
         $this->call(AdminSeeder::class);
 
         // --- Blocks ---

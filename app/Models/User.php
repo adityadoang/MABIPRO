@@ -29,4 +29,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function uploadedLegalDocuments()
+    {
+        return $this->hasMany(LegalDocument::class, 'uploaded_by');
+    }
+
+    public function uploadedProgressPhotos()
+    {
+        return $this->hasMany(ProgressPhoto::class, 'uploaded_by');
+    }
 }
