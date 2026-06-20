@@ -9,7 +9,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Computed;
 use Livewire\WithFileUploads;
 
-#[Layout('layouts.app')]
+#[Layout('layouts.marketing')]
 class MarketingDashboard extends Component
 {
     use WithFileUploads;

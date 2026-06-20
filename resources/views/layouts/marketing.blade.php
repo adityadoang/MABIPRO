@@ -307,7 +307,7 @@
                 Laporan Pembayaran
             </a>
 
-           
+        </nav>
 
         {{-- Footer --}}
         <div class="sidebar-footer">
