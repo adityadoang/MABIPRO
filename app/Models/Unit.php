@@ -21,4 +21,9 @@ class Unit extends Model {
     {
         return $this->hasMany(ProgressPhoto::class);
     }
+
+    public function installmentPayments()
+    {
+        return $this->hasMany(InstallmentPayment::class)->orderBy('installment_month');
+    }
 }

@@ -14,6 +14,12 @@ class MarketingDashboard extends Component
 {
     use WithFileUploads;
 
+    // ─────────────────────────────────────────────────────────────
+    // UI State (new sidebar layout)
+    // ─────────────────────────────────────────────────────────────
+    public $selectedBlockId = null;
+    public $searchUnit      = '';
+
     // Modal state
     public $isPaymentModalOpen = false;
     public $selectedUnitId;
@@ -46,6 +52,51 @@ class MarketingDashboard extends Component
     public $totalPayment        = 0;
     public $totalInterest       = 0;
     public $sisaTagihan         = 0;
+
+    // ─────────────────────────────────────────────────────────────
+    // Mount — default pilih blok pertama
+    // ─────────────────────────────────────────────────────────────
+
+    public function mount()
+    {
+        $firstBlock = Block::first();
+        if ($firstBlock) {
+            $this->selectedBlockId = $firstBlock->id;
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Block Selection
+    // ─────────────────────────────────────────────────────────────
+
+    public function selectBlock($blockId)
+    {
+        $this->selectedBlockId = $blockId;
+        $this->searchUnit = '';
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Statistics Helpers
+    // ─────────────────────────────────────────────────────────────
+
+    public function getStatsProperty(): array
+    {
+        $allUnits   = Unit::all();
+        $total      = $allUnits->count();
+        $terjual    = $allUnits->where('status_penjualan', 'Terjual')->count();
+        $sudahDp    = $allUnits->where('status_penjualan', 'Sudah DP')->count();
+        $belum      = $allUnits->where('status_penjualan', 'Belum Terjual')->count();
+
+        return [
+            'total'      => $total,
+            'terjual'    => $terjual,
+            'sudah_dp'   => $sudahDp,
+            'belum'      => $belum,
+            'pct_terjual' => $total > 0 ? round(($terjual / $total) * 100, 1) : 0,
+            'pct_dp'      => $total > 0 ? round(($sudahDp / $total) * 100, 1) : 0,
+            'pct_belum'   => $total > 0 ? round(($belum / $total) * 100, 1) : 0,
+        ];
+    }
 
     // ─────────────────────────────────────────────────────────────
     // Status Update
@@ -306,8 +357,28 @@ class MarketingDashboard extends Component
     {
         $blocks = Block::with('units')->get();
 
+        // Unit dari blok yang dipilih, dengan filter pencarian
+        $selectedBlock = null;
+        $filteredUnits = collect();
+
+        if ($this->selectedBlockId) {
+            $selectedBlock = Block::with('units')->find($this->selectedBlockId);
+            if ($selectedBlock) {
+                $filteredUnits = $selectedBlock->units->filter(function ($unit) {
+                    if (!$this->searchUnit) return true;
+                    $search = strtolower($this->searchUnit);
+                    return str_contains(strtolower($unit->unit_number ?? ''), $search)
+                        || str_contains(strtolower($unit->tipe_unit   ?? ''), $search)
+                        || str_contains(strtolower($unit->facing      ?? ''), $search);
+                })->values();
+            }
+        }
+
         return view('livewire.marketing-dashboard', [
-            'blocks' => $blocks,
+            'blocks'        => $blocks,
+            'selectedBlock' => $selectedBlock,
+            'filteredUnits' => $filteredUnits,
+            'stats'         => $this->getStatsProperty(),
         ]);
     }
 }
