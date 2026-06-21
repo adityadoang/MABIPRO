@@ -21,6 +21,8 @@ class DashboardController extends Controller
             'legal_documents' => Schema::hasTable('legal_documents') ? DB::table('legal_documents')->count() : null,
         ];
 
-        return view('admin.dashboard', compact('stats'));
+        $recentUsers = \App\Models\User::latest()->take(5)->get();
+
+        return view('admin.dashboard', compact('stats', 'recentUsers'));
     }
 }

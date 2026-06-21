@@ -1,333 +1,198 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html class="light" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="MABIPRO - Sistem Manajemen Penjualan Properti. Pantau dan kelola status unit perumahan secara real-time.">
-    <title>MABIPRO - Property Management System</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&display=swap" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="MABIPRO - Sistem Manajemen Penjualan Properti.">
+    <title>@hasSection('title')@yield('title') — @endif MABIPRO</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
-
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f0f2f5;
-            color: #1a1d23;
-            display: flex;
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* ══════════════════════════════
-           SIDEBAR
-        ══════════════════════════════ */
-        .sidebar {
-            width: 210px;
-            min-height: 100vh;
-            background: #ffffff;
-            border-right: 1px solid #e8eaed;
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            z-index: 50;
-            box-shadow: 2px 0 8px rgba(0,0,0,0.04);
-        }
-
-        /* Logo area */
-        .sidebar-logo {
-            padding: 1.25rem 1rem 1rem;
-            border-bottom: 1px solid #f0f2f5;
-        }
-        .sidebar-logo-inner {
-            display: flex;
-            align-items: center;
-            gap: 0.625rem;
-            text-decoration: none;
-        }
-        .sidebar-logo-icon {
-            width: 32px;
-            height: 32px;
-            background: #1a1d23;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .sidebar-logo-icon svg { color: #fff; width: 16px; height: 16px; }
-        .sidebar-logo-text {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.1;
-        }
-        .sidebar-logo-name {
-            font-size: 0.9375rem;
-            font-weight: 800;
-            color: #1a1d23;
-            letter-spacing: -0.3px;
-        }
-        .sidebar-logo-sub {
-            font-size: 0.6rem;
-            font-weight: 500;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 1px;
-        }
-
-
-        /* Nav sections */
-        .sidebar-nav {
-            flex: 1;
-            padding: 1rem 0.75rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.125rem;
-            overflow-y: auto;
-        }
-        .sidebar-nav-item {
-            display: flex;
-            align-items: center;
-            gap: 0.625rem;
-            padding: 0.5625rem 0.75rem;
-            border-radius: 8px;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            color: #64748b;
-            text-decoration: none;
-            transition: all 0.15s ease;
-            cursor: pointer;
-        }
-        .sidebar-nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
-        .sidebar-nav-item:hover {
-            background: #f8fafc;
-            color: #1a1d23;
-        }
-        .sidebar-nav-item.active {
-            background: #22c55e;
-            color: #ffffff;
-            font-weight: 600;
-        }
-        .sidebar-nav-item.active svg { color: #fff; }
-        .sidebar-nav-item.disabled {
-            opacity: 0.45;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        /* Sidebar footer */
-        .sidebar-footer {
-            padding: 0.75rem;
-            border-top: 1px solid #f0f2f5;
-            display: flex;
-            flex-direction: column;
-            gap: 0.125rem;
-        }
-        .sidebar-footer-item {
-            display: flex;
-            align-items: center;
-            gap: 0.625rem;
-            padding: 0.5rem 0.75rem;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #94a3b8;
-            text-decoration: none;
-            transition: all 0.15s ease;
-            cursor: pointer;
-            background: none;
-            border: none;
-            width: 100%;
-            text-align: left;
-        }
-        .sidebar-footer-item svg { width: 15px; height: 15px; flex-shrink: 0; }
-        .sidebar-footer-item:hover { background: #f8fafc; color: #475569; }
-        .sidebar-footer-item.logout:hover { background: #fef2f2; color: #dc2626; }
-
-        /* ══════════════════════════════
-           MAIN CONTENT
-        ══════════════════════════════ */
-        .main-content {
-            flex: 1;
-            margin-left: 210px;
-            min-height: 100vh;
-            background: #f0f2f5;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* ══════════════════════════════
-           MOBILE OVERLAY
-        ══════════════════════════════ */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.4);
-            z-index: 40;
-        }
-
-        /* Mobile hamburger */
-        .mobile-topbar {
-            display: none;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.875rem 1.25rem;
-            background: #fff;
-            border-bottom: 1px solid #e8eaed;
-            position: sticky;
-            top: 0;
-            z-index: 30;
-        }
-        .hamburger-btn {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            cursor: pointer;
-            background: none;
-            border: none;
-            padding: 4px;
-        }
-        .hamburger-btn span {
-            display: block;
-            width: 20px;
-            height: 2px;
-            background: #475569;
-            border-radius: 2px;
-            transition: all 0.2s;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.25s ease;
-            }
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            .sidebar-overlay.open { display: block; }
-            .mobile-topbar { display: flex; }
-            .main-content { margin-left: 0; }
-        }
-    </style>
 </head>
-<body>
+<body class="bg-surface text-on-surface flex h-screen overflow-hidden font-body-md">
 
-    {{-- Sidebar --}}
-    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+    {{-- ══════════════════════════════════════════
+         SIDEBAR (Desktop) — matches admin layout
+    ══════════════════════════════════════════ --}}
+    <nav class="bg-surface-container-low dark:bg-primary-container text-secondary dark:text-secondary-fixed border-r border-outline-variant dark:border-outline fixed left-0 top-0 h-screen flex flex-col p-4 space-y-2 z-50 w-72 md:flex hidden"
+         id="sidebar" role="navigation" aria-label="Marketing navigation">
 
-        {{-- Logo --}}
-        <div class="sidebar-logo">
-            <a href="{{ route('marketing.dashboard') }}" class="sidebar-logo-inner" id="sidebar-logo">
-                <div class="sidebar-logo-icon">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                    </svg>
+        {{-- Logo / User Area --}}
+        <div class="mb-8">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-lg">
+                    {{ strtoupper(substr(Auth::user()->name ?? 'M', 0, 1)) }}
                 </div>
-                <div class="sidebar-logo-text">
-                    <span class="sidebar-logo-name">MABIPRO</span>
-                    <span class="sidebar-logo-sub">Admin</span>
+                <div>
+                    <h2 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">MABIPRO</h2>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">{{ Auth::user()->role ?? 'Marketing' }}</p>
                 </div>
-            </a>
+            </div>
         </div>
 
+        {{-- Navigation Items --}}
+        <div class="flex-1 space-y-2 overflow-y-auto">
 
-        {{-- Main Navigation --}}
-        <nav class="sidebar-nav" role="menubar">
-            {{-- Overview --}}
-            <a href="#" id="nav-overview" role="menuitem"
-               class="sidebar-nav-item disabled">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/>
-                </svg>
-                Overview
+            @if(Auth::user()->role === 'Admin')
+            <a class="{{ request()->routeIs('admin.dashboard') ? 'bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary' : 'text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high' }} font-bold rounded-lg flex items-center gap-3 px-4 py-3 transition-all" href="{{ route('admin.dashboard') }}">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="font-label-md text-label-md">Overview</span>
+            </a>
+            @endif
+
+            @if(in_array(Auth::user()->role, ['Admin', 'Marketing']))
+            <a class="{{ request()->routeIs('marketing.dashboard') ? 'bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary' : 'text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high' }} font-bold rounded-lg flex items-center gap-3 px-4 py-3 transition-all"
+               href="{{ route('marketing.dashboard') }}"
+               id="nav-marketing">
+                <span class="material-symbols-outlined">trending_up</span>
+                <span class="font-label-md text-label-md">Marketing</span>
             </a>
 
-            {{-- Marketing --}}
-            <a href="{{ route('marketing.dashboard') }}" id="nav-marketing" role="menuitem"
-               class="sidebar-nav-item {{ request()->routeIs('marketing.dashboard') ? 'active' : '' }}">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                </svg>
-                Marketing
+            <a class="{{ request()->routeIs('marketing.payment.report') ? 'bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary' : 'text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high' }} font-bold rounded-lg flex items-center gap-3 px-4 py-3 transition-all"
+               href="{{ route('marketing.payment.report') }}"
+               id="nav-payment-report">
+                <span class="material-symbols-outlined">receipt_long</span>
+                <span class="font-label-md text-label-md">Laporan Pembayaran</span>
+            </a>
+            @endif
+
+            @if(in_array(Auth::user()->role, ['Admin', 'Produksi']))
+            <a class="{{ request()->routeIs('production.*') ? 'bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary' : 'text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high' }} font-bold rounded-lg flex items-center gap-3 px-4 py-3 transition-all" href="{{ route('production.dashboard') }}">
+                <span class="material-symbols-outlined">construction</span>
+                <span class="font-label-md text-label-md">Production</span>
+            </a>
+            @endif
+
+            @if(in_array(Auth::user()->role, ['Admin', 'Legalitas']))
+            <a class="{{ request()->routeIs('legalitas.*') ? 'bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary' : 'text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high' }} font-bold rounded-lg flex items-center gap-3 px-4 py-3 transition-all" href="{{ route('legalitas.dashboard') }}">
+                <span class="material-symbols-outlined">description</span>
+                <span class="font-label-md text-label-md">Legality</span>
+            </a>
+            @endif
+
+            @if(Auth::user()->role === 'Admin')
+            <a class="{{ request()->routeIs('admin.blocks.*') ? 'bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary' : 'text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high' }} font-bold rounded-lg flex items-center gap-3 px-4 py-3 transition-all" href="{{ route('admin.blocks.index') }}">
+                <span class="material-symbols-outlined">domain</span>
+                <span class="font-label-md text-label-md">Blok</span>
             </a>
 
-            {{-- Laporan Pembayaran --}}
-            <a href="{{ route('marketing.payment.report') }}" id="nav-payment-report" role="menuitem"
-               class="sidebar-nav-item {{ request()->routeIs('marketing.payment.report') ? 'active' : '' }}">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                Laporan Pembayaran
+            <a class="{{ request()->routeIs('admin.units.*') ? 'bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary' : 'text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high' }} font-bold rounded-lg flex items-center gap-3 px-4 py-3 transition-all" href="{{ route('admin.units.index') }}">
+                <span class="material-symbols-outlined">home</span>
+                <span class="font-label-md text-label-md">Unit</span>
             </a>
 
-        </nav>
+            <a class="{{ request()->routeIs('admin.users.*') ? 'bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary' : 'text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high' }} font-bold rounded-lg flex items-center gap-3 px-4 py-3 transition-all" href="{{ route('admin.users.index') }}">
+                <span class="material-symbols-outlined">group</span>
+                <span class="font-label-md text-label-md">User Management</span>
+            </a>
+            @endif
 
-        {{-- Footer --}}
-        <div class="sidebar-footer">
+        </div>
 
-            <form method="POST" action="{{ route('logout') }}" class="w-full">
+        {{-- Logout --}}
+        <div class="mt-auto space-y-2 pt-4 border-t border-outline-variant">
+            <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" id="nav-logout" class="sidebar-footer-item logout w-full text-left">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
-                    Logout
+                <button type="submit"
+                        class="w-full text-left text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high dark:hover:bg-on-primary-fixed-variant transition-all flex items-center gap-3 px-4 py-3 rounded-lg"
+                        id="nav-logout">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span class="font-label-md text-label-md">Logout</span>
                 </button>
             </form>
         </div>
-    </aside>
+    </nav>
 
-    {{-- Sidebar overlay (mobile) --}}
-    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    {{-- ══════════════════════════════════════════
+         MAIN CONTENT
+    ══════════════════════════════════════════ --}}
+    <main class="flex-1 ml-0 md:ml-72 flex flex-col h-screen overflow-y-auto bg-surface-bright pb-24 md:pb-0">
 
-    {{-- Main Content --}}
-    <div class="main-content">
-        {{-- Mobile topbar --}}
-        <div class="mobile-topbar">
-            <button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle menu">
-                <span></span><span></span><span></span>
+        {{-- Mobile Header --}}
+        <header class="md:hidden bg-surface border-b border-outline-variant p-4 flex justify-between items-center sticky top-0 z-40">
+            <h1 class="font-headline-md text-headline-md font-bold text-primary">MABIPRO</h1>
+            <button id="sidebar-mobile-btn" class="text-on-surface-variant p-2 rounded-full hover:bg-surface-container" aria-label="Toggle menu">
+                <span class="material-symbols-outlined">menu</span>
             </button>
-            <span style="font-size: 0.9rem; font-weight: 700; color: #1a1d23;">MABIPRO Admin</span>
+        </header>
+
+        <div class="p-margin-mobile md:p-margin-desktop flex-1 max-w-container-max mx-auto w-full space-y-lg">
+            @if (session('success'))
+                <div class="bg-secondary-container text-on-secondary-container p-4 rounded-lg mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="bg-error-container text-on-error-container p-4 rounded-lg mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined">error</span>
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @hasSection('header')
+                @yield('header')
+            @endif
+            
+            @hasSection('content')
+                @yield('content')
+            @else
+                {{ $slot ?? '' }}
+            @endif
         </div>
 
-        {{-- Page Content --}}
-        {{ $slot }}
-    </div>
+        {{-- Footer --}}
+        <footer class="bg-surface-dim dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface border-t border-outline-variant w-full py-6 px-margin-desktop mt-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="font-label-md text-label-md font-bold text-primary dark:text-primary-fixed">MABIPRO</div>
+            <div class="font-body-sm text-body-sm">© {{ date('Y') }} MABIPRO Property Management. All rights reserved.</div>
+        </footer>
+    </main>
+
+    {{-- ══════════════════════════════════════════
+         MOBILE BOTTOM NAV
+    ══════════════════════════════════════════ --}}
+    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface border-t border-outline-variant flex justify-around p-2 z-50">
+        <a class="flex flex-col items-center p-2 {{ request()->routeIs('marketing.dashboard') ? 'text-primary' : 'text-on-surface-variant hover:text-primary' }}"
+           href="{{ route('marketing.dashboard') }}">
+            <span class="material-symbols-outlined" style="{{ request()->routeIs('marketing.dashboard') ? "font-variation-settings: 'FILL' 1;" : '' }}">trending_up</span>
+            <span class="text-[10px] mt-1 {{ request()->routeIs('marketing.dashboard') ? 'font-bold' : '' }}">Marketing</span>
+        </a>
+        <a class="flex flex-col items-center p-2 {{ request()->routeIs('marketing.payment.report') ? 'text-primary' : 'text-on-surface-variant hover:text-primary' }}"
+           href="{{ route('marketing.payment.report') }}">
+            <span class="material-symbols-outlined" style="{{ request()->routeIs('marketing.payment.report') ? "font-variation-settings: 'FILL' 1;" : '' }}">receipt_long</span>
+            <span class="text-[10px] mt-1 {{ request()->routeIs('marketing.payment.report') ? 'font-bold' : '' }}">Laporan</span>
+        </a>
+    </nav>
+
+    {{-- Sidebar Overlay (Mobile) --}}
+    <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black/40 z-40 md:hidden"></div>
 
     @livewireScripts
 
     <script>
         // Mobile sidebar toggle
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-        const hamburger = document.getElementById('hamburger-btn');
+        const sidebarEl  = document.getElementById('sidebar');
+        const overlayEl  = document.getElementById('sidebar-overlay');
+        const mobileBtn  = document.getElementById('sidebar-mobile-btn');
 
         function openSidebar() {
-            sidebar.classList.add('open');
-            overlay.classList.add('open');
+            sidebarEl?.classList.remove('hidden');
+            sidebarEl?.classList.add('flex');
+            overlayEl?.classList.remove('hidden');
         }
         function closeSidebar() {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('open');
+            sidebarEl?.classList.add('hidden');
+            sidebarEl?.classList.remove('flex');
+            overlayEl?.classList.add('hidden');
         }
 
-        if (hamburger) hamburger.addEventListener('click', openSidebar);
-        if (overlay)   overlay.addEventListener('click', closeSidebar);
+        mobileBtn?.addEventListener('click', openSidebar);
+        overlayEl?.addEventListener('click', closeSidebar);
     </script>
 </body>
 </html>
