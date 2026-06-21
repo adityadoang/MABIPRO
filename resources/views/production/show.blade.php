@@ -1,148 +1,120 @@
 @extends('layouts.production')
 
-@section('title', 'Detail Unit ' . $unit->unit_number)
+@section('title', 'Unit ' . $unit->unit_number)
 
 @section('content')
 <div class="mb-6">
-    <a href="{{ route('production.dashboard') }}" 
-       class="font-mono text-sm text-rust hover:text-rust-dark inline-flex items-center gap-2">
-        ← KEMBALI KE DASHBOARD
+    <a href="{{ route('production.index') }}" class="text-sm text-primary-600 hover:text-primary-700 flex items-center gap-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        Back to Dashboard
     </a>
 </div>
 
-<div class="card-industrial mb-6 relative">
-    <span class="corner-rivet" style="top: 8px; left: 8px;"></span>
-    <span class="corner-rivet" style="top: 8px; right: 8px;"></span>
-    <span class="corner-rivet" style="bottom: 8px; left: 8px;"></span>
-    <span class="corner-rivet" style="bottom: 8px; right: 8px;"></span>
-    
-    <div class="bg-industrial-900 text-industrial-50 px-6 py-4 flex justify-between items-center">
-        <div>
-            <span class="label-tag bg-rust mb-2">UNIT DETAIL</span>
-            <h1 class="font-display text-4xl font-bold tracking-wider mt-2">
-                UNIT {{ $unit->unit_number }}
-            </h1>
-            <p class="font-mono text-sm text-industrial-300 mt-1">
-                {{ strtoupper($unit->block->nama_blok) }} // MABIPRO
-            </p>
-        </div>
-        <a href="{{ route('production.edit', $unit->id) }}" 
-           class="btn-industrial bg-rust text-industrial-50 px-6 py-3 hover:bg-rust-dark">
-            + UPDATE PROGRESS
-        </a>
-    </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-3 divide-x-2 divide-y-2 md:divide-y-0 divide-industrial-700">
-        <div class="p-4">
-            <p class="font-mono text-xs text-industrial-700 tracking-wider">STATUS PENJUALAN</p>
-            <p class="font-display text-2xl font-bold text-industrial-900 mt-1">
-                {{ strtoupper($unit->status_penjualan) }}
-            </p>
-        </div>
-        <div class="p-4">
-            <p class="font-mono text-xs text-industrial-700 tracking-wider">TOTAL PROGRESS</p>
-            <p class="font-display text-2xl font-bold text-rust mt-1">
-                {{ $unit->progres_pembangunan }}%
-            </p>
-        </div>
-        <div class="p-4">
-            <p class="font-mono text-xs text-industrial-700 tracking-wider">STATUS LEGALITAS</p>
-            <p class="font-display text-2xl font-bold text-industrial-900 mt-1">
-                {{ strtoupper($unit->status_legalitas) }}
-            </p>
-        </div>
-    </div>
-    
-    @if($latestProgress)
-        <div class="border-t-2 border-industrial-700 px-6 py-4 bg-industrial-100">
-            <div class="flex items-center gap-2 mb-2">
-                <span class="label-tag">CURRENT STAGE</span>
-            </div>
-            <p class="font-display text-xl font-bold text-industrial-900">
-                {{ strtoupper($latestProgress->tahap) }}
-            </p>
-            <p class="font-mono text-sm text-industrial-700 mt-1">
-                // {{ $latestProgress->catatan ?? 'Tidak ada catatan' }}
-            </p>
-        </div>
-    @endif
-</div>
-
-<div class="card-industrial mb-6 relative">
-    <div class="bg-industrial-900 text-industrial-50 px-6 py-3 flex items-center gap-2">
-        <span class="rivet"></span>
-        <h2 class="font-display text-xl font-bold tracking-wider">PROGRESS CHART</h2>
-    </div>
-    <div class="p-6 bg-industrial-50">
-        <canvas id="progressChart" height="80"></canvas>
-    </div>
-</div>
-
-<div class="card-industrial mb-6 relative">
-    <div class="bg-industrial-900 text-industrial-50 px-6 py-3 flex items-center gap-2">
-        <span class="rivet"></span>
-        <h2 class="font-display text-xl font-bold tracking-wider">CONSTRUCTION LOG</h2>
-        <span class="label-tag bg-rust ml-auto">{{ $progressHistory->count() }} ENTRIES</span>
-    </div>
-    
-    <div class="p-6 space-y-4">
-        @foreach($progressHistory as $progress)
-            <div class="timeline-line pl-6 py-2 relative">
-                <div class="absolute -left-[11px] top-3 w-5 h-5 bg-rust border-2 border-industrial-900 rounded-full"></div>
-                
-                <div class="bg-industrial-50 border-2 border-industrial-700 p-4">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <span class="label-tag">{{ $progress->tahap }}</span>
-                        </div>
-                        <span class="font-display text-3xl font-bold text-rust">
-                            {{ $progress->persentase }}%
-                        </span>
-                    </div>
-                    
-                    <p class="font-mono text-sm text-industrial-800 mt-2">
-                        // {{ $progress->catatan ?? 'Tidak ada catatan' }}
-                    </p>
-                    
-                    <div class="flex justify-between items-center mt-3 pt-3 border-t border-industrial-300 font-mono text-xs text-industrial-700">
-                        <span>BY: {{ strtoupper($progress->updater->name ?? 'UNKNOWN') }}</span>
-                        <span>{{ $progress->created_at->format('d.m.Y // H:i') }}</span>
-                    </div>
-                    
-                    @if($progress->photos->count() > 0)
-                        <div class="mt-3 pt-3 border-t border-industrial-300">
-                            <p class="font-mono text-xs text-industrial-700 mb-2">DOCUMENTATION:</p>
-                            <div class="flex gap-2 flex-wrap">
-                                @foreach($progress->photos as $photo)
-                                    <img src="{{ asset('storage/' . $photo->file_path) }}" 
-                                         alt="Foto progress" 
-                                         class="w-24 h-24 object-cover border-2 border-industrial-900 shadow-[3px_3px_0px_#3E2723]">
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
+<div class="grid grid-cols-3 gap-6">
+    <div class="col-span-2 space-y-6">
+        <div class="unit-header mb-6">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Unit {{ $unit->unit_number }}</h1>
+                    <p class="text-sm text-gray-500 mt-1">{{ $unit->block->nama_blok }} • Property Management</p>
                 </div>
             </div>
-        @endforeach
-    </div>
-</div>
-
-<div class="card-industrial relative">
-    <div class="bg-industrial-900 text-industrial-50 px-6 py-3 flex items-center gap-2">
-        <span class="rivet"></span>
-        <h2 class="font-display text-xl font-bold tracking-wider">REPORT GENERATOR</h2>
-    </div>
-    <div class="p-6 flex justify-between items-center bg-industrial-50">
-        <div>
-            <p class="font-display text-lg font-bold text-industrial-900">GENERATE PDF REPORT</p>
-            <p class="font-mono text-xs text-industrial-700 mt-1">
-                // Laporan lengkap progres pembangunan
-            </p>
+            
+            <div class="grid grid-cols-3 gap-4">
+                <div class="status-card">
+                    <p class="text-xs text-gray-500 mb-1">Sales Status</p>
+                    <p class="text-lg font-bold text-gray-900">{{ $unit->status_penjualan }}</p>
+                </div>
+                <div class="status-card primary">
+                    <p class="text-xs text-gray-500 mb-1">Total Progress</p>
+                    <p class="text-lg font-bold text-primary-700">{{ $unit->progres_pembangunan }}%</p>
+                </div>
+                <div class="status-card">
+                    <p class="text-xs text-gray-500 mb-1">Legal Status</p>
+                    <p class="text-lg font-bold text-gray-900">{{ $unit->status_legalitas ?? 'Belum Lengkap' }}</p>
+                </div>
+            </div>
         </div>
-        <a href="{{ route('production.report', $unit->id) }}" 
-           class="btn-industrial bg-industrial-900 text-industrial-50 px-6 py-3 hover:bg-industrial-800">
-            📄 GENERATE PDF
-        </a>
+
+        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Progress Chart</h2>
+            <div class="h-64">
+                <canvas id="progressChart"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Construction Log</h2>
+            <div class="space-y-4">
+                @php
+                    // Urutkan berdasarkan urutan tahap yang benar
+                    $tahapOrder = [
+                        'Persiapan Lahan' => 1,
+                        'Pondasi' => 2,
+                        'Struktur & Dinding' => 3,
+                        'Pengecatan' => 4,
+                        'Finishing' => 5,
+                        'Serah Terima' => 6,
+                    ];
+                    
+                    $sortedHistory = $progressHistory->sortBy(function($progress) use ($tahapOrder) {
+                        return $tahapOrder[$progress->tahap] ?? 99;
+                    });
+                @endphp
+                
+                @foreach($sortedHistory as $progress)
+                    <div class="border-l-4 border-primary-500 pl-4 py-2">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-semibold text-gray-900">{{ $progress->tahap }}</h3>
+                                <p class="text-sm text-gray-600 mt-1">{{ $progress->catatan }}</p>
+                                <p class="text-xs text-gray-500 mt-2">
+                                    By: {{ $progress->updater->name ?? 'Unknown' }} • {{ $progress->created_at->format('d M Y H:i') }}
+                                </p>
+                            </div>
+                            <span class="text-2xl font-bold text-primary-600">{{ $progress->persentase }}%</span>
+                        </div>
+                        @if($progress->photos->count() > 0)
+                            <div class="flex gap-2 mt-3">
+                                @foreach($progress->photos as $photo)
+                                    <img src="{{ asset('storage/' . $photo->file_path) }}" class="w-20 h-20 object-cover rounded-lg border border-gray-200">
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-6">
+        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <h3 class="font-semibold text-gray-900 mb-3">Quick Actions</h3>
+            <div class="space-y-2">
+                <a href="{{ route('production.edit', $unit->id) }}" class="block w-full py-2.5 bg-primary-600 text-white rounded-lg text-sm font-medium text-center hover:bg-primary-700">
+                    Update Progress
+                </a>
+                <a href="{{ route('production.report', $unit->id) }}" class="block w-full py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium text-center hover:bg-gray-50">
+                    Generate PDF Report
+                </a>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <h3 class="font-semibold text-gray-900 mb-3">Activity Log</h3>
+            <div class="space-y-3">
+                @foreach($progressHistory->take(5) as $activity)
+                    <div class="flex gap-3">
+                        <div class="w-2 h-2 rounded-full bg-primary-50 mt-2 flex-shrink-0"></div>
+                        <div class="flex-1">
+                            <p class="text-xs text-gray-500">{{ $activity->created_at->diffForHumans() }}</p>
+                            <p class="text-sm text-gray-900">{{ $activity->tahap }}</p>
+                            <p class="text-xs text-primary-600 font-medium">{{ $activity->persentase }}%</p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
     </div>
 </div>
 
@@ -156,30 +128,28 @@
                 label: 'Progress per Tahap (%)',
                 data: {!! json_encode($chartDataFormatted->pluck('persentase')) !!},
                 backgroundColor: [
-                    '#BF360C',  // Persiapan Lahan
-                    '#E64A19',  // Pondasi
-                    '#FF5722',  // Struktur & Dinding
-                    '#FF7043',  // Pengecatan
-                    '#FF8A65',  // Finishing
-                    '#FFAB91'   // Serah Terima
+                    '#047857',
+                    '#059669',
+                    '#10B981',
+                    '#34D399',
+                    '#6EE7B7',
+                    '#A7F3D0'
                 ],
-                borderColor: '#3E2723',
-                borderWidth: 2
+                borderColor: '#065F46',
+                borderWidth: 1,
+                borderRadius: 6
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: { 
+                    display: true,
+                    position: 'top',
                     labels: { 
-                        font: { family: 'Roboto Mono', size: 12 }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return 'Progress: ' + context.parsed.y + '%';
-                        }
+                        font: { family: 'Inter', size: 12 },
+                        color: '#374151'
                     }
                 }
             },
@@ -187,17 +157,15 @@
                 y: {
                     beginAtZero: true,
                     max: 100,
-                    grid: { color: '#BCAAA4' },
+                    grid: { color: '#F3F4F6' },
                     ticks: { 
-                        font: { family: 'Roboto Mono' },
-                        callback: function(value) {
-                            return value + '%';
-                        }
+                        font: { family: 'Inter', size: 11 },
+                        callback: function(value) { return value + '%'; }
                     }
                 },
                 x: {
-                    grid: { color: '#BCAAA4' },
-                    ticks: { font: { family: 'Roboto Mono', size: 10 } }
+                    grid: { display: false },
+                    ticks: { font: { family: 'Inter', size: 11 } }
                 }
             }
         }

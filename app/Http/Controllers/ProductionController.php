@@ -21,34 +21,34 @@ class ProductionController extends Controller
     }
 
     public function show($unitId)
-{
-    $unit = Unit::with(['block', 'constructionProgress.updater', 'constructionProgress.photos'])
-                ->findOrFail($unitId);
+    {
+        $unit = Unit::with(['block', 'constructionProgress.updater', 'constructionProgress.photos'])
+                    ->findOrFail($unitId);
 
-    $progressHistory = $unit->constructionProgress()
-                            ->orderBy('created_at', 'desc')
-                            ->get();
+        $progressHistory = $unit->constructionProgress()
+                                ->orderBy('created_at', 'desc')
+                                ->get();
 
-    // FIX: Ambil progres terbaru PER TAHAP (untuk chart)
-    $chartData = $unit->constructionProgress()
-                      ->select('tahap', \DB::raw('MAX(persentase) as persentase'))
-                      ->groupBy('tahap')
-                      ->pluck('persentase', 'tahap');
+        // FIX: Ambil progres terbaru PER TAHAP (untuk chart)
+        $chartData = $unit->constructionProgress()
+                          ->select('tahap', \DB::raw('MAX(persentase) as persentase'))
+                          ->groupBy('tahap')
+                          ->pluck('persentase', 'tahap');
 
-    // Pastikan semua 6 tahap ada di chart (kalau belum ada, isi 0)
-    $allTahap = ['Persiapan Lahan', 'Pondasi', 'Struktur & Dinding', 'Pengecatan', 'Finishing', 'Serah Terima'];
-    $chartDataFormatted = collect($allTahap)->map(function($tahap) use ($chartData) {
-        return [
-            'tahap' => $tahap,
-            'persentase' => $chartData[$tahap] ?? 0
-        ];
-    });
+        // Pastikan semua 6 tahap ada di chart (kalau belum ada, isi 0)
+        $allTahap = ['Persiapan Lahan', 'Pondasi', 'Struktur & Dinding', 'Pengecatan', 'Finishing', 'Serah Terima'];
+        $chartDataFormatted = collect($allTahap)->map(function($tahap) use ($chartData) {
+            return [
+                'tahap' => $tahap,
+                'persentase' => $chartData[$tahap] ?? 0
+            ];
+        });
 
-    $latestProgress = $unit->latestProgress();
-    $latestPhoto = $unit->latestPhoto();
+        $latestProgress = $unit->latestProgress();
+        $latestPhoto = $unit->latestPhoto();
 
-    return view('production.show', compact('unit', 'progressHistory', 'latestProgress', 'latestPhoto', 'chartDataFormatted'));
-}
+        return view('production.show', compact('unit', 'progressHistory', 'latestProgress', 'latestPhoto', 'chartDataFormatted'));
+    }
 
     public function edit($unitId)
     {
@@ -58,75 +58,77 @@ class ProductionController extends Controller
     }
 
     public function updateProgress(Request $request, $unitId)
-{
-    $request->validate([
-        'tahap' => 'required|in:Persiapan Lahan,Pondasi,Struktur & Dinding,Pengecatan,Finishing,Serah Terima',
-        'persentase' => 'required|integer|min:0|max:100',
-        'catatan' => 'nullable|string|max:500',
-    ]);
-
-    $unit = Unit::findOrFail($unitId);
-
-    // FIX: Hardcode user_id = 1 (sementara, sampai ada sistem login)
-    $userId = auth()->id() ?? 1;
-
-    $progress = ConstructionProgress::create([
-        'unit_id' => $unit->id,
-        'tahap' => $request->tahap,
-        'persentase' => $request->persentase,
-        'catatan' => $request->catatan,
-        'updated_by' => $userId,
-    ]);
-
-    $unit->update([
-        'progres_pembangunan' => $request->persentase,
-        'tanggal_akhir_progres' => now(),
-    ]);
-
-    if ($request->hasFile('foto')) {
-        $path = $request->file('foto')->store('progress_photos', 'public');
-        
-        ProgressPhoto::create([
-            'progress_id' => $progress->id,
-            'file_path' => $path,
-            'keterangan' => $request->tahap,
-            'uploaded_by' => $userId,
+    {
+        $request->validate([
+            'tahap' => 'required_if:has_tahap,true|in:Persiapan Lahan,Pondasi,Struktur & Dinding,Pengecatan,Finishing,Serah Terima',
+            'persentase' => 'required|integer|min:0|max:100',
+            'catatan' => 'nullable|string|max:500',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
+
+        $unit = Unit::findOrFail($unitId);
+
+        // Create progress record
+        $progress = ConstructionProgress::create([
+            'unit_id' => $unit->id,
+            'tahap' => $request->tahap ?? $unit->latestProgress()?->tahap ?? 'Persiapan Lahan',
+            'persentase' => $request->persentase,
+            'catatan' => $request->catatan,
+            'updated_by' => auth()->id() ?? 1,
+        ]);
+
+        // Update unit progress
+        $unit->update([
+            'progres_pembangunan' => $request->persentase,
+        ]);
+
+        // Handle photo upload
+        if ($request->hasFile('foto')) {
+            $photo = $request->file('foto');
+            $photoName = time() . '_' . $photo->getClientOriginalName();
+            $photoPath = $photo->storeAs('progress_photos', $photoName, 'public');
+            
+            ProgressPhoto::create([
+                'progress_id' => $progress->id,
+                'file_path' => $photoPath,
+                'keterangan' => $request->catatan,
+                'uploaded_by' => auth()->id() ?? 1,  // ← INI PENTING!
+            ]);
+        }
+
+        return redirect()->route('production.show', $unit->id)
+            ->with('success', 'Progress berhasil diupdate!');
     }
 
-    return redirect()->route('production.show', $unitId)
-                    ->with('success', 'Progres pembangunan berhasil diupdate!');
-}
-
     public function generateReport($unitId)
-{
-    $unit = Unit::with(['block', 'constructionProgress.updater', 'constructionProgress.photos'])
-                ->findOrFail($unitId);
+    {
+        $unit = Unit::with(['block', 'constructionProgress.updater', 'constructionProgress.photos'])
+                    ->findOrFail($unitId);
 
-    $progressHistory = $unit->constructionProgress()
-                            ->orderBy('created_at', 'asc')
-                            ->get();
+        $progressHistory = $unit->constructionProgress()
+                                ->orderBy('created_at', 'asc')
+                                ->get();
 
-    // Generate PDF
-    $pdf = \PDF::loadView('production.report-pdf', compact('unit', 'progressHistory'));
-    
-    // Nama file
-    $filename = "laporan-{$unit->unit_number}-" . now()->format('YmdHis') . ".pdf";
-    
-    // Simpan ke storage
-    $path = "reports/{$filename}";
-    \Storage::disk('public')->put($path, $pdf->output());
-    
-    // Simpan record ke database
-    Report::create([
-        'unit_id' => $unit->id,
-        'generated_by' => auth()->id() ?? 1,
-        'file_path' => $path,
-        'report_type' => 'progres_pembangunan',
-        'generated_at' => now(),
-    ]);
+        // Generate PDF
+        $pdf = \PDF::loadView('production.report-pdf', compact('unit', 'progressHistory'));
+        
+        // Nama file
+        $filename = "laporan-{$unit->unit_number}-" . now()->format('YmdHis') . ".pdf";
+        
+        // Simpan ke storage
+        $path = "reports/{$filename}";
+        \Storage::disk('public')->put($path, $pdf->output());
+        
+        // Simpan record ke database
+        Report::create([
+            'unit_id' => $unit->id,
+            'generated_by' => auth()->id() ?? 1,
+            'file_path' => $path,
+            'report_type' => 'progres_pembangunan',
+            'generated_at' => now(),
+        ]);
 
-    // Download PDF
-    return $pdf->download($filename);
-}
+        // Download PDF
+        return $pdf->download($filename);
+    }
 }
