@@ -156,23 +156,28 @@
                 label: 'Progress per Tahap (%)',
                 data: {!! json_encode($chartDataFormatted->pluck('persentase')) !!},
                 backgroundColor: [
-                    '#BF360C',  // Persiapan Lahan
-                    '#E64A19',  // Pondasi
-                    '#FF5722',  // Struktur & Dinding
-                    '#FF7043',  // Pengecatan
-                    '#FF8A65',  // Finishing
-                    '#FFAB91'   // Serah Terima
+                    '#047857',  // Persiapan Lahan - hijau gelap
+                    '#059669',  // Pondasi - hijau medium
+                    '#10B981',  // Struktur & Dinding - hijau primary
+                    '#34D399',  // Pengecatan - hijau terang
+                    '#6EE7B7',  // Finishing - hijau sangat terang
+                    '#A7F3D0'   // Serah Terima - hijau pastel
                 ],
-                borderColor: '#3E2723',
-                borderWidth: 2
+                borderColor: '#065F46',
+                borderWidth: 1,
+                borderRadius: 6
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: { 
+                    display: true,
+                    position: 'top',
                     labels: { 
-                        font: { family: 'Roboto Mono', size: 12 }
+                        font: { family: 'Inter', size: 12 },
+                        color: '#374151'
                     }
                 },
                 tooltip: {
@@ -187,17 +192,27 @@
                 y: {
                     beginAtZero: true,
                     max: 100,
-                    grid: { color: '#BCAAA4' },
+                    grid: { 
+                        color: '#F3F4F6',
+                        drawBorder: false
+                    },
                     ticks: { 
-                        font: { family: 'Roboto Mono' },
+                        font: { family: 'Inter', size: 11 },
+                        color: '#6B7280',
                         callback: function(value) {
                             return value + '%';
                         }
                     }
                 },
                 x: {
-                    grid: { color: '#BCAAA4' },
-                    ticks: { font: { family: 'Roboto Mono', size: 10 } }
+                    grid: { 
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: { 
+                        font: { family: 'Inter', size: 11 },
+                        color: '#6B7280'
+                    }
                 }
             }
         }

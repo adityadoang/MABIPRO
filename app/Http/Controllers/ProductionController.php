@@ -60,44 +60,43 @@ class ProductionController extends Controller
     public function updateProgress(Request $request, $unitId)
 {
     $request->validate([
-        'tahap' => 'required|in:Persiapan Lahan,Pondasi,Struktur & Dinding,Pengecatan,Finishing,Serah Terima',
+        'tahap' => 'required_if:has_tahap,true|in:Persiapan Lahan,Pondasi,Struktur & Dinding,Pengecatan,Finishing,Serah Terima',
         'persentase' => 'required|integer|min:0|max:100',
         'catatan' => 'nullable|string|max:500',
+        'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
     ]);
 
     $unit = Unit::findOrFail($unitId);
 
-    // FIX: Hardcode user_id = 1 (sementara, sampai ada sistem login)
-    $userId = auth()->id() ?? 1;
-
+    // Create progress record
     $progress = ConstructionProgress::create([
         'unit_id' => $unit->id,
-        'tahap' => $request->tahap,
+        'tahap' => $request->tahap ?? $unit->latestProgress()?->tahap ?? 'Persiapan Lahan',
         'persentase' => $request->persentase,
         'catatan' => $request->catatan,
-        'updated_by' => $userId,
+        'updated_by' => auth()->id() ?? 1,
     ]);
 
+    // Update unit progress
     $unit->update([
         'progres_pembangunan' => $request->persentase,
-        'tanggal_akhir_progres' => now(),
     ]);
 
+    // Handle photo upload
     if ($request->hasFile('foto')) {
-        $path = $request->file('foto')->store('progress_photos', 'public');
+        $photo = $request->file('foto');
+        $photoPath = $photo->store('progress_photos', 'public');
         
         ProgressPhoto::create([
             'progress_id' => $progress->id,
-            'file_path' => $path,
-            'keterangan' => $request->tahap,
-            'uploaded_by' => $userId,
+            'file_path' => $photoPath,
+            'keterangan' => $request->catatan,
         ]);
     }
 
-    return redirect()->route('production.show', $unitId)
-                    ->with('success', 'Progres pembangunan berhasil diupdate!');
+    return redirect()->route('production.show', $unit->id)
+        ->with('success', 'Progress berhasil diupdate!');
 }
-
     public function generateReport($unitId)
 {
     $unit = Unit::with(['block', 'constructionProgress.updater', 'constructionProgress.photos'])

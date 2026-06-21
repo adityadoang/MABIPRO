@@ -61,6 +61,14 @@ Route::prefix('production')->name('production.')->group(function () {
     Route::get('/{id}/edit', [ProductionController::class, 'edit'])->name('edit');
     Route::put('/{id}/update', [ProductionController::class, 'updateProgress'])->name('update');
     Route::get('/{id}/report', [ProductionController::class, 'generateReport'])->name('report');
+
+    // API endpoint untuk ambil unit berdasarkan blok
+    Route::get('/api/blocks/{blockId}/units', function($blockId) {
+        $units = \App\Models\Unit::where('block_id', $blockId)
+            ->select('id', 'unit_number')
+            ->get();
+        return response()->json($units);
+    });
 });
 
 // ============================================================
