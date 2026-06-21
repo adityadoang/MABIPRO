@@ -2,62 +2,62 @@
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <div class="mb-8">
-        <h2 class="text-2xl font-bold text-gray-900">Welcome back</h2>
-        <p class="text-sm text-gray-500 mt-1">Please enter your details to sign in.</p>
+    <div class="mb-6">
+        <h2 class="font-headline-md text-2xl font-semibold text-on-surface">Welcome back</h2>
+        <p class="font-body-sm text-sm text-on-surface-variant mt-1">Please enter your details to sign in.</p>
     </div>
 
-    <form method="POST" action="{{ route('login') }}" class="space-y-5">
+    <!-- Error State Example -->
+    @if ($errors->any())
+        <div class="mb-6 bg-error-container text-on-error-container p-2 rounded-md flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">error</span>
+            <span class="font-body-sm text-sm">Email atau password salah</span>
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('login') }}" class="space-y-4">
         @csrf
 
-        <!-- Email Address -->
+        <!-- Email Input -->
         <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-            <div class="relative mt-1">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                    </svg>
+            <label class="block font-label-sm text-xs font-medium text-on-surface mb-1" for="email">Email</label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                    <span class="material-symbols-outlined text-outline text-sm">mail</span>
                 </div>
-                <input id="email" class="block w-full pl-10 border-gray-300 rounded-lg shadow-sm focus:ring-emerald-600 focus:border-emerald-600 sm:text-sm py-2.5" type="email" name="email" value="{{ old('email') }}" placeholder="name@company.com" required autofocus autocomplete="username" />
+                <input class="block w-full pl-8 pr-2 py-2 bg-surface rounded-md border border-outline-variant text-on-surface focus:ring-primary focus:border-primary font-body-md text-base placeholder-outline transition-colors" 
+                       id="email" name="email" value="{{ old('email') }}" placeholder="name@company.com" required autofocus autocomplete="username" type="email"/>
             </div>
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <!-- Password -->
+        <!-- Password Input -->
         <div>
-            <div class="flex items-center justify-between">
-                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+            <div class="flex justify-between items-center mb-1">
+                <label class="block font-label-sm text-xs font-medium text-on-surface" for="password">Password</label>
                 @if (Route::has('password.request'))
-                    <a href="{{ route('password.request') }}" class="text-sm font-medium text-emerald-700 hover:text-emerald-600">
-                        Forgot Password?
-                    </a>
+                    <a class="font-label-sm text-xs font-medium text-secondary hover:text-secondary-fixed-dim transition-colors" href="{{ route('password.request') }}">Forgot Password?</a>
                 @endif
             </div>
-            <div class="relative mt-1">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                    </svg>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                    <span class="material-symbols-outlined text-outline text-sm">lock</span>
                 </div>
-                <input id="password" class="block w-full pl-10 border-gray-300 rounded-lg shadow-sm focus:ring-emerald-600 focus:border-emerald-600 sm:text-sm py-2.5" type="password" name="password" placeholder="••••••••" required autocomplete="current-password" />
+                <input class="block w-full pl-8 pr-2 py-2 bg-surface rounded-md border border-outline-variant text-on-surface focus:ring-primary focus:border-primary font-body-md text-base placeholder-outline transition-colors" 
+                       id="password" name="password" placeholder="••••••••" required autocomplete="current-password" type="password"/>
             </div>
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <div class="mt-6">
-            <button type="submit" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-[#006A4E] hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-600 transition-colors">
-                Masuk
-            </button>
-        </div>
-        
-        <div class="mt-6 text-center">
-            <a href="/" class="text-sm text-gray-500 hover:text-gray-800 font-medium inline-flex items-center gap-1.5 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                </svg>
-                Return to Landing Page
-            </a>
-        </div>
+        <!-- Submit Button -->
+        <button class="w-full flex justify-center items-center py-4 px-6 mt-6 border border-transparent rounded-md shadow-sm font-label-md text-sm font-semibold text-on-secondary bg-secondary hover:bg-on-secondary-fixed-variant focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary transition-all active:scale-[0.98]" type="submit">
+            Masuk
+        </button>
     </form>
+
+    <!-- Return Link -->
+    <div class="mt-6 text-center">
+        <a class="inline-flex items-center gap-1 font-label-sm text-xs font-medium text-on-surface-variant hover:text-primary transition-colors" href="/">
+            <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+            Return to Landing Page
+        </a>
+    </div>
 </x-guest-layout>
