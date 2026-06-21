@@ -19,9 +19,12 @@
     <body class="bg-background text-on-background min-h-screen flex items-center justify-center font-sans antialiased p-4 md:p-8">
         <div class="w-full max-w-[480px]">
             <!-- Brand Logo -->
-            <div class="text-center mb-12">
-                <h1 class="font-display-lg text-[48px] leading-[56px] font-bold text-primary tracking-tighter">MABIPRO</h1>
-                <p class="font-body-md text-base text-on-surface-variant mt-1">Property Management System</p>
+            <div class="text-center mb-10 flex flex-col items-center">
+                <div class="w-24 h-24 flex-shrink-0 rounded-full overflow-hidden bg-white shadow-sm border border-outline-variant p-2 mb-4 flex items-center justify-center">
+                    <img src="{{ asset('images/mabipro-logo.jpg') }}" alt="MABIPRO Logo" class="w-full h-full object-contain">
+                </div>
+                <h1 class="font-display-lg text-[40px] leading-[48px] font-bold text-primary tracking-tighter">MABIPRO</h1>
+                <p class="font-body-md text-sm text-on-surface-variant mt-1">Property Management System</p>
             </div>
 
             <!-- Login Card -->
