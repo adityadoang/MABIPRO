@@ -24,8 +24,8 @@
         {{-- Logo / User Area --}}
         <div class="mb-8">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 flex-shrink-0 rounded-full bg-white overflow-hidden flex items-center justify-center border border-outline-variant shadow-sm p-1">
-                    <img src="{{ asset('images/mabipro-logo.jpg') }}" alt="MABIPRO Logo" class="w-full h-full object-contain">
+                <div class="w-10 h-10 flex-shrink-0 rounded-full bg-white overflow-hidden flex items-center justify-center shadow-sm">
+                    <img src="{{ asset('images/mabipro-logo.png') }}" alt="MABIPRO Logo" class="w-full h-full object-contain">
                 </div>
                 <div>
                     <h2 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">MABIPRO</h2>

@@ -16,8 +16,8 @@
     <nav class="bg-surface-container-low dark:bg-primary-container text-secondary dark:text-secondary-fixed font-headline-md text-headline-md border-r border-outline-variant dark:border-outline fixed left-0 top-0 h-screen flex flex-col p-4 space-y-2 z-50 w-72 md:flex hidden">
         <div class="mb-8">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 flex-shrink-0 rounded-full bg-white overflow-hidden flex items-center justify-center border border-outline-variant shadow-sm p-1">
-                    <img src="{{ asset('images/mabipro-logo.jpg') }}" alt="MABIPRO Logo" class="w-full h-full object-contain">
+                <div class="w-10 h-10 flex-shrink-0 rounded-full bg-white overflow-hidden flex items-center justify-center shadow-sm">
+                    <img src="{{ asset('images/mabipro-logo.png') }}" alt="MABIPRO Logo" class="w-full h-full object-contain">
                 </div>
                 <div>
                     <h2 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">MABIPRO Admin</h2>
