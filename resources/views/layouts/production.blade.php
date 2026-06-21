@@ -10,7 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="stylesheet" href="{{ asset('css/production.css') }}">
     
     <script>
         tailwind.config = {
@@ -37,32 +40,9 @@
             }
         }
     </script>
-    
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .nav-item.active {
-            background-color: #10B981;
-            color: white;
-        }
-        .nav-item:hover:not(.active) {
-            background-color: #F3F4F6;
-        }
-        .progress-bar {
-            transition: width 0.5s ease;
-        }
-        .drop-zone {
-            border: 2px dashed #D1D5DB;
-            transition: all 0.2s;
-        }
-        .drop-zone:hover, .drop-zone.dragover {
-            border-color: #10B981;
-            background-color: #ECFDF5;
-        }
-    </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
     <div class="flex">
-        <!-- Sidebar -->
         <aside class="w-64 bg-white border-r border-gray-200 min-h-screen flex flex-col fixed">
             <div class="p-6 border-b border-gray-100">
                 <h1 class="text-xl font-bold text-gray-900">MABIPRO Admin</h1>
@@ -123,7 +103,6 @@
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="flex-1 ml-64 p-8">
             @yield('content')
         </main>
