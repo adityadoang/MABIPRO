@@ -24,8 +24,8 @@
         {{-- Logo / User Area --}}
         <div class="mb-8">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-lg">
-                    {{ strtoupper(substr(Auth::user()->name ?? 'M', 0, 1)) }}
+                <div class="w-10 h-10 flex-shrink-0 rounded-full bg-white overflow-hidden flex items-center justify-center border border-outline-variant shadow-sm p-1">
+                    <img src="{{ asset('images/mabipro-logo.jpg') }}" alt="MABIPRO Logo" class="w-full h-full object-contain">
                 </div>
                 <div>
                     <h2 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">MABIPRO</h2>
