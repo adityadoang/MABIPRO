@@ -12,10 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('units', function (Blueprint $table) {
-            $table->string('payment_method')->nullable();
-            $table->integer('kpr_duration_months')->nullable();
-            $table->decimal('amount_paid', 15, 2)->nullable();
-            $table->string('payment_proof_path')->nullable();
+            if (!Schema::hasColumn('units', 'payment_method')) {
+                $table->string('payment_method')->nullable();
+            }
+            if (!Schema::hasColumn('units', 'kpr_duration_months')) {
+                $table->integer('kpr_duration_months')->nullable();
+            }
+            if (!Schema::hasColumn('units', 'amount_paid')) {
+                $table->decimal('amount_paid', 15, 2)->nullable();
+            }
+            if (!Schema::hasColumn('units', 'payment_proof_path')) {
+                $table->string('payment_proof_path')->nullable();
+            }
         });
     }
 

@@ -1,69 +1,63 @@
 @extends('layouts.admin')
 
-@section('title', 'Data Blok')
+@section('title', 'Kelola Blok')
 
 @section('content')
-<div class="mb-6 flex justify-between items-center">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
     <div>
-        <span class="label-tag bg-rust">MASTER DATA</span>
-        <h2 class="font-display text-3xl font-bold text-industrial-900 mt-2">DATA BLOK</h2>
+        <h2 class="font-headline-md text-headline-md font-bold text-primary">Kelola Blok</h2>
+        <p class="font-body-md text-body-md text-on-surface-variant">Daftar blok perumahan yang tersedia</p>
     </div>
-    <a href="{{ route('admin.blocks.create') }}" 
-       class="btn-industrial bg-rust text-industrial-50 px-4 py-2">
-        + TAMBAH BLOK
+    <a href="{{ route('admin.blocks.create') }}" class="bg-primary text-on-primary hover:bg-primary/90 font-label-md font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
+        <span class="material-symbols-outlined">add</span>
+        Tambah Blok
     </a>
 </div>
 
-<div class="card-industrial">
-    <table class="w-full">
-        <thead>
-            <tr class="bg-industrial-900 text-industrial-50">
-                <th class="px-4 py-3 text-left font-display tracking-wider">ID</th>
-                <th class="px-4 py-3 text-left font-display tracking-wider">NAMA BLOK</th>
-                <th class="px-4 py-3 text-left font-display tracking-wider">DESKRIPSI</th>
-                <th class="px-4 py-3 text-center font-display tracking-wider">JUMLAH UNIT</th>
-                <th class="px-4 py-3 text-center font-display tracking-wider">AKSI</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($blocks as $block)
-                <tr class="border-t-2 border-industrial-700 hover:bg-industrial-100">
-                    <td class="px-4 py-3 font-mono text-sm">{{ $block->id }}</td>
-                    <td class="px-4 py-3 font-display font-bold text-industrial-900">
-                        {{ strtoupper($block->nama_blok) }}
+<div class="bg-surface-container-low rounded-2xl border border-outline-variant overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left font-body-sm text-on-surface">
+            <thead class="bg-surface-container border-b border-outline-variant text-on-surface-variant font-label-md">
+                <tr>
+                    <th class="py-3 px-4 font-bold">NAMA BLOK</th>
+                    <th class="py-3 px-4 font-bold">DESKRIPSI</th>
+                    <th class="py-3 px-4 font-bold text-center">JUMLAH UNIT</th>
+                    <th class="py-3 px-4 font-bold text-right">AKSI</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant">
+                @forelse($blocks as $block)
+                <tr class="hover:bg-surface-container-high transition-colors">
+                    <td class="py-3 px-4 font-bold text-primary">{{ strtoupper($block->nama_blok) }}</td>
+                    <td class="py-3 px-4">{{ $block->deskripsi ?? '-' }}</td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="bg-secondary-container text-on-secondary-container py-1 px-2 rounded-md font-bold text-xs">{{ $block->units_count }}</span>
                     </td>
-                    <td class="px-4 py-3 font-mono text-sm text-industrial-700">
-                        {{ $block->deskripsi ?? '-' }}
-                    </td>
-                    <td class="px-4 py-3 text-center">
-                        <span class="label-tag bg-rust">{{ $block->units_count }}</span>
-                    </td>
-                    <td class="px-4 py-3 text-center">
-                        <div class="flex gap-2 justify-center">
-                            <a href="{{ route('admin.blocks.edit', $block->id) }}" 
-                               class="text-industrial-900 hover:text-rust font-mono text-xs">
-                                [EDIT]
+                    <td class="py-3 px-4 text-right">
+                        <div class="flex items-center justify-end gap-2">
+                            <a href="{{ route('admin.blocks.edit', $block->id) }}" class="text-secondary hover:text-primary transition-colors p-1" title="Edit">
+                                <span class="material-symbols-outlined text-[20px]">edit</span>
                             </a>
-                            <form action="{{ route('admin.blocks.destroy', $block->id) }}" 
-                                  method="POST" class="inline"
-                                  onsubmit="return confirm('Yakin hapus blok ini? Semua unit di dalamnya juga akan terhapus!')">
+                            <form action="{{ route('admin.blocks.destroy', $block->id) }}" method="POST" class="inline" onsubmit="return confirm('Yakin hapus blok ini? Semua unit di dalamnya juga akan terhapus!')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-rust hover:text-rust-dark font-mono text-xs">
-                                    [HAPUS]
+                                <button type="submit" class="text-error hover:text-error/80 transition-colors p-1" title="Hapus">
+                                    <span class="material-symbols-outlined text-[20px]">delete</span>
                                 </button>
                             </form>
                         </div>
                     </td>
                 </tr>
-            @empty
+                @empty
                 <tr>
-                    <td colspan="5" class="px-4 py-8 text-center font-mono text-industrial-600">
-                        // Belum ada data blok
+                    <td colspan="4" class="py-8 px-4 text-center text-on-surface-variant flex flex-col items-center gap-2 justify-center">
+                        <span class="material-symbols-outlined text-4xl text-outline">domain_disabled</span>
+                        <span>Belum ada data blok</span>
                     </td>
                 </tr>
-            @endforelse
-        </tbody>
-    </table>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
 @endsection

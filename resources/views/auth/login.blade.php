@@ -1,181 +1,63 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — MABIPRO Admin</title>
+<x-guest-layout>
+    <!-- Session Status -->
+    <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @else
-        <style>
-            *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-            body {
-                font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
-                background: linear-gradient(135deg, #0f2340 0%, #1e3a5f 50%, #0f4c75 100%);
-                min-height: 100vh;
-                display: flex; align-items: center; justify-content: center;
-                padding: 24px;
-            }
-
-            .login-card {
-                background: #ffffff;
-                border-radius: 16px;
-                box-shadow: 0 25px 60px rgba(0,0,0,0.3);
-                width: 100%;
-                max-width: 420px;
-                overflow: hidden;
-            }
-            .login-header {
-                background: linear-gradient(135deg, #1e3a5f 0%, #0f2340 100%);
-                padding: 32px 32px 28px;
-                text-align: center;
-            }
-            .login-logo {
-                font-size: 28px;
-                font-weight: 700;
-                color: #ffffff;
-                letter-spacing: 0.05em;
-            }
-            .login-logo-sub {
-                font-size: 12px;
-                color: rgba(255,255,255,0.5);
-                text-transform: uppercase;
-                letter-spacing: 0.1em;
-                margin-top: 4px;
-            }
-            .login-body { padding: 32px; }
-            .login-title {
-                font-size: 20px; font-weight: 700; color: #1e293b;
-                margin-bottom: 4px;
-            }
-            .login-subtitle { font-size: 13px; color: #64748b; margin-bottom: 24px; }
-
-            .form-group { margin-bottom: 18px; }
-            .form-label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
-            .form-control {
-                width: 100%; padding: 11px 14px; border-radius: 8px;
-                border: 1px solid #d1d5db; font-size: 14px; color: #111827;
-                outline: none; transition: border-color 0.15s, box-shadow 0.15s;
-                font-family: inherit;
-            }
-            .form-control:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
-            .form-control.is-invalid { border-color: #ef4444; }
-            .form-error { font-size: 12px; color: #dc2626; margin-top: 5px; }
-
-            .form-check { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
-            .form-check input { width: 15px; height: 15px; cursor: pointer; accent-color: #1e3a5f; }
-            .form-check label { font-size: 13px; color: #475569; cursor: pointer; }
-
-            .alert-error {
-                background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;
-                padding: 11px 14px; font-size: 13px; color: #dc2626; margin-bottom: 18px;
-                display: flex; align-items: center; gap: 8px;
-            }
-            .alert-success {
-                background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
-                padding: 11px 14px; font-size: 13px; color: #166534; margin-bottom: 18px;
-            }
-            .alert-error svg { width: 16px; height: 16px; flex-shrink: 0; }
-
-            .btn-login {
-                width: 100%; padding: 12px; border-radius: 8px;
-                background: linear-gradient(135deg, #1e3a5f, #0f4c75);
-                color: #fff; font-size: 15px; font-weight: 600;
-                border: none; cursor: pointer; font-family: inherit;
-                transition: opacity 0.15s, transform 0.1s;
-            }
-            .btn-login:hover { opacity: 0.92; transform: translateY(-1px); }
-            .btn-login:active { transform: translateY(0); }
-
-            .login-footer {
-                padding: 16px 32px;
-                background: #f8fafc;
-                border-top: 1px solid #f1f5f9;
-                text-align: center;
-                font-size: 12px;
-                color: #94a3b8;
-            }
-        </style>
-    @endif
-</head>
-<body>
-    <div class="login-card">
-        <div class="login-header">
-            <div class="login-logo">MABIPRO</div>
-            <div class="login-logo-sub">Manajemen Properti</div>
-        </div>
-
-        <div class="login-body">
-            <h1 class="login-title">Masuk ke Sistem</h1>
-            <p class="login-subtitle">Silakan masukkan kredensial Anda.</p>
-
-            {{-- Alert error login --}}
-            @if ($errors->has('email'))
-                <div class="alert-error" role="alert">
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    {{ $errors->first('email') }}
-                </div>
-            @endif
-
-            {{-- Alert success (misal setelah logout) --}}
-            @if (session('success'))
-                <div class="alert-success">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            <form method="POST" action="{{ route('login') }}" id="login-form">
-                @csrf
-
-                <div class="form-group">
-                    <label class="form-label" for="email">Email</label>
-                    <input
-                        id="email"
-                        type="email"
-                        name="email"
-                        class="form-control {{ $errors->has('email') ? 'is-invalid' : '' }}"
-                        value="{{ old('email') }}"
-                        required
-                        autofocus
-                        autocomplete="email"
-                        placeholder="contoh@email.com"
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="password">Password</label>
-                    <input
-                        id="password"
-                        type="password"
-                        name="password"
-                        class="form-control"
-                        required
-                        autocomplete="current-password"
-                        placeholder="••••••••"
-                    >
-                </div>
-
-                <div class="form-check">
-                    <input type="checkbox" id="remember" name="remember">
-                    <label for="remember">Ingat saya</label>
-                </div>
-
-                <button type="submit" class="btn-login" id="btn-login">
-                    Masuk
-                </button>
-            </form>
-        </div>
-
-        <div class="login-footer">
-            &copy; {{ date('Y') }} MABIPRO. Hak cipta dilindungi.
-        </div>
+    <div class="mb-6">
+        <h2 class="font-headline-md text-2xl font-semibold text-on-surface">Welcome back</h2>
+        <p class="font-body-sm text-sm text-on-surface-variant mt-1">Please enter your details to sign in.</p>
     </div>
-</body>
-</html>
+
+    <!-- Error State Example -->
+    @if ($errors->any())
+        <div class="mb-6 bg-error-container text-on-error-container p-2 rounded-md flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">error</span>
+            <span class="font-body-sm text-sm">Email atau password salah</span>
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('login') }}" class="space-y-4">
+        @csrf
+
+        <!-- Email Input -->
+        <div>
+            <label class="block font-label-sm text-xs font-medium text-on-surface mb-1" for="email">Email</label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                    <span class="material-symbols-outlined text-outline text-sm">mail</span>
+                </div>
+                <input class="block w-full pl-8 pr-2 py-2 bg-surface rounded-md border border-outline-variant text-on-surface focus:ring-primary focus:border-primary font-body-md text-base placeholder-outline transition-colors" 
+                       id="email" name="email" value="{{ old('email') }}" placeholder="name@company.com" required autofocus autocomplete="username" type="email"/>
+            </div>
+        </div>
+
+        <!-- Password Input -->
+        <div>
+            <div class="flex justify-between items-center mb-1">
+                <label class="block font-label-sm text-xs font-medium text-on-surface" for="password">Password</label>
+                @if (Route::has('password.request'))
+                    <a class="font-label-sm text-xs font-medium text-secondary hover:text-secondary-fixed-dim transition-colors" href="{{ route('password.request') }}">Forgot Password?</a>
+                @endif
+            </div>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                    <span class="material-symbols-outlined text-outline text-sm">lock</span>
+                </div>
+                <input class="block w-full pl-8 pr-2 py-2 bg-surface rounded-md border border-outline-variant text-on-surface focus:ring-primary focus:border-primary font-body-md text-base placeholder-outline transition-colors" 
+                       id="password" name="password" placeholder="••••••••" required autocomplete="current-password" type="password"/>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button class="w-full flex justify-center items-center py-4 px-6 mt-6 border border-transparent rounded-md shadow-sm font-label-md text-sm font-semibold text-on-secondary bg-secondary hover:bg-on-secondary-fixed-variant focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary transition-all active:scale-[0.98]" type="submit">
+            Masuk
+        </button>
+    </form>
+
+    <!-- Return Link -->
+    <div class="mt-6 text-center">
+        <a class="inline-flex items-center gap-1 font-label-sm text-xs font-medium text-on-surface-variant hover:text-primary transition-colors" href="/">
+            <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+            Return to Landing Page
+        </a>
+    </div>
+</x-guest-layout>

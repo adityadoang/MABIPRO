@@ -8,38 +8,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Tabel Blok
-        Schema::create('blocks', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama_blok');
-            $table->timestamps();
-        });
-
-        // Tabel Unit Rumah
-        Schema::create('units', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('block_id')->constrained('blocks')->onDelete('cascade');
-            $table->string('unit_number'); 
-            $table->enum('status_penjualan', ['Belum Terjual', 'Sudah DP', 'Terjual'])->default('Belum Terjual');
-            $table->integer('progres_pembangunan')->default(0);
-            $table->string('status_legalitas')->default('Belum Lengkap');
-            $table->string('payment_method')->nullable();
-            $table->integer('kpr_duration_months')->nullable();
-            $table->decimal('amount_paid', 15, 2)->nullable();
-            $table->string('payment_proof_path')->nullable();
-            $table->decimal('harga_unit', 15, 2)->nullable();
-            $table->string('kpr_type')->nullable();
-            $table->string('bank_name')->nullable();
-            $table->date('akad_date')->nullable();
-            $table->decimal('dp_amount', 15, 2)->nullable();
-            $table->decimal('dp_percentage', 5, 2)->nullable();
-            $table->decimal('pokok_kredit', 15, 2)->nullable();
-            $table->decimal('interest_rate', 5, 2)->nullable();
-            $table->string('interest_type')->nullable();
-            $table->decimal('monthly_installment', 15, 2)->nullable();
-            $table->timestamps();
-        });
-
         // Tabel Dokumen Legalitas (FR-010)
         Schema::create('legal_documents', function (Blueprint $table) {
             $table->id();

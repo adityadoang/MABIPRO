@@ -14,7 +14,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <link rel="stylesheet" href="{{ asset('css/production.css') }}">
-    
     <script>
         tailwind.config = {
             theme: {
