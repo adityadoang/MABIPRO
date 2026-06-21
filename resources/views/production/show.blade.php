@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="mb-6">
-    <a href="{{ route('production.index') }}" 
+    <a href="{{ route('production.dashboard') }}" 
        class="font-mono text-sm text-rust hover:text-rust-dark inline-flex items-center gap-2">
         ← KEMBALI KE DASHBOARD
     </a>

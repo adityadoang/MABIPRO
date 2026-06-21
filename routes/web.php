@@ -16,47 +16,49 @@ use Illuminate\Support\Facades\Route;
 // ============================================================
 
 Route::get('/', function () {
-    return redirect()->route('marketing.dashboard');
+    if (auth()->check()) {
+        $role = auth()->user()->role;
+        return match ($role) {
+            'Admin' => redirect()->route('admin.dashboard'),
+            'Legalitas' => redirect()->route('legalitas.dashboard'),
+            'Produksi' => redirect()->route('production.dashboard'),
+            'Marketing' => redirect()->route('marketing.dashboard'),
+            default => redirect()->route('marketing.dashboard'),
+        };
+    }
+    return redirect()->route('login');
 });
-
-// ============================================================
-// AUTH ROUTES
-// ============================================================
-
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
-    Route::post('/login', [LoginController::class, 'login']);
-});
-
-Route::post('/logout', [LoginController::class, 'logout'])
-    ->middleware('auth')
-    ->name('logout');
 
 // ============================================================
 // MARKETING ROUTES
 // ============================================================
 
-Route::get('/marketing', MarketingDashboard::class)->name('marketing.dashboard');
-Route::get('/laporan-pembayaran', PaymentReport::class)->name('payment.report');
+Route::middleware('auth')->prefix('marketing')->name('marketing.')->group(function () {
+    Route::get('/', function () { return redirect()->route('marketing.dashboard'); });
+    Route::get('/dashboard', MarketingDashboard::class)->name('dashboard');
+    Route::get('/laporan-pembayaran', PaymentReport::class)->name('payment.report');
+});
 
 // ============================================================
 // LEGALITAS ROUTES (dari pasha)
 // ============================================================
 
-Route::prefix('legalitas')->group(function () {
-    Route::get('/dashboard', [LegalitasController::class, 'index'])->name('legalitas.dashboard');
-    Route::post('/upload/{unit_id}', [LegalitasController::class, 'upload'])->name('legalitas.upload');
-    Route::get('/download/{document_id}', [LegalitasController::class, 'download'])->name('legalitas.download');
-    Route::get('/preview/{document_id}', [LegalitasController::class, 'preview'])->name('legalitas.preview');
-    Route::post('/complete/{unit_id}', [LegalitasController::class, 'markAsComplete'])->name('legalitas.complete');
+Route::middleware('auth')->prefix('legalitas')->name('legalitas.')->group(function () {
+    Route::get('/', function () { return redirect()->route('legalitas.dashboard'); });
+    Route::get('/dashboard', [LegalitasController::class, 'index'])->name('dashboard');
+    Route::post('/upload/{unit_id}', [LegalitasController::class, 'upload'])->name('upload');
+    Route::get('/download/{document_id}', [LegalitasController::class, 'download'])->name('download');
+    Route::get('/preview/{document_id}', [LegalitasController::class, 'preview'])->name('preview');
+    Route::post('/complete/{unit_id}', [LegalitasController::class, 'markAsComplete'])->name('complete');
 });
 
 // ============================================================
 // PRODUKSI ROUTES (dari feature/modul-produksi)
 // ============================================================
 
-Route::prefix('production')->name('production.')->group(function () {
-    Route::get('/', [ProductionController::class, 'index'])->name('index');
+Route::middleware('auth')->prefix('production')->name('production.')->group(function () {
+    Route::get('/', function () { return redirect()->route('production.dashboard'); });
+    Route::get('/dashboard', [ProductionController::class, 'index'])->name('dashboard');
     Route::get('/{id}', [ProductionController::class, 'show'])->name('show');
     Route::get('/{id}/edit', [ProductionController::class, 'edit'])->name('edit');
     Route::put('/{id}/update', [ProductionController::class, 'updateProgress'])->name('update');
@@ -71,6 +73,8 @@ Route::middleware(['auth', 'role:Admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+
+        Route::get('/', function () { return redirect()->route('admin.dashboard'); });
 
         // Dashboard Admin
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -95,3 +99,5 @@ Route::middleware(['auth', 'role:Admin'])
         Route::put('/units/{unit}', [UnitController::class, 'update'])->name('units.update');
         Route::delete('/units/{unit}', [UnitController::class, 'destroy'])->name('units.destroy');
     });
+
+require __DIR__.'/auth.php';

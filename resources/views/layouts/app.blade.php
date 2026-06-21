@@ -1,127 +1,333 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="MABIPRO - Sistem Manajemen Penjualan Properti.">
-    <title>@yield('title', 'MABIPRO Property Management')</title>
-
+    <meta name="description" content="MABIPRO - Sistem Manajemen Penjualan Properti. Pantau dan kelola status unit perumahan secara real-time.">
+    <title>MABIPRO - Property Management System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&display=swap" rel="stylesheet">
 
-    {{-- Vite assets (CSS & JS dikompilasi) --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    {{-- Livewire styles --}}
     @livewireStyles
 
-    {{-- Tailwind CDN sebagai fallback saat npm run dev belum dijalankan --}}
-    <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .sidebar-active { background-color: #6ee7b7; color: #064e3b; font-weight: 600; }
-        .sidebar-item { color: #475569; transition: all 0.2s; }
-        .sidebar-item:hover { background-color: #e2e8f0; }
-        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f2f5;
+            color: #1a1d23;
+            display: flex;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        /* ══════════════════════════════
+           SIDEBAR
+        ══════════════════════════════ */
+        .sidebar {
+            width: 210px;
+            min-height: 100vh;
+            background: #ffffff;
+            border-right: 1px solid #e8eaed;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 50;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+        }
+
+        /* Logo area */
+        .sidebar-logo {
+            padding: 1.25rem 1rem 1rem;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .sidebar-logo-inner {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            text-decoration: none;
+        }
+        .sidebar-logo-icon {
+            width: 32px;
+            height: 32px;
+            background: #1a1d23;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .sidebar-logo-icon svg { color: #fff; width: 16px; height: 16px; }
+        .sidebar-logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+        .sidebar-logo-name {
+            font-size: 0.9375rem;
+            font-weight: 800;
+            color: #1a1d23;
+            letter-spacing: -0.3px;
+        }
+        .sidebar-logo-sub {
+            font-size: 0.6rem;
+            font-weight: 500;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 1px;
+        }
+
+
+        /* Nav sections */
+        .sidebar-nav {
+            flex: 1;
+            padding: 1rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.125rem;
+            overflow-y: auto;
+        }
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            padding: 0.5625rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: #64748b;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .sidebar-nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+        .sidebar-nav-item:hover {
+            background: #f8fafc;
+            color: #1a1d23;
+        }
+        .sidebar-nav-item.active {
+            background: #22c55e;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .sidebar-nav-item.active svg { color: #fff; }
+        .sidebar-nav-item.disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Sidebar footer */
+        .sidebar-footer {
+            padding: 0.75rem;
+            border-top: 1px solid #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            gap: 0.125rem;
+        }
+        .sidebar-footer-item {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+        .sidebar-footer-item svg { width: 15px; height: 15px; flex-shrink: 0; }
+        .sidebar-footer-item:hover { background: #f8fafc; color: #475569; }
+        .sidebar-footer-item.logout:hover { background: #fef2f2; color: #dc2626; }
+
+        /* ══════════════════════════════
+           MAIN CONTENT
+        ══════════════════════════════ */
+        .main-content {
+            flex: 1;
+            margin-left: 210px;
+            min-height: 100vh;
+            background: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ══════════════════════════════
+           MOBILE OVERLAY
+        ══════════════════════════════ */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 40;
+        }
+
+        /* Mobile hamburger */
+        .mobile-topbar {
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.875rem 1.25rem;
+            background: #fff;
+            border-bottom: 1px solid #e8eaed;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+        }
+        .hamburger-btn {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 4px;
+        }
+        .hamburger-btn span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: #475569;
+            border-radius: 2px;
+            transition: all 0.2s;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.25s ease;
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.open { display: block; }
+            .mobile-topbar { display: flex; }
+            .main-content { margin-left: 0; }
+        }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden text-gray-800">
+<body>
 
-    <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col justify-between h-full flex-shrink-0 z-20 shadow-sm">
-        <div>
-            <!-- Logo & Profile -->
-            <div class="p-6 flex items-center gap-3 border-b border-gray-100">
-                <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-white font-bold">
-                    M
-                </div>
-                <div>
-                    <h2 class="font-bold text-gray-900 leading-tight">MABIPRO<br>System</h2>
-                    <p class="text-[10px] text-gray-500 leading-tight mt-0.5">Property Management<br>System</p>
-                </div>
-            </div>
+    {{-- Sidebar --}}
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
 
-            <!-- Navigation -->
-            <nav class="p-4 space-y-1">
-                <a href="{{ route('marketing.dashboard') }}"
-                   class="{{ request()->routeIs('marketing.dashboard') ? 'sidebar-active' : 'sidebar-item' }} flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                    Dashboard
-                </a>
-                <a href="{{ route('payment.report') }}"
-                   class="{{ request()->routeIs('payment.report') ? 'sidebar-active' : 'sidebar-item' }} flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                    Laporan Pembayaran
-                </a>
-                <a href="{{ route('legalitas.dashboard') }}"
-                   class="{{ request()->routeIs('legalitas.*') ? 'sidebar-active' : 'sidebar-item' }} flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    Legalitas
-                </a>
-            </nav>
+        {{-- Logo --}}
+        <div class="sidebar-logo">
+            <a href="{{ route('marketing.dashboard') }}" class="sidebar-logo-inner" id="sidebar-logo">
+                <div class="sidebar-logo-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                </div>
+                <div class="sidebar-logo-text">
+                    <span class="sidebar-logo-name">MABIPRO</span>
+                    <span class="sidebar-logo-sub">Admin</span>
+                </div>
+            </a>
         </div>
 
-        <div class="p-4 border-t border-gray-100">
-            <nav class="space-y-1">
-                <a href="#" class="sidebar-item flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-red-600 hover:bg-red-50">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+
+        {{-- Main Navigation --}}
+        <nav class="sidebar-nav" role="menubar">
+            {{-- Overview --}}
+            <a href="#" id="nav-overview" role="menuitem"
+               class="sidebar-nav-item disabled">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/>
+                </svg>
+                Overview
+            </a>
+
+            {{-- Marketing --}}
+            <a href="{{ route('marketing.dashboard') }}" id="nav-marketing" role="menuitem"
+               class="sidebar-nav-item {{ request()->routeIs('marketing.dashboard') ? 'active' : '' }}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                Marketing
+            </a>
+
+            {{-- Laporan Pembayaran --}}
+            <a href="{{ route('marketing.payment.report') }}" id="nav-payment-report" role="menuitem"
+               class="sidebar-nav-item {{ request()->routeIs('marketing.payment.report') ? 'active' : '' }}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Laporan Pembayaran
+            </a>
+
+        </nav>
+
+        {{-- Footer --}}
+        <div class="sidebar-footer">
+
+            <form method="POST" action="{{ route('logout') }}" class="w-full">
+                @csrf
+                <button type="submit" id="nav-logout" class="sidebar-footer-item logout w-full text-left">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
                     Logout
-                </a>
-            </nav>
+                </button>
+            </form>
         </div>
     </aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 flex flex-col h-full overflow-hidden bg-[#f8fafc]">
-        @yield('header')
+    {{-- Sidebar overlay (mobile) --}}
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-        <!-- Scrollable Content Area -->
-        <div class="flex-1 overflow-y-auto p-8">
-            @if(session('success'))
-                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 shadow-sm flex items-center gap-3">
-                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 shadow-sm flex items-center gap-3">
-                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            {{-- Support @extends/@yield (Blade biasa) --}}
-            @yield('content')
-
-            {{-- Support Livewire component ($slot) --}}
-            @isset($slot)
-                {{ $slot }}
-            @endisset
+    {{-- Main Content --}}
+    <div class="main-content">
+        {{-- Mobile topbar --}}
+        <div class="mobile-topbar">
+            <button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+            <span style="font-size: 0.9rem; font-weight: 700; color: #1a1d23;">MABIPRO Admin</span>
         </div>
 
-        <!-- Footer -->
-        <footer class="bg-gray-200/50 border-t border-gray-300 px-8 py-4 flex justify-between items-center flex-shrink-0 mt-auto">
-            <div class="flex items-center gap-6">
-                <span class="font-bold text-gray-900 text-xs">MABIPRO</span>
-                <span class="text-gray-500 text-xs">&copy; 2026 MABIPRO Property Management. All rights reserved.</span>
-            </div>
-            <div class="flex items-center gap-4 text-xs text-gray-500 font-medium">
-                <a href="#" class="hover:text-gray-900">Privacy Policy</a>
-                <a href="#" class="hover:text-gray-900">Terms of Service</a>
-            </div>
-        </footer>
-    </main>
+        {{-- Page Content --}}
+        {{ $slot }}
+    </div>
 
     @livewireScripts
 
+    <script>
+        // Mobile sidebar toggle
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const hamburger = document.getElementById('hamburger-btn');
+
+        function openSidebar() {
+            sidebar.classList.add('open');
+            overlay.classList.add('open');
+        }
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+        }
+
+        if (hamburger) hamburger.addEventListener('click', openSidebar);
+        if (overlay)   overlay.addEventListener('click', closeSidebar);
+    </script>
 </body>
 </html>
