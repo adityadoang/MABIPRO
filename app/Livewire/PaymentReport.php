@@ -9,7 +9,7 @@ use Livewire\Attributes\Layout;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
-#[Layout('layouts.marketing')]
+#[Layout('layouts.app')]
 class PaymentReport extends Component
 {
     // ── Tracker state ──
