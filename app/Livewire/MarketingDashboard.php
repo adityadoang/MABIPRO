@@ -245,12 +245,16 @@ class MarketingDashboard extends Component
     public function savePaymentDetails()
     {
         $isKpr = $this->paymentMethod === 'KPR';
+        $isAdmin = auth()->check() && auth()->user()->isAdmin();
 
         $rules = [
             'paymentMethod' => 'required|in:Cash,KPR',
             'paymentProof'  => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
-            'hargaUnit'     => 'required|numeric|min:1',
         ];
+
+        if ($isAdmin) {
+            $rules['hargaUnit'] = 'required|numeric|min:1';
+        }
 
         if ($isKpr) {
             $rules = array_merge($rules, [
@@ -261,13 +265,17 @@ class MarketingDashboard extends Component
                 'dpPercentage'       => 'required|numeric|min:0|max:100',
                 'kprDurationMonths'  => 'required|integer|min:12|max:360',
             ]);
-        } else {
-            $rules['amountPaid'] = 'required|numeric|min:0';
         }
 
         $this->validate($rules);
 
         $unit = Unit::findOrFail($this->selectedUnitId);
+        
+        // Force the value to stay the same if the user is not an Admin
+        if (!$isAdmin) {
+            $this->hargaUnit = $unit->harga_unit;
+        }
+
         $path = $unit->payment_proof_path;
 
         if ($this->paymentProof) {
@@ -296,7 +304,7 @@ class MarketingDashboard extends Component
         } else {
             $unit->update([
                 'payment_method'      => 'Cash',
-                'amount_paid'         => $this->amountPaid,
+                'amount_paid'         => $this->hargaUnit,
                 'payment_proof_path'  => $path,
                 'harga_unit'          => $this->hargaUnit,
                 // Reset KPR-specific fields

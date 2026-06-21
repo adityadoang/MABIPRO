@@ -28,17 +28,17 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        $role = $request->user()->role ?? 'Marketing';
+        $role = strtolower($request->user()->role ?? 'marketing');
 
         $redirectRoute = match ($role) {
-            'Admin' => route('admin.dashboard', absolute: false),
-            'Legalitas' => route('legalitas.dashboard', absolute: false),
-            'Produksi' => route('production.dashboard', absolute: false),
-            'Marketing' => route('marketing.dashboard', absolute: false),
+            'admin' => route('admin.dashboard', absolute: false),
+            'legalitas' => route('legalitas.dashboard', absolute: false),
+            'produksi' => route('production.dashboard', absolute: false),
+            'marketing' => route('marketing.dashboard', absolute: false),
             default => route('marketing.dashboard', absolute: false),
         };
 
-        return redirect()->intended($redirectRoute);
+        return redirect($redirectRoute);
     }
 
     /**

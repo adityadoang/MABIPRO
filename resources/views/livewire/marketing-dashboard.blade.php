@@ -379,11 +379,12 @@
 
                     {{-- Harga Unit --}}
                     <div class="form-group">
-                        <label class="form-label" for="harga-unit">Harga Unit (Rp) <span class="required-mark">*</span></label>
-                        <div class="input-with-addon">
+                        <label class="form-label" for="harga-unit">Harga Unit (Rp) @if(auth()->check() && auth()->user()->isAdmin())<span class="required-mark">*</span>@endif</label>
+                        <div class="input-with-addon @if(!auth()->check() || !auth()->user()->isAdmin()) bg-surface-container opacity-70 @endif">
                             <span class="input-addon addon-left-label">Rp</span>
                             <input id="harga-unit" type="number" wire:model.live="hargaUnit"
-                                   class="form-input" placeholder="500000000" min="1">
+                                   class="form-input" placeholder="500000000" min="1"
+                                   @if(!auth()->check() || !auth()->user()->isAdmin()) disabled @endif>
                         </div>
                         @error('hargaUnit') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
@@ -399,35 +400,7 @@
                         @error('paymentMethod') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
 
-                    {{-- CASH --}}
-                    @if($paymentMethod === 'Cash')
-                        <div class="form-section">
-                            <div class="form-section-title">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                Pembayaran Tunai
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="amount-paid">Jumlah Terbayar (Rp)</label>
-                                <div class="input-with-addon">
-                                    <span class="input-addon addon-left-label">Rp</span>
-                                    <input id="amount-paid" type="number" wire:model.live="amountPaid"
-                                           class="form-input" placeholder="0" min="0">
-                                </div>
-                                @error('amountPaid') <p class="form-error">{{ $message }}</p> @enderror
-                            </div>
-                            @if($sisaTagihan > 0)
-                            <div class="calc-info-row" style="margin-top: 1rem; display: flex; justify-content: space-between; padding: 0.75rem 1rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
-                                <span class="calc-info-label" style="font-weight: 600; color: #64748b;">Sisa Tagihan</span>
-                                <span class="calc-info-value" style="font-weight: 800; color: #ef4444;">Rp {{ number_format($sisaTagihan, 0, ',', '.') }}</span>
-                            </div>
-                            @elseif($amountPaid > 0 && $sisaTagihan == 0)
-                            <div class="calc-info-row" style="margin-top: 1rem; display: flex; justify-content: space-between; padding: 0.75rem 1rem; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
-                                <span class="calc-info-label" style="font-weight: 600; color: #15803d;">Status</span>
-                                <span class="calc-info-value" style="font-weight: 800; color: #16a34a;">Lunas</span>
-                            </div>
-                            @endif
-                        </div>
-                    @endif
+
 
                     {{-- KPR --}}
                     @if($paymentMethod === 'KPR')

@@ -46,21 +46,21 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return strtolower($this->role) === 'admin';
     }
 
     public function isProduksi(): bool
     {
-        return $this->role === 'produksi';
+        return strtolower($this->role) === 'produksi';
     }
 
     public function isMarketing(): bool
     {
-        return $this->role === 'marketing';
+        return strtolower($this->role) === 'marketing';
     }
 
     public function isLegalitas(): bool
     {
-        return $this->role === 'legalitas';
+        return strtolower($this->role) === 'legalitas';
     }
 }

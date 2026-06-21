@@ -17,12 +17,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (auth()->check()) {
-        $role = auth()->user()->role;
+        $role = strtolower(auth()->user()->role);
         return match ($role) {
-            'Admin' => redirect()->route('admin.dashboard'),
-            'Legalitas' => redirect()->route('legalitas.dashboard'),
-            'Produksi' => redirect()->route('production.dashboard'),
-            'Marketing' => redirect()->route('marketing.dashboard'),
+            'admin' => redirect()->route('admin.dashboard'),
+            'legalitas' => redirect()->route('legalitas.dashboard'),
+            'produksi' => redirect()->route('production.dashboard'),
+            'marketing' => redirect()->route('marketing.dashboard'),
             default => redirect()->route('marketing.dashboard'),
         };
     }
