@@ -27,14 +27,14 @@
         </div>
 
         <div class="flex-1 space-y-2 overflow-y-auto">
-            @if(Auth::user()->role === 'Admin')
+            @if(Auth::user()->isAdmin())
             <a class="{{ request()->routeIs('admin.dashboard') ? 'bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary' : 'text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high' }} font-bold rounded-lg flex items-center gap-3 px-4 py-3 transition-all" href="{{ route('admin.dashboard') }}">
                 <span class="material-symbols-outlined">dashboard</span>
                 <span class="font-label-md text-label-md">Overview</span>
             </a>
             @endif
 
-            @if(in_array(Auth::user()->role, ['Admin', 'Marketing']))
+            @if(Auth::user()->isAdmin() || Auth::user()->isMarketing())
             <a class="{{ request()->routeIs('marketing.dashboard') ? 'bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary' : 'text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high' }} font-bold rounded-lg flex items-center gap-3 px-4 py-3 transition-all" href="{{ route('marketing.dashboard') }}">
                 <span class="material-symbols-outlined">trending_up</span>
                 <span class="font-label-md text-label-md">Marketing</span>
@@ -46,21 +46,21 @@
             </a>
             @endif
 
-            @if(in_array(Auth::user()->role, ['Admin', 'Produksi']))
+            @if(Auth::user()->isAdmin() || Auth::user()->isProduksi())
             <a class="{{ request()->routeIs('production.*') ? 'bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary' : 'text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high' }} font-bold rounded-lg flex items-center gap-3 px-4 py-3 transition-all" href="{{ route('production.dashboard') }}">
                 <span class="material-symbols-outlined">construction</span>
                 <span class="font-label-md text-label-md">Production</span>
             </a>
             @endif
 
-            @if(in_array(Auth::user()->role, ['Admin', 'Legalitas']))
+            @if(Auth::user()->isAdmin() || Auth::user()->isLegalitas())
             <a class="{{ request()->routeIs('legalitas.*') ? 'bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary' : 'text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high' }} font-bold rounded-lg flex items-center gap-3 px-4 py-3 transition-all" href="{{ route('legalitas.dashboard') }}">
                 <span class="material-symbols-outlined">description</span>
                 <span class="font-label-md text-label-md">Legality</span>
             </a>
             @endif
 
-            @if(Auth::user()->role === 'Admin')
+            @if(Auth::user()->isAdmin())
             <a class="{{ request()->routeIs('admin.blocks.*') ? 'bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary' : 'text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high' }} font-bold rounded-lg flex items-center gap-3 px-4 py-3 transition-all" href="{{ route('admin.blocks.index') }}">
                 <span class="material-symbols-outlined">domain</span>
                 <span class="font-label-md text-label-md">Blok</span>
