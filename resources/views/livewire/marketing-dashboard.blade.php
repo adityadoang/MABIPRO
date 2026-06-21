@@ -496,11 +496,11 @@
                             @endif
                         </div>
 
-                        {{-- Section 3: Kredit & Bunga --}}
+                        {{-- Section 3: Kredit --}}
                         <div class="form-section">
                             <div class="form-section-title">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                                Kredit &amp; Bunga
+                                Kredit
                             </div>
                             <div class="form-grid-2">
                                 <div class="form-group">
@@ -516,70 +516,21 @@
                                     @error('kprDurationMonths') <p class="form-error">{{ $message }}</p> @enderror
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label" for="interest-rate">Suku Bunga p.a. (%) <span class="required-mark">*</span></label>
-                                    <div class="input-with-addon">
-                                        <input id="interest-rate" type="number" wire:model.live="interestRate"
-                                               class="form-input" placeholder="7.5" min="0.1" max="30" step="0.01">
-                                        <span class="input-addon">%/Thn</span>
-                                    </div>
-                                    @error('interestRate') <p class="form-error">{{ $message }}</p> @enderror
-                                </div>
-                                <div class="form-group" style="grid-column: 1 / -1">
-                                    <label class="form-label">Jenis Perhitungan Bunga <span class="required-mark">*</span></label>
-                                    <div class="radio-group">
-                                        <label class="radio-card {{ $interestType === 'anuitas' ? 'radio-card-active' : '' }}" for="type-anuitas">
-                                            <input id="type-anuitas" type="radio" wire:model.live="interestType" value="anuitas" class="sr-only">
-                                            <div class="radio-card-icon">📊</div>
-                                            <div>
-                                                <p class="radio-card-title">Anuitas (Efektif)</p>
-                                                <p class="radio-card-desc">Cicilan tetap, porsi bunga menurun tiap bulan. Umum digunakan bank.</p>
-                                            </div>
-                                        </label>
-                                        <label class="radio-card {{ $interestType === 'flat' ? 'radio-card-active' : '' }}" for="type-flat">
-                                            <input id="type-flat" type="radio" wire:model.live="interestType" value="flat" class="sr-only">
-                                            <div class="radio-card-icon">📈</div>
-                                            <div>
-                                                <p class="radio-card-title">Flat</p>
-                                                <p class="radio-card-desc">Bunga dihitung dari pokok awal, cicilan lebih besar di awal.</p>
-                                            </div>
-                                        </label>
-                                    </div>
-                                    @error('interestType') <p class="form-error">{{ $message }}</p> @enderror
+                                    <label class="form-label">Cicilan / Bulan</label>
+                                    @if($monthlyInstallment > 0)
+                                        <div class="calc-info-row">
+                                            <span class="calc-info-label">Cicilan / Bulan (Pokok ÷ Tenor)</span>
+                                            <span class="calc-info-value" style="font-size:1.1rem; color:#16a34a;">
+                                                Rp {{ number_format($monthlyInstallment, 0, ',', '.') }}
+                                            </span>
+                                        </div>
+                                        <p class="form-hint">Dihitung otomatis: Pokok Kredit ÷ Tenor bulan.</p>
+                                    @else
+                                        <p class="form-hint">Isi Harga Unit, DP, dan Tenor untuk melihat estimasi cicilan.</p>
+                                    @endif
                                 </div>
                             </div>
                         </div>
-
-                        {{-- Hasil Simulasi --}}
-                        @if($monthlyInstallment > 0)
-                        <div class="simulation-result">
-                            <div class="simulation-header">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                Hasil Simulasi KPR
-                            </div>
-                            <div class="simulation-grid">
-                                <div class="sim-item sim-main">
-                                    <p class="sim-label">Cicilan / Bulan</p>
-                                    <p class="sim-value sim-value-main">Rp {{ number_format($monthlyInstallment, 0, ',', '.') }}</p>
-                                </div>
-                                <div class="sim-item">
-                                    <p class="sim-label">Pokok Kredit</p>
-                                    <p class="sim-value">Rp {{ number_format($pokokKredit, 0, ',', '.') }}</p>
-                                </div>
-                                <div class="sim-item">
-                                    <p class="sim-label">Total Pembayaran</p>
-                                    <p class="sim-value">Rp {{ number_format($totalPayment, 0, ',', '.') }}</p>
-                                </div>
-                                <div class="sim-item">
-                                    <p class="sim-label">Total Bunga</p>
-                                    <p class="sim-value sim-value-interest">Rp {{ number_format($totalInterest, 0, ',', '.') }}</p>
-                                </div>
-                            </div>
-                            <p class="sim-note">
-                                * Simulasi menggunakan metode <strong>{{ $interestType === 'anuitas' ? 'Anuitas (Efektif)' : 'Flat' }}</strong>,
-                                suku bunga {{ $interestRate }}% per tahun, tenor {{ $kprDurationMonths }} bulan.
-                            </p>
-                        </div>
-                        @endif
                     @endif
 
                     {{-- Upload Bukti --}}

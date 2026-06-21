@@ -43,14 +43,10 @@ class MarketingDashboard extends Component
 
     // ── KPR: Kredit ──
     public $kprDurationMonths;
-    public $interestRate;
-    public $interestType   = 'anuitas';       // anuitas / flat
 
     // ── KPR: Read-only computed display ──
     public $pokokKredit         = 0;
-    public $monthlyInstallment  = 0;
-    public $totalPayment        = 0;
-    public $totalInterest       = 0;
+    public $monthlyInstallment  = 0;   // Dihitung otomatis: pokok / tenor
     public $sisaTagihan         = 0;
 
     // ─────────────────────────────────────────────────────────────
@@ -156,8 +152,6 @@ class MarketingDashboard extends Component
         $this->dpAmount           = $unit->dp_amount;
         $this->dpPercentage       = $unit->dp_percentage;
         $this->kprDurationMonths  = $unit->kpr_duration_months;
-        $this->interestRate       = $unit->interest_rate;
-        $this->interestType       = $unit->interest_type  ?? 'anuitas';
 
         $this->recalculate();
         $this->isPaymentModalOpen = true;
@@ -170,11 +164,10 @@ class MarketingDashboard extends Component
             'selectedUnitId', 'paymentMethod', 'amountPaid', 'paymentProof',
             'hargaUnit', 'kprType', 'bankName', 'akadDate',
             'dpAmount', 'dpPercentage',
-            'kprDurationMonths', 'interestRate', 'interestType',
-            'pokokKredit', 'monthlyInstallment', 'totalPayment', 'totalInterest', 'sisaTagihan'
+            'kprDurationMonths', 'monthlyInstallment',
+            'pokokKredit', 'sisaTagihan'
         ]);
-        $this->kprType      = 'non_subsidi';
-        $this->interestType = 'anuitas';
+        $this->kprType = 'non_subsidi';
         $this->resetValidation();
     }
 
@@ -218,8 +211,6 @@ class MarketingDashboard extends Component
     }
 
     public function updatedKprDurationMonths() { $this->recalculate(); }
-    public function updatedInterestRate()       { $this->recalculate(); }
-    public function updatedInterestType()       { $this->recalculate(); }
     public function updatedKprType()            { $this->recalculate(); }
 
     // ─────────────────────────────────────────────────────────────
@@ -228,44 +219,23 @@ class MarketingDashboard extends Component
 
     public function recalculate()
     {
-        $harga   = (float) ($this->hargaUnit         ?? 0);
-        $dp      = (float) ($this->dpAmount          ?? 0);
-        $paid    = (float) ($this->amountPaid        ?? 0);
-        $n       = (int)   ($this->kprDurationMonths ?? 0);
-        $rTahunan = (float) ($this->interestRate      ?? 0);
+        $harga = (float) ($this->hargaUnit ?? 0);
+        $dp    = (float) ($this->dpAmount  ?? 0);
+        $paid  = (float) ($this->amountPaid ?? 0);
+        $n     = (int)   ($this->kprDurationMonths ?? 0);
 
         if ($this->paymentMethod === 'Cash') {
             $this->sisaTagihan = max(0, $harga - $paid);
         }
 
-        // Pokok kredit
+        // Pokok kredit = Harga − DP
         $pokok = max(0, $harga - $dp);
         $this->pokokKredit = $pokok;
 
-        if ($pokok <= 0 || $n <= 0 || $rTahunan <= 0) {
-            $this->monthlyInstallment = 0;
-            $this->totalPayment       = 0;
-            $this->totalInterest      = 0;
-            return;
-        }
-
-        if ($this->interestType === 'flat') {
-            // Cicilan Flat: pokok rata + bunga flat dari pokok awal
-            $bungaBulanan  = ($rTahunan / 100 / 12) * $pokok;
-            $pokokBulanan  = $pokok / $n;
-            $cicilan       = $pokokBulanan + $bungaBulanan;
-        } else {
-            // Cicilan Anuitas (efektif): M = P × r(1+r)^n / [(1+r)^n − 1]
-            $r       = $rTahunan / 100 / 12;
-            $cicilan = $pokok * ($r * pow(1 + $r, $n)) / (pow(1 + $r, $n) - 1);
-        }
-
-        $totalBayar  = $cicilan * $n;
-        $totalBunga  = $totalBayar - $pokok;
-
-        $this->monthlyInstallment = round($cicilan, 0);
-        $this->totalPayment       = round($totalBayar, 0);
-        $this->totalInterest      = round($totalBunga, 0);
+        // Cicilan per bulan = Pokok ÷ Tenor
+        $this->monthlyInstallment = ($pokok > 0 && $n > 0)
+            ? (int) round($pokok / $n)
+            : 0;
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -290,8 +260,6 @@ class MarketingDashboard extends Component
                 'dpAmount'           => 'required|numeric|min:0',
                 'dpPercentage'       => 'required|numeric|min:0|max:100',
                 'kprDurationMonths'  => 'required|integer|min:12|max:360',
-                'interestRate'       => 'required|numeric|min:0.1|max:30',
-                'interestType'       => 'required|in:anuitas,flat',
             ]);
         } else {
             $rules['amountPaid'] = 'required|numeric|min:0';
@@ -321,8 +289,8 @@ class MarketingDashboard extends Component
                 'dp_percentage'       => $this->dpPercentage,
                 'pokok_kredit'        => $this->pokokKredit,
                 'kpr_duration_months' => $this->kprDurationMonths,
-                'interest_rate'       => $this->interestRate,
-                'interest_type'       => $this->interestType,
+                'interest_rate'       => null,
+                'interest_type'       => null,
                 'monthly_installment' => $this->monthlyInstallment,
             ]);
         } else {
@@ -342,6 +310,7 @@ class MarketingDashboard extends Component
                 'interest_rate'       => null,
                 'interest_type'       => null,
                 'monthly_installment' => null,
+
             ]);
         }
 

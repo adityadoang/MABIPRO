@@ -101,7 +101,7 @@
                         <th>Harga Unit</th>
                         <th>DP / Terbayar</th>
                         <th>Pokok Kredit</th>
-                        <th>Tenor &amp; Bunga</th>
+                        <th>Tenor</th>
                         <th>Cicilan/Bulan</th>
                         <th class="text-center">Bukti</th>
                         <th class="text-center">Cicilan</th>
@@ -172,11 +172,6 @@
                                     @if($unit->kpr_duration_months)
                                         <div class="tenor-cell">{{ $unit->kpr_duration_months }} Bln
                                             <span class="tenor-year">({{ round($unit->kpr_duration_months / 12, 0) }} Thn)</span>
-                                        </div>
-                                    @endif
-                                    @if($unit->interest_rate)
-                                        <div class="rate-cell">{{ $unit->interest_rate }}%
-                                            <span class="rate-type">{{ $unit->interest_type === 'anuitas' ? 'Anuitas' : 'Flat' }}</span>
                                         </div>
                                     @endif
                                 @else
@@ -416,10 +411,10 @@
                                 <span class="mobile-card-val">{{ $unit->bank_name }}</span>
                             </div>
                             @endif
-                            @if($unit->kpr_duration_months && $unit->interest_rate)
+                            @if($unit->kpr_duration_months)
                             <div class="mobile-card-row">
-                                <span class="mobile-card-label">Tenor &amp; Bunga</span>
-                                <span class="mobile-card-val">{{ $unit->kpr_duration_months }} Bln · {{ $unit->interest_rate }}%</span>
+                                <span class="mobile-card-label">Tenor</span>
+                                <span class="mobile-card-val">{{ $unit->kpr_duration_months }} Bln</span>
                             </div>
                             @endif
                             @if($unit->monthly_installment)
