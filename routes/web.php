@@ -50,6 +50,7 @@ Route::middleware('auth')->prefix('legalitas')->name('legalitas.')->group(functi
     Route::get('/download/{document_id}', [LegalitasController::class, 'download'])->name('download');
     Route::get('/preview/{document_id}', [LegalitasController::class, 'preview'])->name('preview');
     Route::post('/complete/{unit_id}', [LegalitasController::class, 'markAsComplete'])->name('complete');
+    Route::delete('/document/{document_id}', [LegalitasController::class, 'destroy'])->name('document.destroy');
 });
 
 // ============================================================

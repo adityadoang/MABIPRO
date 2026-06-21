@@ -95,4 +95,24 @@ class LegalitasController extends Controller
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'inline; filename="' . $originalFilename . '"');
     }
+
+    // FR-012: Hapus Dokumen — hanya Admin
+    public function destroy($document_id)
+    {
+        // Pastikan hanya Admin yang bisa menghapus
+        if (Auth::user()->role !== 'Admin') {
+            abort(403, 'Hanya Admin yang dapat menghapus dokumen.');
+        }
+
+        $document = LegalDocument::findOrFail($document_id);
+
+        // Hapus file fisik dari storage
+        if (Storage::exists($document->file_path)) {
+            Storage::delete($document->file_path);
+        }
+
+        $document->delete();
+
+        return redirect()->back()->with('success', 'Dokumen berhasil dihapus.');
+    }
 }
