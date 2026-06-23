@@ -1,4 +1,4 @@
-@extends('layouts.production')
+@extends('layouts.app')
 
 @section('title', 'Update Progress - ' . $unit->unit_number)
 

@@ -23,7 +23,7 @@
                     <img src="{{ asset('images/mabipro-logo.jpg') }}" alt="MABIPRO Logo" class="w-full h-full object-contain">
                 </div>
                 <div>
-                    <h2 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">MABIPRO Admin</h2>
+                    <h2 class="font-headline-md text-headline-md font-bold text-gray-900 dark:text-white">MABIPRO</h2>
                     <p class="font-body-sm text-body-sm text-on-surface-variant">Property Management</p>
                 </div>
             </div>
@@ -96,7 +96,7 @@
     <main class="flex-1 ml-0 md:ml-72 flex flex-col h-[100dvh] overflow-y-auto bg-surface-bright">
         <!-- Mobile Header (Visible only on mobile) -->
         <header class="md:hidden bg-surface border-b border-outline-variant p-4 flex justify-between items-center sticky top-0 z-40">
-            <h1 class="font-headline-md text-headline-md font-bold text-primary">MABIPRO Admin</h1>
+            <h1 class="font-headline-md text-headline-md font-bold text-gray-900 dark:text-white">MABIPRO</h1>
             <button @click="sidebarOpen = !sidebarOpen" class="text-on-surface-variant p-2 rounded-full hover:bg-surface-container" aria-label="Toggle menu">
                 <span class="material-symbols-outlined">menu</span>
             </button>
@@ -122,8 +122,8 @@
 
         <!-- Footer -->
         <footer class="bg-surface-dim dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface border-t border-outline-variant dark:border-outline flat no shadows w-full py-8 px-margin-desktop mt-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="font-label-md text-label-md font-bold text-primary dark:text-primary-fixed">
-                MABIPRO Admin
+            <div class="font-label-md text-label-md font-bold text-gray-900 dark:text-white">
+                MABIPRO
             </div>
             <div class="font-body-sm text-body-sm">
                 © {{ date('Y') }} MABIPRO Property Management. All rights reserved.
