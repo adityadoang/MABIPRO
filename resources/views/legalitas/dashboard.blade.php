@@ -3,18 +3,18 @@
 @section('title', 'Dashboard Legalitas - MABIPRO')
 
 @section('header')
-<div class="px-8 pt-8 pb-6 bg-white border-b border-gray-200 z-10 shadow-sm flex-shrink-0">
-    <div class="flex justify-between items-start">
+<div class="px-4 md:px-8 pt-6 md:pt-8 pb-4 md:pb-6 bg-white border-b border-gray-200 z-10 shadow-sm flex-shrink-0">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
         <div>
             <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Legal Compliance</h1>
             <p class="text-gray-500 mt-1 text-sm">Manage unit documents, certificates, and permits.</p>
         </div>
-        <div class="flex gap-3">
-            <div class="relative">
+        <div class="flex gap-2 sm:gap-3 w-full sm:w-auto">
+            <div class="relative flex-1 sm:flex-none">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3">
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </span>
-                <input type="text" class="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 w-64 bg-gray-50" placeholder="Search units or documents">
+                <input type="text" class="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 w-full sm:w-64 bg-gray-50" placeholder="Search units or documents">
             </div>
             <button class="p-2 border border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-600 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
@@ -35,7 +35,7 @@
     @endphp
 
     <!-- Stats Row -->
-    <div class="grid grid-cols-4 gap-4 mt-8">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-6 md:mt-8">
         <!-- Stat Card 1 -->
         <div class="bg-white border border-gray-200 rounded-xl p-5 card-shadow">
             <div class="flex justify-between items-start">
@@ -169,7 +169,7 @@
          x-transition:leave-end="opacity-0 -translate-y-2"
          class="border-t border-gray-100">
 
-        <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div class="p-4 md:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             @foreach($blockUnits as $unit)
                 @php
                     $isComplete = $unit->status_legalitas == 'Lengkap';

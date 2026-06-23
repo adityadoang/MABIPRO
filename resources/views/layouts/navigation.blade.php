@@ -1,18 +1,23 @@
 @php
-    $dashboardRoute = match(auth()->user()->role ?? 'Marketing') {
-        'Admin' => route('admin.dashboard'),
-        'Legalitas' => route('legalitas.dashboard'),
-        'Produksi' => route('production.dashboard'),
-        'Marketing' => route('marketing.dashboard'),
-        default => route('marketing.dashboard'),
-    };
-    $activeRoute = match(auth()->user()->role ?? 'Marketing') {
-        'Admin' => 'admin.dashboard',
-        'Legalitas' => 'legalitas.dashboard',
-        'Produksi' => 'production.dashboard',
-        'Marketing' => 'marketing.dashboard',
-        default => 'marketing.dashboard',
-    };
+    // Ambil role user yang sedang login, jika tidak ada default ke 'Marketing'
+    $role = auth()->user()->role ?? 'Marketing';
+    
+    // Tentukan prefix berdasarkan role
+    $prefix = 'marketing'; // nilai default
+    
+    if ($role == 'Admin') {
+        $prefix = 'admin';
+    } elseif ($role == 'Legalitas') {
+        $prefix = 'legalitas';
+    } elseif ($role == 'Produksi') {
+        $prefix = 'production';
+    } elseif ($role == 'Marketing') {
+        $prefix = 'marketing';
+    }
+
+    // Gabungkan prefix untuk membentuk nama route
+    $dashboardRoute = route($prefix . '.dashboard');
+    $activeRoute = $prefix . '.dashboard';
 @endphp
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <!-- Primary Navigation Menu -->

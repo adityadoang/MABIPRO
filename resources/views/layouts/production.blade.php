@@ -4,11 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>@yield('title', 'Production Dashboard') — MABIPRO</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {{-- Favicon --}}
+    <link rel="icon" type="image/jpeg" href="{{ asset('images/mabipro-logo.jpg') }}">
 
+    {{-- Fonts --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+    {{-- Vite Assets --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     @stack('styles')
@@ -83,12 +91,12 @@
         </div>
 
         <!-- Footer -->
-        <footer class="bg-surface-dim dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface border-t border-outline-variant dark:border-outline flat no shadows w-full py-8 px-margin-desktop mt-auto flex flex-col md:flex-row justify-between items-center gap-4">
+        <footer class="bg-surface-dim dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface border-t border-outline-variant dark:border-outline w-full py-8 px-margin-desktop mt-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="font-label-md text-label-md font-bold text-primary dark:text-primary-fixed">
                 MABIPRO Produksi
             </div>
             <div class="font-body-sm text-body-sm">
-                © {{ date('Y') }} MABIPRO Property Management. Production Module v1.2
+                © {{ date('Y') }} MABIPRO Property Management. Production Module v1.3
             </div>
         </footer>
     </main>
@@ -106,7 +114,7 @@
     </nav>
 
     <script>
-        // Mobile menu toggle (untuk future implementation)
+        // Mobile menu toggle
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         if (mobileMenuBtn) {
             mobileMenuBtn.addEventListener('click', () => {
