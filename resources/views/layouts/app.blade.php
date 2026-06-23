@@ -22,7 +22,7 @@
     ══════════════════════════════════════════ --}}
     <nav class="bg-surface-container-low dark:bg-primary-container text-secondary dark:text-secondary-fixed border-r border-outline-variant dark:border-outline fixed left-0 top-0 h-[100dvh] flex flex-col p-4 space-y-2 z-50 w-72 max-w-[85vw] md:flex"
          x-bind:class="sidebarOpen ? 'flex' : 'hidden'"
-         id="sidebar" role="navigation" aria-label="Marketing navigation">
+         id="sidebar" role="navigation" aria-label="Main navigation">
 
         {{-- Logo / User Area --}}
         <div class="mb-8">
@@ -75,6 +75,17 @@
                 <span class="material-symbols-outlined">description</span>
                 <span class="font-label-md text-label-md">Legality</span>
             </a>
+            @if(Auth::user()->isLegalitas() && !Auth::user()->isAdmin())
+            <form method="POST" action="{{ route('logout') }}" class="pt-2">
+                @csrf
+                <button type="submit"
+                        class="w-full text-left text-error hover:bg-error-container hover:text-on-error-container transition-all flex items-center gap-3 px-4 py-3 rounded-lg font-bold"
+                        id="nav-logout-legalitas">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span class="font-label-md text-label-md">Logout</span>
+                </button>
+            </form>
+            @endif
             @endif
 
             @if(Auth::user()->isAdmin())
@@ -155,6 +166,7 @@
             <div class="font-body-sm text-body-sm">© {{ date('Y') }} MABIPRO Property Management. All rights reserved.</div>
         </footer>
     </main>
+
 
     {{-- Sidebar Overlay (Mobile) --}}
     <div id="sidebar-overlay" x-show="sidebarOpen" @click="sidebarOpen = false" x-transition.opacity class="fixed inset-0 bg-black/40 z-40 md:hidden" style="display: none;"></div>
