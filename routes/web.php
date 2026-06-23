@@ -16,6 +16,15 @@ use Illuminate\Support\Facades\Route;
 // PUBLIC ROUTES
 // ============================================================
 
+Route::get('/setup-storage', function() {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('storage:link');
+        return 'Sukses: Storage link berhasil dibuat! Silakan refresh halaman bukti pembayaran Anda.';
+    } catch (\Exception $e) {
+        return 'Gagal: ' . $e->getMessage();
+    }
+});
+
 Route::get('/', function () {
     if (auth()->check()) {
         $role = strtolower(auth()->user()->role);

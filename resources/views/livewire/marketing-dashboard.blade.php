@@ -1,14 +1,4 @@
 <div class="dashboard-wrapper">
-    {{-- 
-         TIPS BELAJAR LIVEWIRE & BLADE: 
-         1. Setiap komponen Livewire harus dibungkus oleh SATU elemen utama (root element).
-            Di sini kita menggunakan <div class="dashboard-wrapper"> sebagai bungkus utama.
-         2. Tanda kurung kurawal ganda seperti {{ $variabel }} digunakan untuk mencetak isi variabel dari PHP ke HTML.
-         3. Komentar ini tidak akan terlihat oleh pengguna (disembunyikan oleh Blade).
-    --}}
-    {{-- ══════════════════════════════════════════════════════════════
-         PAGE HEADER
-    ══════════════════════════════════════════════════════════════ --}}
     <div class="page-header">
         <div class="page-header-left">
             <h1 class="page-title">Sales Marketing</h1>
@@ -24,8 +14,6 @@
             </div>
         </div>
     </div>
-
-    {{-- ── Flash Message ── --}}
     @if (session()->has('message'))
         <div x-data="{ show: true }" x-show="show"
              x-init="setTimeout(() => show = false, 4000)"
@@ -42,13 +30,7 @@
             <p class="flash-text">{{ session('message') }}</p>
         </div>
     @endif
-
-    {{-- ══════════════════════════════════════════════════════════════
-         STATS CARDS
-    ══════════════════════════════════════════════════════════════ --}}
     <div class="stats-grid">
-
-        {{-- Total Units --}}
         <div class="stat-card stat-total" id="stat-total">
             <div class="stat-header">
                 <div class="stat-icon-wrap stat-icon-gray">
@@ -61,8 +43,6 @@
             </div>
             <div class="stat-value">{{ $stats['total'] }}</div>
         </div>
-
-        {{-- Terjual --}}
         <div class="stat-card stat-terjual" id="stat-terjual">
             <div class="stat-header">
                 <div class="stat-icon-wrap stat-icon-green">
@@ -76,8 +56,6 @@
             <div class="stat-value stat-value-green">{{ $stats['terjual'] }}</div>
             <div class="stat-pct">{{ $stats['pct_terjual'] }}% of total</div>
         </div>
-
-        {{-- Belum Terjual --}}
         <div class="stat-card stat-belum" id="stat-belum">
             <div class="stat-header">
                 <div class="stat-icon-wrap stat-icon-blue">
@@ -91,8 +69,6 @@
             <div class="stat-value">{{ $stats['belum'] }}</div>
             <div class="stat-pct">{{ $stats['pct_belum'] }}% of total</div>
         </div>
-
-        {{-- Sudah DP --}}
         <div class="stat-card stat-dp" id="stat-dp">
             <div class="stat-header">
                 <div class="stat-icon-wrap stat-icon-amber">
@@ -106,15 +82,8 @@
             <div class="stat-value">{{ $stats['sudah_dp'] }}</div>
             <div class="stat-pct">{{ $stats['pct_dp'] }}% of total</div>
         </div>
-
     </div>
-
-    {{-- ══════════════════════════════════════════════════════════════
-         SPLIT PANEL: Housing Blocks | Unit Management
-    ══════════════════════════════════════════════════════════════ --}}
     <div class="split-panel">
-
-        {{-- ── LEFT: Housing Blocks ── --}}
         <div class="panel-left" id="panel-blocks">
             <div class="panel-title-row">
                 <div class="panel-icon-wrap">
@@ -125,7 +94,6 @@
                 </div>
                 <h2 class="panel-title">Housing Blocks</h2>
             </div>
-
             <div class="blocks-list">
                 @forelse($blocks as $block)
                     @php
@@ -135,7 +103,6 @@
                         $blockSold    = $blockTerjual + $blockDp;
                         $blockPct     = $blockTotal > 0 ? round(($blockTerjual / $blockTotal) * 100) : 0;
                         $isActive     = $selectedBlockId == $block->id;
-
                         // Generate a gradient color per block (rotate through palettes)
                         $gradients = [
                             'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
@@ -147,12 +114,6 @@
                         ];
                         $blockGradient = $gradients[($block->id - 1) % count($gradients)];
                     @endphp
-
-                    {{-- 
-                         TIPS LIVEWIRE:
-                         - wire:key: Membantu Livewire melacak elemen spesifik di dalam loop HTML.
-                         - wire:click: Mirip `onclick` di JavaScript, tapi ini memanggil fungsi `selectBlock()` yang ada di file PHP.
-                    --}}
                     <div wire:key="block-{{ $block->id }}"
                          wire:click="selectBlock({{ $block->id }})"
                          id="block-card-{{ $block->id }}"
@@ -161,12 +122,8 @@
                          tabindex="0"
                          aria-pressed="{{ $isActive ? 'true' : 'false' }}"
                          aria-label="Pilih {{ $block->nama_blok }}">
-
-                        {{-- Block thumbnail --}}
                         <div class="block-thumb" style="background: {{ $blockGradient }};">
-                            {{-- Decorative pattern --}}
                             <div class="block-thumb-pattern"></div>
-                            {{-- Block icon & buildings --}}
                             <div class="block-thumb-buildings">
                                 <svg fill="none" stroke="rgba(255,255,255,0.7)" viewBox="0 0 64 32" width="64" height="32">
                                     <rect x="2" y="8" width="12" height="24" rx="1" stroke-width="1.5"/>
@@ -190,13 +147,10 @@
                                     <line x1="0" y1="32" x2="64" y2="32" stroke-width="1"/>
                                 </svg>
                             </div>
-                            {{-- Block name overlay --}}
                             <div class="block-thumb-overlay">
                                 <span class="block-thumb-name">{{ $block->nama_blok }}</span>
                             </div>
                         </div>
-
-                        {{-- Block info --}}
                         <div class="block-info">
                             <div class="block-progress-row">
                                 <span class="block-progress-label">Progress</span>
@@ -220,11 +174,7 @@
                 @endforelse
             </div>
         </div>
-
-        {{-- ── RIGHT: Unit Management ── --}}
         <div class="panel-right" id="panel-units">
-
-            {{-- Unit panel header --}}
             <div class="unit-panel-header">
                 <div>
                     <h2 class="unit-panel-title">Unit Management</h2>
@@ -240,11 +190,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
-                    {{-- 
-                         TIPS LIVEWIRE:
-                         wire:model.live menghubungkan tag input ini dengan properti `$searchUnit` di PHP secara *real-time*.
-                         Setiap kali user mengetik, data di backend (PHP) akan langsung ter-update tanpa perlu reload halaman.
-                    --}}
                     <input
                         wire:model.live="searchUnit"
                         type="text"
@@ -255,8 +200,6 @@
                     >
                 </div>
             </div>
-
-            {{-- Unit list --}}
             <div class="unit-list-wrap">
                 @if(!$selectedBlock)
                     <div class="unit-empty-state">
@@ -266,7 +209,6 @@
                         </svg>
                         <p>Pilih blok di sebelah kiri untuk melihat unit</p>
                     </div>
-
                 @elseif($filteredUnits->isEmpty())
                     <div class="unit-empty-state">
                         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -275,7 +217,6 @@
                         </svg>
                         <p>Tidak ada unit ditemukan</p>
                     </div>
-
                 @else
                     <div class="unit-list">
                         @foreach($filteredUnits as $unit)
@@ -283,7 +224,6 @@
                                 // Menentukan warna badge (label status) & warna baris
                                 $statusClass = 'badge-belum'; // Nilai default
                                 $rowAccent   = '';            // Nilai default
-                                
                                 if ($unit->status_penjualan === 'Terjual') {
                                     $statusClass = 'badge-terjual';
                                     $rowAccent   = 'unit-row-green';
@@ -292,10 +232,7 @@
                                     $rowAccent   = 'unit-row-amber';
                                 }
                             @endphp
-
                             <div wire:key="unit-{{ $unit->id }}" class="unit-row {{ $rowAccent }}" id="unit-row-{{ $unit->id }}">
-
-                                {{-- Unit ID --}}
                                 <div class="unit-row-id">
                                     <span class="unit-row-number">{{ $unit->unit_number }}</span>
                                     @if($unit->harga_unit)
@@ -304,8 +241,6 @@
                                         <span class="unit-row-price-empty">Harga belum diset</span>
                                     @endif
                                 </div>
-
-                                {{-- Payment info (if sold) --}}
                                 @if($unit->payment_method)
                                     <div class="unit-row-meta">
                                         <span class="unit-row-method">{{ $unit->payment_method }}</span>
@@ -316,14 +251,7 @@
                                 @else
                                     <div class="unit-row-meta"></div>
                                 @endif
-
-                                {{-- Status dropdown + action --}}
                                 <div class="unit-row-actions">
-                                    {{-- 
-                                         TIPS LIVEWIRE:
-                                         - wire:change akan memanggil fungsi updateStatus() saat user memilih opsi lain.
-                                         - $event.target.value bertugas mengambil nilai dari opsi yang sedang diklik (misal: "Sudah DP").
-                                    --}}
                                     <select
                                         wire:change="updateStatus({{ $unit->id }}, $event.target.value)"
                                         class="unit-status-select {{ $statusClass }}"
@@ -340,9 +268,7 @@
                                             Terjual
                                         </option>
                                     </select>
-
                                     @if(in_array($unit->status_penjualan, ['Sudah DP', 'Terjual']))
-                                        {{-- Klik tombol ini untuk memanggil openPaymentModal() di PHP --}}
                                         <button
                                             wire:click="openPaymentModal({{ $unit->id }})"
                                             id="detail-btn-{{ $unit->id }}"
@@ -362,26 +288,13 @@
                     </div>
                 @endif
             </div>
-
         </div>
     </div>
-
-
-    {{-- ══════════════════════════════════════════════════════════════
-         PAYMENT MODAL
-    ══════════════════════════════════════════════════════════════ --}}
     @if($isPaymentModalOpen)
     <div class="modal-overlay" id="payment-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="modal-backdrop" wire:click="closePaymentModal"></div>
         <div class="modal-panel modal-panel-wide">
-            {{-- 
-                 TIPS LIVEWIRE:
-                 wire:submit.prevent mencegah form melakukan reload halaman secara bawaan HTML (mirip event.preventDefault() di JS),
-                 lalu memanggil fungsi savePaymentDetails() di file PHP untuk menyimpan data.
-            --}}
             <form wire:submit.prevent="savePaymentDetails">
-
-                {{-- Modal Header --}}
                 <div class="modal-header">
                     <div class="modal-header-left">
                         <div class="modal-icon">
@@ -401,11 +314,7 @@
                         </svg>
                     </button>
                 </div>
-
-                {{-- Modal Body --}}
                 <div class="modal-body">
-
-                    {{-- Harga Unit --}}
                     <div class="form-group">
                         <label class="form-label" for="harga-unit">Harga Unit (Rp) @if(auth()->check() && auth()->user()->isAdmin())<span class="required-mark">*</span>@endif</label>
                         <div class="input-with-addon @if(!auth()->check() || !auth()->user()->isAdmin()) bg-surface-container opacity-70 @endif">
@@ -416,8 +325,6 @@
                         </div>
                         @error('hargaUnit') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
-
-                    {{-- Metode Pembayaran --}}
                     <div class="form-group">
                         <label class="form-label" for="payment-method-select">Metode Pembayaran</label>
                         <select id="payment-method-select" wire:model.live="paymentMethod" class="form-select">
@@ -427,13 +334,7 @@
                         </select>
                         @error('paymentMethod') <p class="form-error">{{ $message }}</p> @enderror
                     </div>
-
-
-
-                    {{-- KPR --}}
                     @if($paymentMethod === 'KPR')
-
-                        {{-- Section 1: Info Unit --}}
                         <div class="form-section">
                             <div class="form-section-title">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
@@ -461,8 +362,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        {{-- Section 2: Down Payment --}}
                         <div class="form-section">
                             <div class="form-section-title">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -496,8 +395,6 @@
                             </div>
                             @endif
                         </div>
-
-                        {{-- Section 3: Kredit --}}
                         <div class="form-section">
                             <div class="form-section-title">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
@@ -533,8 +430,6 @@
                             </div>
                         </div>
                     @endif
-
-                    {{-- Upload Bukti --}}
                     @if($paymentMethod)
                     <div class="form-group">
                         <label class="form-label">Upload Bukti / Dokumen</label>
@@ -559,7 +454,6 @@
                             Sedang mengunggah...
                         </div>
                         @error('paymentProof') <p class="form-error">{{ $message }}</p> @enderror
-
                         @php $unitTemp = \App\Models\Unit::find($selectedUnitId); @endphp
                         @if($unitTemp && $unitTemp->payment_proof_path)
                             <div class="existing-file">
@@ -577,10 +471,7 @@
                         @endif
                     </div>
                     @endif
-
-                </div>{{-- /modal-body --}}
-
-                {{-- Modal Footer --}}
+                </div>
                 <div class="modal-footer">
                     <button type="button" wire:click="closePaymentModal" class="btn-secondary">Tutup</button>
                     <button type="submit" class="btn-primary" id="save-payment-btn">
@@ -594,12 +485,7 @@
         </div>
     </div>
     @endif
-
-</div>{{-- /dashboard-wrapper --}}
-
-{{-- ═══════════════════════════════════════════════════════════════
-     STYLES
-═══════════════════════════════════════════════════════════════ --}}
+</div>
 <style>
 /* ── Wrapper ── */
 .dashboard-wrapper {
@@ -610,7 +496,6 @@
     flex-direction: column;
     gap: 1.5rem;
 }
-
 /* ── Page Header ── */
 .page-header {
     display: flex;
@@ -645,7 +530,6 @@
     color: #475569;
     box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
-
 /* ── Flash ── */
 .flash-alert {
     display: flex;
@@ -660,7 +544,6 @@
 }
 .flash-icon { width: 18px; height: 18px; color: #16a34a; flex-shrink: 0; }
 .flash-text { font-size: 0.875rem; font-weight: 600; color: #15803d; }
-
 /* ── Stats Grid ── */
 .stats-grid {
     display: grid;
@@ -669,7 +552,6 @@
 }
 @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; } }
-
 .stat-card {
     background: #fff;
     border: 1.5px solid #e8eaed;
@@ -689,7 +571,6 @@
     background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
     border-color: #bbf7d0;
 }
-
 .stat-header {
     display: flex;
     align-items: center;
@@ -710,7 +591,6 @@
 .stat-icon-green { background: #dcfce7; color: #16a34a; }
 .stat-icon-blue  { background: #e0f2fe; color: #0284c7; }
 .stat-icon-amber { background: #fef3c7; color: #d97706; }
-
 .stat-label {
     font-size: 0.65rem;
     font-weight: 700;
@@ -719,7 +599,6 @@
     letter-spacing: 0.6px;
 }
 .stat-label-green { color: #16a34a; }
-
 .stat-value {
     font-size: 2rem;
     font-weight: 800;
@@ -733,7 +612,6 @@
     color: #94a3b8;
     font-weight: 500;
 }
-
 /* ── Split Panel ── */
 .split-panel {
     display: grid;
@@ -746,7 +624,6 @@
         grid-template-columns: 1fr;
     }
 }
-
 /* ── Left Panel: Housing Blocks ── */
 .panel-left {
     background: #fff;
@@ -775,7 +652,6 @@
     font-weight: 700;
     color: #1a1d23;
 }
-
 .blocks-list {
     padding: 0.75rem;
     display: flex;
@@ -784,7 +660,6 @@
     max-height: 520px;
     overflow-y: auto;
 }
-
 /* ── Block Card ── */
 .block-card {
     border: 1.5px solid #e8eaed;
@@ -802,7 +677,6 @@
     border-color: #22c55e !important;
     box-shadow: 0 0 0 3px rgba(34,197,94,0.15);
 }
-
 .block-thumb {
     position: relative;
     height: 80px;
@@ -836,7 +710,6 @@
     text-shadow: 0 1px 4px rgba(0,0,0,0.3);
     letter-spacing: -0.2px;
 }
-
 .block-info {
     padding: 0.625rem 0.75rem;
     background: #fafbfc;
@@ -872,7 +745,6 @@
     transition: width 0.5s ease, background 0.3s;
     min-width: 4px;
 }
-
 .empty-blocks {
     text-align: center;
     padding: 2rem 1rem;
@@ -884,7 +756,6 @@
 }
 .empty-blocks svg { width: 32px; height: 32px; opacity: 0.5; }
 .empty-blocks p { font-size: 0.78rem; font-weight: 500; }
-
 /* ── Right Panel: Unit Management ── */
 .panel-right {
     background: #fff;
@@ -893,7 +764,6 @@
     overflow: hidden;
     box-shadow: 0 1px 6px rgba(0,0,0,0.04);
 }
-
 .unit-panel-header {
     display: flex;
     align-items: center;
@@ -914,7 +784,6 @@
     margin-top: 0.125rem;
 }
 .unit-panel-sub strong { color: #475569; }
-
 .unit-search-wrap {
     position: relative;
     flex-shrink: 0;
@@ -947,12 +816,10 @@
     background: #fff;
     box-shadow: 0 0 0 3px rgba(34,197,94,0.1);
 }
-
 .unit-list-wrap {
     max-height: 480px;
     overflow-y: auto;
 }
-
 .unit-empty-state {
     display: flex;
     flex-direction: column;
@@ -964,7 +831,6 @@
 }
 .unit-empty-state svg { width: 36px; height: 36px; opacity: 0.4; }
 .unit-empty-state p { font-size: 0.8rem; font-weight: 500; }
-
 /* ── Unit Row ── */
 .unit-list { display: flex; flex-direction: column; }
 .unit-row {
@@ -979,7 +845,6 @@
 .unit-row:hover { background: #f8fafc; }
 .unit-row-green { border-left: 3px solid #22c55e; }
 .unit-row-amber { border-left: 3px solid #f59e0b; }
-
 .unit-row-id {
     flex: 0 0 auto;
     min-width: 120px;
@@ -1005,7 +870,6 @@
     margin-top: 0.125rem;
     font-style: italic;
 }
-
 .unit-row-meta {
     flex: 1;
     display: flex;
@@ -1025,14 +889,12 @@
     color: #94a3b8;
     font-weight: 500;
 }
-
 .unit-row-actions {
     display: flex;
     align-items: center;
     gap: 0.375rem;
     flex-shrink: 0;
 }
-
 .unit-status-select {
     padding: 0.375rem 0.5rem;
     border-radius: 7px;
@@ -1052,7 +914,6 @@
 .badge-terjual { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
 .badge-dp      { background: #fefce8; color: #a16207; border-color: #fde68a; }
 .badge-belum   { background: #f8fafc; color: #475569; border-color: #e2e8f0; }
-
 .unit-detail-btn {
     width: 30px; height: 30px;
     display: flex; align-items: center; justify-content: center;
@@ -1066,7 +927,6 @@
 }
 .unit-detail-btn svg { width: 14px; height: 14px; }
 .unit-detail-btn:hover { background: #dbeafe; border-color: #93c5fd; }
-
 /* ──────────────────────────────────────────
    MODAL
 ────────────────────────────────────────── */
@@ -1094,7 +954,6 @@
     to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 .modal-panel-wide { max-width: 640px; }
-
 .modal-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 1.25rem 1.5rem;
@@ -1121,9 +980,7 @@
 }
 .modal-close svg { width: 15px; height: 15px; }
 .modal-close:hover { background: #fee2e2; border-color: #fecaca; color: #dc2626; }
-
 .modal-body { padding: 1.375rem 1.5rem; display: flex; flex-direction: column; gap: 1.125rem; }
-
 /* Form */
 .form-group { display: flex; flex-direction: column; gap: 0.3125rem; }
 .form-label { font-size: 0.8rem; font-weight: 700; color: #374151; }
@@ -1140,7 +997,6 @@
 .form-error { font-size: 0.72rem; color: #dc2626; margin-top: 0.2rem; font-weight: 600; }
 .form-hint  { font-size: 0.7rem; color: #64748b; margin-top: 0.25rem; font-weight: 500; }
 .required-mark { color: #ef4444; margin-left: 1px; }
-
 .input-with-addon {
     display: flex; align-items: stretch;
     border: 1.5px solid #e2e8f0;
@@ -1169,7 +1025,6 @@
     box-shadow: none; min-width: 0; width: 100%;
 }
 .input-with-addon .form-input:focus { outline: none; box-shadow: none; background: transparent; }
-
 /* Form sections */
 .form-section { border: 1.5px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
 .form-section-title {
@@ -1184,10 +1039,8 @@
 .form-section > .form-grid-2 { padding-bottom: 0; }
 .form-section > .calc-info-row { border-top: 1px solid #f1f5f9; margin: 0; }
 .section-note { font-size: 0.68rem; font-weight: 500; color: #94a3b8; margin-left: auto; }
-
 .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; padding-bottom: 0.75rem; }
 @media (max-width: 480px) { .form-grid-2 { grid-template-columns: 1fr; } }
-
 .calc-info-row {
     display: flex; justify-content: space-between; align-items: center;
     gap: 1rem; padding: 0.5625rem 0.875rem;
@@ -1196,7 +1049,6 @@
 }
 .calc-info-label { font-size: 0.75rem; font-weight: 600; color: #3b82f6; }
 .calc-info-value { font-size: 0.875rem; font-weight: 800; color: #1d4ed8; }
-
 /* Radio cards */
 .radio-group { display: flex; gap: 0.625rem; flex-wrap: wrap; }
 .radio-card {
@@ -1211,7 +1063,6 @@
 .radio-card-icon { font-size: 1.125rem; flex-shrink: 0; }
 .radio-card-title { font-size: 0.78rem; font-weight: 700; color: #1e293b; margin-bottom: 0.2rem; }
 .radio-card-desc  { font-size: 0.68rem; color: #64748b; line-height: 1.5; }
-
 /* Simulation */
 .simulation-result {
     background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 60%, #2563eb 100%);
@@ -1240,7 +1091,6 @@
 .sim-value-main { font-size: 1.25rem; }
 .sim-value-interest { color: #fca5a5; }
 .sim-note { font-size: 0.65rem; color: rgba(255,255,255,0.6); line-height: 1.5; }
-
 /* File upload */
 .file-upload-area {
     display: flex; flex-direction: column; align-items: center;
@@ -1261,7 +1111,6 @@
 .existing-file-link { display: inline-flex; align-items: center; gap: 0.375rem; font-size: 0.78rem; font-weight: 700; color: #2563eb; text-decoration: none; }
 .existing-file-link svg { width: 13px; height: 13px; }
 .existing-file-link:hover { color: #1d4ed8; text-decoration: underline; }
-
 /* Modal footer */
 .modal-footer {
     display: flex; justify-content: flex-end; gap: 0.625rem;
@@ -1291,7 +1140,6 @@
     transition: all 0.2s; font-family: 'Inter', sans-serif;
 }
 .btn-secondary:hover { background: #f1f5f9; border-color: #cbd5e1; color: #1e293b; }
-
 /* Scrollbar styling */
 .blocks-list::-webkit-scrollbar,
 .unit-list-wrap::-webkit-scrollbar { width: 4px; }
@@ -1301,7 +1149,6 @@
 .unit-list-wrap::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
 .blocks-list::-webkit-scrollbar-thumb:hover,
 .unit-list-wrap::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
-
 /* sr-only */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
 </style>

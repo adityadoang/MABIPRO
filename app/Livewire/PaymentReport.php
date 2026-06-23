@@ -1,52 +1,35 @@
 <?php
-
 namespace App\Livewire;
-
 use Livewire\Component;
 use App\Models\Unit;
 use App\Models\InstallmentPayment;
 use Livewire\Attributes\Layout;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-
 #[Layout('layouts.app')]
 class PaymentReport extends Component
 {
-    // ── Tracker state ──
     public ?int $activeTrackerUnitId = null;
-
-    // Modal edit cicilan
     public bool $isEditModalOpen    = false;
-    public ?string $editMonth       = null;   // format: Y-m-d (awal bulan)
-    public ?string $editMonthLabel  = null;   // format: "Januari 2026"
+    public ?string $editMonth       = null;   
+    public ?string $editMonthLabel  = null;   
     public string  $editNote        = '';
     public string  $editAmount      = '';
     public bool    $editIsPaid      = false;
-
-    // ─────────────────────────────────────────────────────────────
-    // Toggle panel tracker
-    // ─────────────────────────────────────────────────────────────
-
     public function openTracker(int $unitId): void
     {
         if ($this->activeTrackerUnitId === $unitId) {
-            $this->activeTrackerUnitId = null;  // toggle off
+            $this->activeTrackerUnitId = null;  
         } else {
             $this->activeTrackerUnitId = $unitId;
         }
         $this->closeEditModal();
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Quick toggle paid/unpaid langsung dari list
-    // ─────────────────────────────────────────────────────────────
-
     public function togglePaid(int $unitId, string $month): void
     {
         $existing = InstallmentPayment::where('unit_id', $unitId)
             ->where('installment_month', $month)
             ->first();
-
         if ($existing) {
             $newStatus = !$existing->is_paid;
             $existing->update([
@@ -65,48 +48,34 @@ class PaymentReport extends Component
             ]);
         }
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Edit modal untuk satu bulan
-    // ─────────────────────────────────────────────────────────────
-
     public function openEditModal(int $unitId, string $month): void
     {
         $this->activeTrackerUnitId = $unitId;
         $this->editMonth     = $month;
         $this->editMonthLabel = Carbon::parse($month)->translatedFormat('F Y');
-
         $existing = InstallmentPayment::where('unit_id', $unitId)
             ->where('installment_month', $month)
             ->first();
-
         $unit = Unit::find($unitId);
         $this->editIsPaid  = $existing?->is_paid  ?? false;
-        // Store as plain integer string to avoid browser appending issues
         $rawAmount = $existing?->amount_paid ?? ($unit?->monthly_installment ?? null);
         $this->editAmount  = $rawAmount !== null ? (string)(int)round((float)$rawAmount) : '';
         $this->editNote    = $existing?->note ?? '';
-
         $this->isEditModalOpen = true;
     }
-
     public function closeEditModal(): void
     {
         $this->isEditModalOpen = false;
         $this->reset(['editMonth', 'editMonthLabel', 'editNote', 'editAmount', 'editIsPaid']);
     }
-
     public function saveInstallment(): void
     {
         $this->validate([
             'editAmount' => 'nullable|numeric|min:0|max:999999999999',
             'editNote'   => 'nullable|string|max:500',
         ]);
-
-        // Parse amount safely — remove any thousand separators, then cast to float
         $amountRaw = preg_replace('/[^0-9.]/', '', (string) $this->editAmount);
         $amount    = $amountRaw !== '' ? (float) $amountRaw : null;
-
         InstallmentPayment::updateOrCreate(
             [
                 'unit_id'           => $this->activeTrackerUnitId,
@@ -120,65 +89,49 @@ class PaymentReport extends Component
                 'recorded_by' => Auth::id(),
             ]
         );
-
         $this->closeEditModal();
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Helper: generate daftar bulan dari akad sampai tenor habis
-    // ─────────────────────────────────────────────────────────────
-
     public function getInstallmentMonths(Unit $unit): array
     {
         if (!$unit->akad_date || !$unit->kpr_duration_months) {
             return [];
         }
-
         $start  = Carbon::parse($unit->akad_date)->startOfMonth()->addMonth();
         $months = [];
-
         for ($i = 0; $i < $unit->kpr_duration_months; $i++) {
             $months[] = $start->copy()->addMonths($i)->format('Y-m-d');
         }
-
         return $months;
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Render
-    // ─────────────────────────────────────────────────────────────
-
     public function render()
     {
         $units = Unit::whereNotNull('payment_method')
-            ->with(['block', 'installmentPayments'])
+            ->with(['block'])
+            ->withCount(['installmentPayments as paid_installments_count' => function ($query) {
+                $query->where('is_paid', true);
+            }])
             ->get();
-
         $totalRevenue            = $units->sum('amount_paid');
         $totalCashUnits          = $units->where('payment_method', 'Cash')->count();
         $totalKprUnits           = $units->where('payment_method', 'KPR')->count();
         $totalMonthlyInstallment = $units->where('payment_method', 'KPR')->sum('monthly_installment');
-
-        // Hitung summary tracker untuk unit aktif
         $activeUnit         = null;
         $installmentMonths  = [];
         $paidMap            = [];
         $trackerSummary     = null;
-
         if ($this->activeTrackerUnitId) {
             $activeUnit = $units->firstWhere('id', $this->activeTrackerUnitId);
             if ($activeUnit) {
+                $activeUnit->load('installmentPayments');
                 $installmentMonths = $this->getInstallmentMonths($activeUnit);
                 $paidMap = $activeUnit->installmentPayments
                     ->keyBy(fn($p) => Carbon::parse($p->installment_month)->format('Y-m-d'))
                     ->toArray();
-
                 $paidCount    = collect($paidMap)->where('is_paid', true)->count();
                 $totalPaid    = collect($paidMap)->where('is_paid', true)->sum('amount_paid');
                 $totalTenor   = count($installmentMonths);
                 $remaining    = max(0, $totalTenor - $paidCount);
                 $sisaNominal  = max(0, ($activeUnit->monthly_installment * $remaining));
-
                 $trackerSummary = [
                     'paid_count'   => $paidCount,
                     'total_tenor'  => $totalTenor,
@@ -189,7 +142,6 @@ class PaymentReport extends Component
                 ];
             }
         }
-
         return view('livewire.payment-report', [
             'units'                  => $units,
             'totalRevenue'           => $totalRevenue,

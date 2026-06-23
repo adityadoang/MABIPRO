@@ -1,6 +1,4 @@
 <div class="page-wrapper">
-
-    {{-- ── Page Header ── --}}
     <div class="page-header">
         <div class="page-header-inner">
             <div>
@@ -15,10 +13,7 @@
             </a>
         </div>
     </div>
-
-    {{-- ── Summary Cards ── --}}
     <div class="summary-grid">
-
         <div class="summary-card">
             <div class="summary-card-icon summary-icon-blue">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,7 +27,6 @@
                 <p class="summary-note">DP &amp; Cash terkumpul</p>
             </div>
         </div>
-
         <div class="summary-card">
             <div class="summary-card-icon summary-icon-green">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,7 +40,6 @@
                 <p class="summary-note">Dibayar tunai penuh</p>
             </div>
         </div>
-
         <div class="summary-card">
             <div class="summary-card-icon summary-icon-purple">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,7 +53,6 @@
                 <p class="summary-note">Proses cicilan bank</p>
             </div>
         </div>
-
         @if($totalMonthlyInstallment > 0)
         <div class="summary-card">
             <div class="summary-card-icon summary-icon-orange">
@@ -77,8 +69,6 @@
         </div>
         @endif
     </div>
-
-    {{-- ── Data Table ── --}}
     <div class="table-card">
         <div class="table-card-header">
             <h2 class="table-card-title">
@@ -89,8 +79,6 @@
                 Rincian Pembayaran per Unit
             </h2>
         </div>
-
-        {{-- Desktop Table --}}
         <div class="table-scroll">
             <table class="data-table" id="payment-table">
                 <thead>
@@ -117,13 +105,12 @@
                                 'Sudah DP' => 'status-yellow',
                                 default    => 'status-gray',
                             };
-
                             // Quick stats untuk badge di kolom Cicilan
                             $unitPaidCount = 0;
                             $unitTotalTenor = 0;
                             if ($isKpr && $unit->akad_date && $unit->kpr_duration_months) {
                                 $unitTotalTenor = $unit->kpr_duration_months;
-                                $unitPaidCount = $unit->installmentPayments->where('is_paid', true)->count();
+                                $unitPaidCount = $unit->paid_installments_count ?? 0;
                             }
                         @endphp
                         <tr class="table-row {{ $isActiveTracker ? 'row-active' : '' }}">
@@ -226,14 +213,10 @@
                                 @endif
                             </td>
                         </tr>
-
-                        {{-- ── Tracker Panel (accordion, muncul di bawah baris unit KPR) ── --}}
                         @if($isActiveTracker && $activeUnit && $trackerSummary)
                         <tr class="tracker-row">
                             <td colspan="10" class="tracker-td">
                                 <div class="tracker-panel">
-
-                                    {{-- Header summary --}}
                                     <div class="tracker-header">
                                         <div class="tracker-header-left">
                                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -248,8 +231,6 @@
                                             </svg>
                                         </button>
                                     </div>
-
-                                    {{-- Stats bar --}}
                                     <div class="tracker-stats">
                                         <div class="tstat tstat-green">
                                             <span class="tstat-val">{{ $trackerSummary['paid_count'] }}</span>
@@ -268,16 +249,12 @@
                                             <span class="tstat-lbl">Sisa Tagihan</span>
                                         </div>
                                     </div>
-
-                                    {{-- Progress bar --}}
                                     <div class="tracker-progress-wrap">
                                         <div class="tracker-progress-bar">
                                             <div class="tracker-progress-fill" style="width: {{ $trackerSummary['pct'] }}%"></div>
                                         </div>
                                         <span class="tracker-progress-pct">{{ $trackerSummary['pct'] }}% lunas</span>
                                     </div>
-
-                                    {{-- Monthly grid --}}
                                     <div class="month-grid">
                                         @foreach($installmentMonths as $idx => $monthStr)
                                             @php
@@ -330,12 +307,10 @@
                                             </div>
                                         @endforeach
                                     </div>
-
                                 </div>
                             </td>
                         </tr>
                         @endif
-
                     @empty
                         <tr>
                             <td colspan="10">
@@ -352,8 +327,6 @@
                 </tbody>
             </table>
         </div>
-
-        {{-- Mobile Cards --}}
         <div class="mobile-cards">
             @forelse($units as $unit)
                 @php
@@ -368,7 +341,7 @@
                         'Sudah DP' => 'mobile-card-yellow',
                         default    => 'mobile-card-gray',
                     };
-                    $unitPaidCount = $isKpr ? $unit->installmentPayments->where('is_paid', true)->count() : 0;
+                    $unitPaidCount = $isKpr ? ($unit->paid_installments_count ?? 0) : 0;
                     $unitTotalTenor = $isKpr ? ($unit->kpr_duration_months ?? 0) : 0;
                     $isActiveMobile = $activeTrackerUnitId === $unit->id;
                 @endphp
@@ -445,8 +418,6 @@
                             </div>
                         @endif
                     </div>
-
-                    {{-- Mobile tracker panel --}}
                     @if($isActiveMobile && $activeUnit && $trackerSummary)
                     <div class="mobile-tracker-panel">
                         <div class="tracker-stats tracker-stats-mobile">
@@ -520,10 +491,6 @@
             @endforelse
         </div>
     </div>
-
-    {{-- ═══════════════════════════════════════════════════════════
-         Modal Edit Cicilan
-         ═══════════════════════════════════════════════════════════ --}}
     @if($isEditModalOpen)
     <div class="modal-overlay" wire:click.self="closeEditModal" id="edit-installment-modal">
         <div class="modal-box">
@@ -538,9 +505,7 @@
                     </svg>
                 </button>
             </div>
-
             <div class="modal-body">
-                {{-- Status paid --}}
                 <div class="form-group">
                     <label class="form-label">Status Pembayaran</label>
                     <div class="toggle-row">
@@ -558,8 +523,6 @@
                         </button>
                     </div>
                 </div>
-
-                {{-- Nominal --}}
                 @if($editIsPaid)
                 <div class="form-group">
                     <label for="edit-amount" class="form-label">
@@ -581,8 +544,6 @@
                     @error('editAmount') <span class="form-error">{{ $message }}</span> @enderror
                 </div>
                 @endif
-
-                {{-- Catatan --}}
                 <div class="form-group">
                     <label for="edit-note" class="form-label">Catatan <span class="form-optional">(opsional)</span></label>
                     <textarea id="edit-note"
@@ -593,7 +554,6 @@
                     @error('editNote') <span class="form-error">{{ $message }}</span> @enderror
                 </div>
             </div>
-
             <div class="modal-footer">
                 <button wire:click="closeEditModal" class="btn-cancel">Batal</button>
                 <button wire:click="saveInstallment" id="save-installment-btn" class="btn-save">
@@ -606,13 +566,10 @@
         </div>
     </div>
     @endif
-
 </div>
-
 <style>
 /* ── Layout ── */
 .page-wrapper { max-width: 1400px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
-
 /* ── Page Header ── */
 .page-header { margin-bottom: 2rem; }
 .page-header-inner { display: flex; flex-direction: column; gap: 1rem; }
@@ -627,12 +584,10 @@
 }
 .back-btn svg { width: 16px; height: 16px; }
 .back-btn:hover { background: #f1f5f9; border-color: #cbd5e1; color: #1e293b; }
-
 /* ── Summary Grid ── */
 .summary-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1.75rem; }
 @media (min-width: 480px) { .summary-grid { grid-template-columns: 1fr 1fr; } }
 @media (min-width: 900px) { .summary-grid { grid-template-columns: repeat(4, 1fr); } }
-
 .summary-card {
     background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.25rem;
     display: flex; align-items: center; gap: 1rem;
@@ -654,13 +609,11 @@
 .summary-value { font-size: 1.375rem; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; line-height: 1.1; word-break: break-all; }
 .summary-unit  { font-size: 0.875rem; font-weight: 600; color: #64748b; }
 .summary-note  { font-size: 0.7rem; color: #94a3b8; margin-top: 0.25rem; font-weight: 500; }
-
 /* ── Table Card ── */
 .table-card { background: #fff; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 2px 12px rgba(0,0,0,0.05); overflow: hidden; }
 .table-card-header { padding: 1.125rem 1.5rem; border-bottom: 1px solid #f1f5f9; background: #f8fafc; }
 .table-card-title { display: flex; align-items: center; gap: 0.625rem; font-size: 1rem; font-weight: 800; color: #1e293b; }
 .table-card-title svg { width: 18px; height: 18px; color: #64748b; }
-
 /* Desktop table */
 .table-scroll { overflow-x: auto; }
 .data-table { width: 100%; border-collapse: collapse; }
@@ -671,7 +624,6 @@
 .table-row:last-child td { border-bottom: none; }
 .table-row:hover td { background: #f8fafc; }
 .table-row.row-active td { background: #f0f9ff; border-bottom-color: #bae6fd; }
-
 /* Cell types */
 .unit-cell-number { font-size: 0.9375rem; font-weight: 800; color: #0f172a; }
 .unit-cell-block  { font-size: 0.75rem; color: #94a3b8; font-weight: 500; margin-top: 2px; }
@@ -687,28 +639,23 @@
 .bank-name  { font-size: 0.72rem; color: #64748b; margin-top: 2px; }
 .kpr-type-badge { display: inline-block; font-size: 0.65rem; font-weight: 600; color: #7c3aed; background: #f5f3ff; border: 1px solid #ede9fe; padding: 1px 6px; border-radius: 4px; margin-top: 3px; }
 .no-data    { color: #cbd5e1; font-size: 0.8125rem; }
-
 /* Method badges */
 .method-badge { display: inline-flex; align-items: center; padding: 0.2rem 0.625rem; border-radius: 6px; font-size: 0.72rem; font-weight: 700; }
 .method-kpr  { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; }
 .method-cash { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-
 /* Status badges */
 .status-badge { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.625rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
 .status-green  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
 .status-yellow { background: #fefce8; color: #a16207; border: 1px solid #fde68a; }
 .status-gray   { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
-
 /* Proof btn */
 .proof-btn { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.75rem; background: #eff6ff; border: 1px solid #dbeafe; color: #2563eb; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none; transition: all 0.2s ease; }
 .proof-btn svg { width: 14px; height: 14px; }
 .proof-btn:hover { background: #dbeafe; border-color: #93c5fd; }
 .no-file { font-size: 0.75rem; color: #cbd5e1; font-style: italic; }
-
 /* Empty */
 .empty-table-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; padding: 3rem 1rem; color: #94a3b8; font-size: 0.875rem; text-align: center; }
 .empty-table-state svg { width: 40px; height: 40px; color: #cbd5e1; }
-
 /* ── Tracker Button (di kolom tabel) ── */
 .tracker-btn {
     display: inline-flex; align-items: center; gap: 0.375rem;
@@ -720,24 +667,20 @@
 .tracker-btn-active { background: #15803d; color: #fff; border-color: #15803d; }
 .tracker-btn-active:hover { background: #166534; }
 .tracker-icon { width: 13px; height: 13px; }
-
 .tracker-btn-sm {
     display: inline-flex; align-items: center; gap: 0.375rem;
     padding: 0.3rem 0.625rem; border-radius: 7px; font-size: 0.75rem; font-weight: 700;
     background: #f0fdf4; color: #15803d; border: 1.5px solid #bbf7d0; cursor: pointer;
 }
 .tracker-btn-sm-active { background: #15803d; color: #fff; border-color: #15803d; }
-
 /* Tracker pill (X/Y lunas) */
 .tracker-pill { display: inline-flex; align-items: center; padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 0.68rem; font-weight: 800; }
 .pill-done    { background: #bbf7d0; color: #14532d; }
 .pill-partial { background: #fde68a; color: #78350f; }
 .pill-none    { background: #f1f5f9; color: #94a3b8; }
-
 /* ── Tracker Row & Panel ── */
 .tracker-row td { padding: 0 !important; border-bottom: 3px solid #0ea5e9 !important; }
 .tracker-td { background: #f0f9ff !important; }
-
 .tracker-panel {
     padding: 1.25rem 1.5rem 1.5rem;
     background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
@@ -747,7 +690,6 @@
     from { opacity: 0; transform: translateY(-8px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-
 .tracker-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
 .tracker-header-left { display: flex; align-items: center; gap: 0.5rem; }
 .tracker-header-left svg { width: 18px; height: 18px; color: #0284c7; }
@@ -759,7 +701,6 @@
 }
 .tracker-close:hover { background: #fff; }
 .tracker-close svg { width: 14px; height: 14px; }
-
 /* Stats bar */
 .tracker-stats {
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1rem;
@@ -772,34 +713,28 @@
 .tstat-orange { border-color: #fed7aa; }
 .tstat-val { display: block; font-size: 1.25rem; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; line-height: 1; }
 .tstat-lbl { display: block; font-size: 0.65rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.3rem; }
-
 /* Progress bar */
 .tracker-progress-wrap { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; }
 .tracker-progress-bar { flex: 1; height: 10px; background: #e0f2fe; border-radius: 999px; overflow: hidden; }
 .tracker-progress-fill { height: 100%; background: linear-gradient(90deg, #0ea5e9, #22c55e); border-radius: 999px; transition: width 0.5s ease; }
 .tracker-progress-pct { font-size: 0.78rem; font-weight: 700; color: #0369a1; white-space: nowrap; }
-
 /* ── Month Grid ── */
 .month-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.625rem; }
 .month-grid-mobile { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); padding: 0 1rem 1rem; }
-
 .month-card {
     border-radius: 12px; padding: 0.75rem; border: 1.5px solid;
     display: flex; flex-direction: column; gap: 0.3rem;
     transition: all 0.2s ease;
 }
 .month-card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-
 .mc-paid    { background: #f0fdf4; border-color: #86efac; }
 .mc-overdue { background: #fff1f2; border-color: #fca5a5; }
 .mc-current { background: #fefce8; border-color: #fde047; }
 .mc-future  { background: #fff; border-color: #e2e8f0; }
-
 .mc-top { display: flex; align-items: center; gap: 0.375rem; }
 .mc-num { font-size: 0.65rem; font-weight: 700; color: #94a3b8; background: #f1f5f9; padding: 1px 5px; border-radius: 4px; }
 .mc-date { font-size: 0.72rem; font-weight: 700; color: #374151; }
 .mc-now-badge { font-size: 0.58rem; font-weight: 700; background: #fef08a; color: #78350f; padding: 1px 5px; border-radius: 4px; margin-left: auto; }
-
 .mc-status { display: flex; align-items: center; gap: 0.3rem; }
 .mc-status-icon { font-size: 0.8rem; font-weight: 900; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .mc-icon-paid    { background: #bbf7d0; color: #14532d; }
@@ -807,10 +742,8 @@
 .mc-icon-upcoming { background: #e2e8f0; color: #94a3b8; font-size: 0.7rem; }
 .mc-status-label { font-size: 0.68rem; font-weight: 600; color: #64748b; }
 .mc-label-red { color: #dc2626; }
-
 .mc-amount { font-size: 0.68rem; font-weight: 700; color: #15803d; }
 .mc-note { font-size: 0.62rem; color: #64748b; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
 .mc-actions { display: flex; gap: 0.25rem; margin-top: 0.25rem; }
 .mc-btn {
     flex: 1; padding: 0.25rem 0.25rem; border-radius: 6px; font-size: 0.65rem; font-weight: 700;
@@ -822,19 +755,15 @@
 .mc-btn-unmark:hover { background: #ffe4e6; }
 .mc-btn-edit   { flex: 0; padding: 0.25rem 0.5rem; background: #f8fafc; border-color: #e2e8f0; color: #64748b; }
 .mc-btn-edit:hover { background: #f1f5f9; color: #374151; }
-
 /* ── Mobile Tracker Panel ── */
 .mobile-tracker-panel { border-top: 2px solid #bae6fd; background: #f0f9ff; padding-top: 0.75rem; }
-
 /* ── Mobile Cards ── */
 .mobile-cards { display: none; flex-direction: column; gap: 0.875rem; padding: 1rem; }
 @media (max-width: 768px) { .table-scroll { display: none; } .mobile-cards { display: flex; } }
-
 .mobile-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; overflow: hidden; }
 .mobile-card-green  { border-top: 3px solid #22c55e; }
 .mobile-card-yellow { border-top: 3px solid #eab308; }
 .mobile-card-gray   { border-top: 3px solid #cbd5e1; }
-
 .mobile-card-top { display: flex; justify-content: space-between; align-items: flex-start; padding: 1rem; border-bottom: 1px solid #f1f5f9; gap: 0.75rem; }
 .mobile-card-number { font-size: 1.25rem; font-weight: 900; color: #0f172a; }
 .mobile-card-block  { font-size: 0.75rem; color: #94a3b8; font-weight: 500; margin-top: 2px; }
@@ -848,7 +777,6 @@
 .mobile-amount     { font-size: 0.875rem; font-weight: 800; color: #1d4ed8; }
 .proof-btn-sm { font-size: 0.8125rem; font-weight: 700; color: #2563eb; text-decoration: none; }
 .proof-btn-sm:hover { text-decoration: underline; }
-
 /* ── Edit Modal ── */
 .modal-overlay {
     position: fixed; inset: 0; background: rgba(15,23,42,0.45); backdrop-filter: blur(4px);
@@ -856,7 +784,6 @@
     animation: fadeIn 0.15s ease;
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
 .modal-box {
     background: #fff; border-radius: 20px; width: 100%; max-width: 480px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden;
@@ -866,23 +793,19 @@
     from { opacity: 0; transform: scale(0.92) translateY(12px); }
     to   { opacity: 1; transform: scale(1) translateY(0); }
 }
-
 .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
 .modal-title { font-size: 1.125rem; font-weight: 800; color: #0f172a; }
 .modal-subtitle { font-size: 0.78rem; color: #64748b; margin-top: 2px; font-weight: 500; }
 .modal-close-btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; flex-shrink: 0; transition: all 0.15s ease; }
 .modal-close-btn:hover { background: #f1f5f9; color: #0f172a; }
 .modal-close-btn svg { width: 16px; height: 16px; }
-
 .modal-body { padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1.125rem; }
 .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid #f1f5f9; display: flex; gap: 0.75rem; justify-content: flex-end; }
-
 .form-group { display: flex; flex-direction: column; gap: 0.375rem; }
 .form-label { font-size: 0.8125rem; font-weight: 700; color: #374151; }
 .form-hint { font-size: 0.72rem; font-weight: 500; color: #94a3b8; }
 .form-optional { font-size: 0.72rem; font-weight: 500; color: #94a3b8; }
 .form-error { font-size: 0.72rem; color: #dc2626; margin-top: 2px; }
-
 .form-input {
     width: 100%; padding: 0.625rem 0.875rem; border: 1.5px solid #e2e8f0; border-radius: 10px;
     font-size: 0.875rem; color: #0f172a; outline: none; transition: border-color 0.2s ease;
@@ -890,11 +813,9 @@
 }
 .form-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
 .form-textarea { resize: vertical; min-height: 80px; font-family: inherit; }
-
 .input-prefix-wrap { position: relative; display: flex; align-items: center; }
 .input-prefix { position: absolute; left: 0.875rem; font-size: 0.875rem; font-weight: 600; color: #64748b; pointer-events: none; }
 .input-with-prefix { padding-left: 2.5rem !important; }
-
 .toggle-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
 .toggle-opt {
     padding: 0.625rem 1rem; border-radius: 10px; font-size: 0.8125rem; font-weight: 700;
@@ -904,7 +825,6 @@
 .toggle-opt:hover { border-color: #cbd5e1; background: #f1f5f9; }
 .toggle-opt-active-green { background: #f0fdf4; border-color: #86efac; color: #15803d; }
 .toggle-opt-active-red   { background: #fff1f2; border-color: #fca5a5; color: #dc2626; }
-
 .btn-cancel {
     padding: 0.625rem 1.25rem; border-radius: 10px; font-size: 0.875rem; font-weight: 600;
     border: 1.5px solid #e2e8f0; background: #fff; color: #64748b; cursor: pointer;
