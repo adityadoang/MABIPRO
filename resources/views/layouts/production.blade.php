@@ -37,16 +37,25 @@
             </div>
             
             {{-- Menu --}}
-            {{-- Menu --}}
-<nav class="flex-1 p-4 space-y-2">
-    <a href="{{ route('production.dashboard') }}" 
-       class="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-lg font-medium transition-colors">
-        <span class="material-symbols-outlined text-[20px]">handyman</span>
-        Production
-    </a>
-</nav>
-            
-            {{-- User Profile --}}
+            <nav class="flex-1 p-4 space-y-2">
+                <a href="{{ route('production.dashboard') }}" 
+                   class="flex items-center gap-3 px-4 py-3 bg-primary text-white rounded-lg font-medium transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">handyman</span>
+                    Production
+                </a>
+                
+                {{-- Logout Button - Merah --}}
+                <form method="POST" action="{{ route('logout') }}" class="mt-2">
+                    @csrf
+                    <button type="submit" 
+                            class="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">logout</span>
+                        Logout
+                    </button>
+                </form>
+            </nav>
+
+            {{-- User Profile (HANYA 1x, tanpa logout) --}}
             <div class="p-4 border-t border-gray-200">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center">
@@ -56,12 +65,6 @@
                         <p class="font-medium text-gray-900 text-sm">{{ auth()->user()->name ?? 'User' }}</p>
                         <p class="text-xs text-gray-500">{{ auth()->user()->role ?? 'Role' }}</p>
                     </div>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="text-gray-400 hover:text-red-500 transition-colors">
-                            <span class="material-symbols-outlined text-[20px]">logout</span>
-                        </button>
-                    </form>
                 </div>
             </div>
         </aside>
