@@ -28,8 +28,8 @@
                     <img src="{{ asset('images/mabipro-logo.png') }}" alt="MABIPRO Logo" class="w-full h-full object-contain">
                 </div>
                 <div>
-                    <h2 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">MABIPRO</h2>
-                    <p class="font-body-sm text-body-sm text-on-surface-variant">{{ Auth::user()->role ?? 'Marketing' }}</p>
+                    <h2 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">MABIPRO {{ Auth::user()->role ?? 'Marketing' }}</h2>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Property Management</p>
                 </div>
             </div>
         </div>
