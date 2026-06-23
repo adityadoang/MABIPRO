@@ -5,19 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Dashboard') — MABIPRO</title>
+    <link rel="icon" type="image/jpeg" href="{{ asset('images/mabipro-logo.jpg') }}">
 
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
 </head>
-<body class="bg-surface text-on-surface flex h-screen overflow-hidden font-body-md">
+<body class="bg-surface text-on-surface flex h-screen overflow-hidden font-body-md" x-data="{ sidebarOpen: false }">
     <!-- SideNavBar -->
-    <nav class="bg-surface-container-low dark:bg-primary-container text-secondary dark:text-secondary-fixed font-headline-md text-headline-md border-r border-outline-variant dark:border-outline fixed left-0 top-0 h-screen flex flex-col p-4 space-y-2 z-50 w-72 md:flex hidden">
+    <nav class="bg-surface-container-low dark:bg-primary-container text-secondary dark:text-secondary-fixed font-headline-md text-headline-md border-r border-outline-variant dark:border-outline fixed left-0 top-0 h-[100dvh] flex flex-col p-4 space-y-2 z-50 w-72 max-w-[85vw] md:flex"
+         x-bind:class="sidebarOpen ? 'flex' : 'hidden'" id="sidebar">
         <div class="mb-8">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 flex-shrink-0 rounded-full bg-white overflow-hidden flex items-center justify-center shadow-sm">
-                    <img src="{{ asset('images/mabipro-logo.png') }}" alt="MABIPRO Logo" class="w-full h-full object-contain">
+                    <img src="{{ asset('images/mabipro-logo.jpg') }}" alt="MABIPRO Logo" class="w-full h-full object-contain">
                 </div>
                 <div>
                     <h2 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">MABIPRO Admin</h2>
@@ -78,7 +81,7 @@
             @endif
         </div>
 
-        <div class="mt-auto space-y-2 pt-4 border-t border-outline-variant">
+        <div class="mt-auto space-y-2 pt-4 border-t border-outline-variant shrink-0">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="w-full text-left text-on-surface-variant dark:text-on-primary-container hover:bg-surface-container-high dark:hover:bg-on-primary-fixed-variant transition-all flex items-center gap-3 px-4 py-3 rounded-lg">
@@ -90,11 +93,11 @@
     </nav>
 
     <!-- Main Content Area -->
-    <main class="flex-1 ml-0 md:ml-72 flex flex-col h-screen overflow-y-auto bg-surface-bright pb-24 md:pb-0">
+    <main class="flex-1 ml-0 md:ml-72 flex flex-col h-[100dvh] overflow-y-auto bg-surface-bright">
         <!-- Mobile Header (Visible only on mobile) -->
         <header class="md:hidden bg-surface border-b border-outline-variant p-4 flex justify-between items-center sticky top-0 z-40">
             <h1 class="font-headline-md text-headline-md font-bold text-primary">MABIPRO Admin</h1>
-            <button class="text-on-surface-variant p-2 rounded-full hover:bg-surface-container">
+            <button @click="sidebarOpen = !sidebarOpen" class="text-on-surface-variant p-2 rounded-full hover:bg-surface-container" aria-label="Toggle menu">
                 <span class="material-symbols-outlined">menu</span>
             </button>
         </header>
@@ -128,16 +131,9 @@
         </footer>
     </main>
 
-    <!-- Mobile Bottom Navigation (Visible only on mobile) -->
-    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface border-t border-outline-variant flex justify-around p-2 z-50">
-        <a class="flex flex-col items-center p-2 {{ request()->routeIs('admin.dashboard') ? 'text-primary' : 'text-on-surface-variant hover:text-primary' }}" href="{{ route('admin.dashboard') }}">
-            <span class="material-symbols-outlined" style="{{ request()->routeIs('admin.dashboard') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">dashboard</span>
-            <span class="font-label-sm text-[10px] mt-1 {{ request()->routeIs('admin.dashboard') ? 'font-bold' : '' }}">Overview</span>
-        </a>
-        <a class="flex flex-col items-center p-2 {{ request()->routeIs('admin.users.*') ? 'text-primary' : 'text-on-surface-variant hover:text-primary' }}" href="{{ route('admin.users.index') }}">
-            <span class="material-symbols-outlined" style="{{ request()->routeIs('admin.users.*') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">group</span>
-            <span class="font-label-sm text-[10px] mt-1 {{ request()->routeIs('admin.users.*') ? 'font-bold' : '' }}">Users</span>
-        </a>
-    </nav>
+    {{-- Sidebar Overlay (Mobile) --}}
+    <div id="sidebar-overlay" x-show="sidebarOpen" @click="sidebarOpen = false" x-transition.opacity class="fixed inset-0 bg-black/40 z-40 md:hidden" style="display: none;"></div>
+
+    @livewireScripts
 </body>
 </html>

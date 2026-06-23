@@ -53,11 +53,4 @@
         </button>
     </form>
 
-    <!-- Return Link -->
-    <div class="mt-6 text-center">
-        <a class="inline-flex items-center gap-1 font-label-sm text-xs font-medium text-on-surface-variant hover:text-primary transition-colors" href="/">
-            <span class="material-symbols-outlined text-[16px]">arrow_back</span>
-            Return to Landing Page
-        </a>
-    </div>
 </x-guest-layout>

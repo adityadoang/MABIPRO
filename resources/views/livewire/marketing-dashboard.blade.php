@@ -1,5 +1,11 @@
 <div class="dashboard-wrapper">
-
+    {{-- 
+         TIPS BELAJAR LIVEWIRE & BLADE: 
+         1. Setiap komponen Livewire harus dibungkus oleh SATU elemen utama (root element).
+            Di sini kita menggunakan <div class="dashboard-wrapper"> sebagai bungkus utama.
+         2. Tanda kurung kurawal ganda seperti {{ $variabel }} digunakan untuk mencetak isi variabel dari PHP ke HTML.
+         3. Komentar ini tidak akan terlihat oleh pengguna (disembunyikan oleh Blade).
+    --}}
     {{-- ══════════════════════════════════════════════════════════════
          PAGE HEADER
     ══════════════════════════════════════════════════════════════ --}}
@@ -142,6 +148,11 @@
                         $blockGradient = $gradients[($block->id - 1) % count($gradients)];
                     @endphp
 
+                    {{-- 
+                         TIPS LIVEWIRE:
+                         - wire:key: Membantu Livewire melacak elemen spesifik di dalam loop HTML.
+                         - wire:click: Mirip `onclick` di JavaScript, tapi ini memanggil fungsi `selectBlock()` yang ada di file PHP.
+                    --}}
                     <div wire:key="block-{{ $block->id }}"
                          wire:click="selectBlock({{ $block->id }})"
                          id="block-card-{{ $block->id }}"
@@ -229,6 +240,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
+                    {{-- 
+                         TIPS LIVEWIRE:
+                         wire:model.live menghubungkan tag input ini dengan properti `$searchUnit` di PHP secara *real-time*.
+                         Setiap kali user mengetik, data di backend (PHP) akan langsung ter-update tanpa perlu reload halaman.
+                    --}}
                     <input
                         wire:model.live="searchUnit"
                         type="text"
@@ -264,16 +280,17 @@
                     <div class="unit-list">
                         @foreach($filteredUnits as $unit)
                             @php
-                                $statusClass = match($unit->status_penjualan) {
-                                    'Terjual'       => 'badge-terjual',
-                                    'Sudah DP'      => 'badge-dp',
-                                    default         => 'badge-belum',
-                                };
-                                $rowAccent = match($unit->status_penjualan) {
-                                    'Terjual'       => 'unit-row-green',
-                                    'Sudah DP'      => 'unit-row-amber',
-                                    default         => '',
-                                };
+                                // Menentukan warna badge (label status) & warna baris
+                                $statusClass = 'badge-belum'; // Nilai default
+                                $rowAccent   = '';            // Nilai default
+                                
+                                if ($unit->status_penjualan === 'Terjual') {
+                                    $statusClass = 'badge-terjual';
+                                    $rowAccent   = 'unit-row-green';
+                                } elseif ($unit->status_penjualan === 'Sudah DP') {
+                                    $statusClass = 'badge-dp';
+                                    $rowAccent   = 'unit-row-amber';
+                                }
                             @endphp
 
                             <div wire:key="unit-{{ $unit->id }}" class="unit-row {{ $rowAccent }}" id="unit-row-{{ $unit->id }}">
@@ -302,6 +319,11 @@
 
                                 {{-- Status dropdown + action --}}
                                 <div class="unit-row-actions">
+                                    {{-- 
+                                         TIPS LIVEWIRE:
+                                         - wire:change akan memanggil fungsi updateStatus() saat user memilih opsi lain.
+                                         - $event.target.value bertugas mengambil nilai dari opsi yang sedang diklik (misal: "Sudah DP").
+                                    --}}
                                     <select
                                         wire:change="updateStatus({{ $unit->id }}, $event.target.value)"
                                         class="unit-status-select {{ $statusClass }}"
@@ -320,6 +342,7 @@
                                     </select>
 
                                     @if(in_array($unit->status_penjualan, ['Sudah DP', 'Terjual']))
+                                        {{-- Klik tombol ini untuk memanggil openPaymentModal() di PHP --}}
                                         <button
                                             wire:click="openPaymentModal({{ $unit->id }})"
                                             id="detail-btn-{{ $unit->id }}"
@@ -351,6 +374,11 @@
     <div class="modal-overlay" id="payment-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div class="modal-backdrop" wire:click="closePaymentModal"></div>
         <div class="modal-panel modal-panel-wide">
+            {{-- 
+                 TIPS LIVEWIRE:
+                 wire:submit.prevent mencegah form melakukan reload halaman secara bawaan HTML (mirip event.preventDefault() di JS),
+                 lalu memanggil fungsi savePaymentDetails() di file PHP untuk menyimpan data.
+            --}}
             <form wire:submit.prevent="savePaymentDetails">
 
                 {{-- Modal Header --}}
