@@ -24,6 +24,11 @@ class Unit extends Model
         return $this->hasMany(LegalDocument::class, 'unit_id');
     }
 
+    public function installmentPayments()
+    {
+        return $this->hasMany(InstallmentPayment::class, 'unit_id');
+    }
+
     // ==========================================
     // RELASI TAMBAHAN (Construction & Block)
     // ==========================================

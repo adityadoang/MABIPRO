@@ -212,7 +212,6 @@ class MarketingDashboard extends Component
             'kpr_duration_months' => null,
             'amount_paid'         => null,
             'payment_proof_path'  => null,
-            'harga_unit'          => null,
             'kpr_type'            => null,
             'bank_name'           => null,
             'akad_date'           => null,
