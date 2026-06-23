@@ -58,6 +58,18 @@
                 <span class="material-symbols-outlined">receipt_long</span>
                 <span class="font-label-md text-label-md">Laporan Pembayaran</span>
             </a>
+
+            @if(Auth::user()->isMarketing() && !Auth::user()->isAdmin())
+            <form method="POST" action="{{ route('logout') }}" class="pt-2">
+                @csrf
+                <button type="submit"
+                        class="w-full text-left text-error hover:bg-error-container hover:text-on-error-container transition-all flex items-center gap-3 px-4 py-3 rounded-lg font-bold"
+                        id="nav-logout-marketing">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span class="font-label-md text-label-md">Logout</span>
+                </button>
+            </form>
+            @endif
             @endif
 
             @if(Auth::user()->isAdmin() || Auth::user()->isProduksi())
@@ -94,6 +106,7 @@
         </div>
 
         {{-- Logout --}}
+        @if(!Auth::user()->isMarketing() || Auth::user()->isAdmin())
         <div class="mt-auto space-y-2 pt-4 border-t border-outline-variant">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
@@ -105,6 +118,7 @@
                 </button>
             </form>
         </div>
+        @endif
     </nav>
 
     {{-- ══════════════════════════════════════════
@@ -167,6 +181,13 @@
             <span class="material-symbols-outlined" style="{{ request()->routeIs('marketing.payment.report') ? "font-variation-settings: 'FILL' 1;" : '' }}">receipt_long</span>
             <span class="text-[10px] mt-1 {{ request()->routeIs('marketing.payment.report') ? 'font-bold' : '' }}">Laporan</span>
         </a>
+        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form-mobile').submit();" class="flex flex-col items-center p-2 text-on-surface-variant hover:text-error">
+            <span class="material-symbols-outlined">logout</span>
+            <span class="text-[10px] mt-1">Logout</span>
+        </a>
+        <form id="logout-form-mobile" method="POST" action="{{ route('logout') }}" class="hidden" style="display: none;">
+            @csrf
+        </form>
     </nav>
 
     {{-- Sidebar Overlay (Mobile) --}}

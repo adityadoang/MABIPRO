@@ -138,6 +138,13 @@
             <span class="material-symbols-outlined" style="{{ request()->routeIs('admin.users.*') ? 'font-variation-settings: \'FILL\' 1;' : '' }}">group</span>
             <span class="font-label-sm text-[10px] mt-1 {{ request()->routeIs('admin.users.*') ? 'font-bold' : '' }}">Users</span>
         </a>
+        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form-admin-mobile').submit();" class="flex flex-col items-center p-2 text-on-surface-variant hover:text-error">
+            <span class="material-symbols-outlined">logout</span>
+            <span class="font-label-sm text-[10px] mt-1">Logout</span>
+        </a>
+        <form id="logout-form-admin-mobile" method="POST" action="{{ route('logout') }}" class="hidden" style="display: none;">
+            @csrf
+        </form>
     </nav>
 </body>
 </html>
