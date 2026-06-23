@@ -2,154 +2,158 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Laporan Progres - Unit {{ $unit->unit_number }}</title>
+    <title>Laporan Progress - {{ $unit->unit_number }}</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'Inter', Arial, sans-serif;
+            font-family: Arial, sans-serif;
             font-size: 12px;
-            line-height: 1.6;
-            color: #1F2937;
-            background-color: #F9FAFB;
+            line-height: 1.4;
         }
         
         .header {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            color: white;
-            padding: 30px;
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #10B981;
+            padding-bottom: 10px;
         }
         
         .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: 0.5px;
+            margin: 0;
+            color: #10B981;
+            font-size: 18px;
         }
         
         .header h2 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        
-        .header .date {
-            font-size: 11px;
-            opacity: 0.95;
-        }
-        
-        .section {
-            margin-bottom: 20px;
-            border: 1px solid #E5E7EB;
-            border-radius: 8px;
-            overflow: hidden;
-            background: white;
-        }
-        
-        .section-header {
-            background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
-            color: #065F46;
-            padding: 12px 20px;
-            font-weight: 600;
-            font-size: 13px;
-            border-bottom: 2px solid #10B981;
-        }
-        
-        .section-content {
-            padding: 20px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        table tr {
-            border-bottom: 1px solid #E5E7EB;
-        }
-        
-        table tr:last-child {
-            border-bottom: none;
-        }
-        
-        table td {
-            padding: 10px 15px;
-            vertical-align: top;
-        }
-        
-        table td:first-child {
-            width: 35%;
-            font-weight: 600;
+            margin: 5px 0;
             color: #374151;
-            background-color: #F9FAFB;
+            font-size: 14px;
         }
         
-        table td:last-child {
-            color: #1F2937;
+        .unit-info {
+            background-color: #ECFDF5;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .unit-info table {
+            width: 100%;
+        }
+        
+        .unit-info td {
+            padding: 5px;
+        }
+        
+        .unit-info strong {
+            color: #047857;
+        }
+        
+        .section-title {
+            background-color: #10B981;
+            color: white;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 20px 0 10px 0;
+            border-radius: 3px;
         }
         
         .progress-item {
-            margin-bottom: 15px;
             border: 1px solid #E5E7EB;
-            border-radius: 6px;
-            overflow: hidden;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            page-break-inside: avoid;
         }
         
-        .progress-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .progress-header {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            color: white;
-            padding: 10px 15px;
-            font-weight: 600;
-            font-size: 13px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .progress-percentage {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 2px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-        
-        .progress-content {
-            padding: 12px 15px;
+        .progress-item-header {
             background-color: #F9FAFB;
+            padding: 5px;
+            margin: -10px -10px 10px -10px;
+            border-bottom: 1px solid #E5E7EB;
         }
         
-        .progress-content p {
-            margin-bottom: 6px;
-            font-size: 11px;
+        .progress-item-header h3 {
+            margin: 0;
+            color: #10B981;
+            font-size: 13px;
         }
         
-        .progress-content strong {
-            color: #065F46;
+        .progress-item table {
+            width: 100%;
         }
         
-        .progress-content .label {
+        .progress-item td {
+            padding: 4px;
+            vertical-align: top;
+        }
+        
+        .progress-item .label {
+            font-weight: bold;
             color: #6B7280;
+            width: 100px;
+        }
+        
+        .progress-item .value {
+            color: #111827;
+        }
+        
+        .photo-placeholder {
+            background-color: #ECFDF5;
+            border: 2px dashed #10B981;
+            text-align: center;
+            padding: 20px;
+            color: #6B7280;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        
+        .photo-container {
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .photo-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #E5E7EB;
+        }
+        
+        .signature-section {
+            margin-top: 30px;
+            display: table;
+            width: 100%;
+        }
+        
+        .signature-box {
+            display: table-cell;
+            width: 50%;
+            text-align: center;
+            vertical-align: top;
+        }
+        
+        .signature-line {
+            margin-top: 60px;
+            border-top: 1px solid #374151;
+            padding-top: 5px;
+            font-weight: bold;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            text-align: center;
             font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: #6B7280;
+            border-top: 1px solid #E5E7EB;
+            padding-top: 10px;
         }
         
         .badge {
             display: inline-block;
-            padding: 3px 10px;
-            border-radius: 4px;
+            padding: 3px 8px;
+            border-radius: 3px;
             font-size: 11px;
-            font-weight: 600;
+            font-weight: bold;
         }
         
         .badge-success {
@@ -162,178 +166,137 @@
             color: #92400E;
         }
         
-        .photo-box {
-            margin-top: 10px;
-            padding: 10px;
-            border: 2px dashed #D1FAE5;
-            background-color: #ECFDF5;
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #E5E7EB;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #10B981;
             text-align: center;
-            border-radius: 4px;
-        }
-        
-        .photo-box img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 4px;
-        }
-        
-        .photo-placeholder {
-            color: #6B7280;
-            font-style: italic;
+            color: white;
             font-size: 11px;
-        }
-        
-        .footer {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #D1FAE5;
-            text-align: center;
-            font-size: 10px;
-            color: #6B7280;
-        }
-        
-        .text-center {
-            text-align: center;
-        }
-        
-        .text-right {
-            text-align: right;
+            line-height: 20px;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
+    {{-- Header --}}
     <div class="header">
-        <h1>LAPORAN PROGRES PEMBANGUNAN</h1>
-        <h2>UNIT {{ strtoupper($unit->unit_number) }} // {{ strtoupper($unit->block->nama_blok) }}</h2>
-        <div class="date">
-            TANGGAL CETAK: {{ strtoupper(now()->format('d F Y // H:i')) }} WIB
-        </div>
+        <h1>MABIPRO - Property Management</h1>
+        <h2>Laporan Progress Konstruksi</h2>
     </div>
 
-    <!-- Informasi Unit -->
-    <div class="section">
-        <div class="section-header">INFORMASI UNIT</div>
-        <div class="section-content">
-            <table>
-                <tr>
-                    <td>NOMOR UNIT</td>
-                    <td>{{ $unit->unit_number }}</td>
-                </tr>
-                <tr>
-                    <td>BLOK</td>
-                    <td>{{ $unit->block->nama_blok }}</td>
-                </tr>
-                <tr>
-                    <td>STATUS PENJUALAN</td>
-                    <td>
-                        <span class="badge badge-success">{{ strtoupper($unit->status_penjualan) }}</span>
-                    </td>
-                </tr>
-                <tr>
-                    <td>PROGRES TOTAL</td>
-                    <td><strong style="color: #10B981; font-size: 16px;">{{ $unit->progres_pembangunan }}%</strong></td>
-                </tr>
-                <tr>
-                    <td>STATUS LEGALITAS</td>
-                    <td>
-                        <span class="badge badge-warning">{{ strtoupper($unit->status_legalitas ?? 'BELUM LENGKAP') }}</span>
-                    </td>
-                </tr>
-            </table>
-        </div>
+    {{-- Unit Information --}}
+    <div class="unit-info">
+        <table>
+            <tr>
+                <td><strong>Nomor Unit</strong></td>
+                <td>: {{ $unit->unit_number }}</td>
+                <td><strong>Blok</strong></td>
+                <td>: {{ $unit->block->nama_blok ?? '-' }}</td>
+            </tr>
+            <tr>
+                <td><strong>Status Penjualan</strong></td>
+                <td>: 
+                    <span class="badge {{ $unit->status_penjualan == 'Terjual' ? 'badge-success' : 'badge-warning' }}">
+                        {{ $unit->status_penjualan ?? 'Belum Terjual' }}
+                    </span>
+                </td>
+                <td><strong>Status Legalitas</strong></td>
+                <td>: {{ $unit->status_legalitas ?? 'Belum Lengkap' }}</td>
+            </tr>
+            <tr>
+                <td><strong>Total Progress</strong></td>
+                <td colspan="3">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ $unit->progres_pembangunan }}%">
+                            {{ $unit->progres_pembangunan }}%
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
     </div>
 
-    <!-- Detail Progress Per Tahap -->
-    <div class="section">
-        <div class="section-header">DETAIL PROGRESS PER TAHAP</div>
-        <div class="section-content">
-            @php
-                $chartData = $unit->constructionProgress()
-                    ->select('tahap', \DB::raw('MAX(persentase) as persentase'))
-                    ->groupBy('tahap')
-                    ->orderBy('persentase', 'desc')
-                    ->get();
-            @endphp
-            
-            @forelse($chartData as $progress)
-                @php
-                    $latestLog = $unit->constructionProgress()
-                        ->where('tahap', $progress->tahap)
-                        ->orderBy('created_at', 'desc')
-                        ->first();
-                @endphp
-                
-                <div class="progress-item">
-                    <div class="progress-header">
-                        <span>{{ strtoupper($progress->tahap) }}</span>
-                        <span class="progress-percentage">{{ $progress->persentase }}%</span>
-                    </div>
-                    <div class="progress-content">
-                        @if($latestLog)
-                            <p><span class="label">Catatan:</span> {{ $latestLog->catatan ?? '-' }}</p>
-                            <p><span class="label">Tanggal:</span> {{ $latestLog->created_at->format('d.m.Y // H:i') }}</p>
-                            <p><span class="label">Petugas:</span> {{ strtoupper($latestLog->updater->name ?? 'TIM PRODUKSI') }}</p>
-                            
-                            @if($latestLog->photos->count() > 0)
-                                <div class="photo-box">
-                                    <p class="label" style="margin-bottom: 8px;">DOKUMENTASI:</p>
-                                    @foreach($latestLog->photos as $photo)
-                                        <img src="{{ public_path('storage/' . $photo->file_path) }}" alt="Foto Progress">
-                                    @endforeach
-                                </div>
-                            @else
-                                <div class="photo-box">
-                                    <p class="photo-placeholder">Foto progress</p>
-                                </div>
-                            @endif
-                        @else
-                            <p><span class="label">Catatan:</span> -</p>
-                            <p><span class="label">Tanggal:</span> -</p>
-                            <p><span class="label">Petugas:</span> -</p>
-                        @endif
-                    </div>
+    {{-- Construction History --}}
+    <div class="section-title">RIWAYAT KONSTRUKSI</div>
+    
+    @if($progressHistory->count() > 0)
+        @foreach($progressHistory as $progress)
+            <div class="progress-item">
+                <div class="progress-item-header">
+                    <h3>{{ $progress->tahap }} - {{ $progress->persentase }}%</h3>
                 </div>
-            @empty
-                <p class="text-center" style="color: #6B7280; padding: 20px;">Belum ada data progress</p>
-            @endforelse
+                <table>
+                    <tr>
+                        <td class="label">CATATAN</td>
+                        <td class="value">: {{ $progress->catatan ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">TANGGAL</td>
+                        <td class="value">: {{ $progress->created_at->format('d.m.Y // H:i') }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">PETUGAS</td>
+                        <td class="value">: {{ $progress->updater->name ?? 'ADMIN' }}</td>
+                    </tr>
+                    @if($progress->photos->count() > 0)
+                        <tr>
+                            <td class="label">FOTO</td>
+                            <td class="value">
+                                @foreach($progress->photos as $photo)
+                                    <div class="photo-container">
+                                        <img src="{{ public_path('storage/' . $photo->file_path) }}" alt="Progress Photo">
+                                        @if($photo->keterangan)
+                                            <p style="font-size: 10px; margin: 5px 0; color: #6B7280;">{{ $photo->keterangan }}</p>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </td>
+                        </tr>
+                    @else
+                        <tr>
+                            <td class="label">FOTO</td>
+                            <td class="value">
+                                <div class="photo-placeholder">Foto progress</div>
+                            </td>
+                        </tr>
+                    @endif
+                </table>
+            </div>
+        @endforeach
+    @else
+        <p style="text-align: center; color: #6B7280; padding: 20px;">Belum ada riwayat konstruksi</p>
+    @endif
+
+    {{-- Signature Section --}}
+    <div class="signature-section">
+        <div class="signature-box">
+            <div>Diketahui Oleh,</div>
+            <div class="signature-line">
+                ( ............................. )<br>
+                <span style="font-size: 11px;">Project Manager</span>
+            </div>
+        </div>
+        <div class="signature-box">
+            <div>Dibuat Oleh,</div>
+            <div class="signature-line">
+                ( {{ auth()->user()->name ?? 'ADMIN' }} )<br>
+                <span style="font-size: 11px;">{{ now()->format('d F Y') }}</span>
+            </div>
         </div>
     </div>
 
-    <!-- Construction Log -->
-    <div class="section">
-        <div class="section-header">RIWAYAT KONSTRUKSI</div>
-        <div class="section-content">
-            @php
-                $allLogs = $unit->constructionProgress()
-                    ->with(['updater', 'photos'])
-                    ->orderBy('created_at', 'desc')
-                    ->take(10)
-                    ->get();
-            @endphp
-            
-            @forelse($allLogs as $log)
-                <div class="progress-item">
-                    <div class="progress-header" style="background: linear-gradient(135deg, #34D399 0%, #10B981 100%);">
-                        <span>{{ strtoupper($log->tahap) }}</span>
-                        <span class="progress-percentage">{{ $log->persentase }}%</span>
-                    </div>
-                    <div class="progress-content">
-                        <p><span class="label">Catatan:</span> {{ $log->catatan ?? '-' }}</p>
-                        <p><span class="label">Tanggal:</span> {{ $log->created_at->format('d.m.Y // H:i') }}</p>
-                        <p><span class="label">Petugas:</span> {{ strtoupper($log->updater->name ?? 'TIM PRODUKSI') }}</p>
-                    </div>
-                </div>
-            @empty
-                <p class="text-center" style="color: #6B7280; padding: 20px;">Belum ada riwayat konstruksi</p>
-            @endforelse
-        </div>
-    </div>
-
-    <!-- Footer -->
+    {{-- Footer --}}
     <div class="footer">
         <p>Laporan ini dibuat secara otomatis oleh sistem MABIPRO</p>
-        <p>Property Management System</p>
+        <p>Dicetak pada: {{ now()->format('d F Y H:i') }} WIB</p>
     </div>
 </body>
 </html>
