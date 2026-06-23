@@ -1,4 +1,4 @@
-@extends('layouts.production')
+@extends('layouts.app')
 
 @section('title', 'Production Dashboard')
 
