@@ -9,6 +9,7 @@ use App\Http\Controllers\ProductionController;
 use App\Http\Controllers\UnitController;
 use App\Livewire\MarketingDashboard;
 use App\Livewire\PaymentReport;
+use App\Livewire\LegalitasDashboard;
 use Illuminate\Support\Facades\Route;
 
 // ============================================================
@@ -40,17 +41,18 @@ Route::middleware('auth')->prefix('marketing')->name('marketing.')->group(functi
 });
 
 // ============================================================
-// LEGALITAS ROUTES (dari pasha)
+// LEGALITAS ROUTES
 // ============================================================
 
 Route::middleware('auth')->prefix('legalitas')->name('legalitas.')->group(function () {
     Route::get('/', function () { return redirect()->route('legalitas.dashboard'); });
-    Route::get('/dashboard', [LegalitasController::class, 'index'])->name('dashboard');
-    Route::post('/upload/{unit_id}', [LegalitasController::class, 'upload'])->name('upload');
+
+    // Dashboard — dihandle oleh Livewire (upload, delete, markAsComplete ada di dalam komponen)
+    Route::get('/dashboard', LegalitasDashboard::class)->name('dashboard');
+
+    // Download & Preview tetap di controller karena mengembalikan file binary response
     Route::get('/download/{document_id}', [LegalitasController::class, 'download'])->name('download');
-    Route::get('/preview/{document_id}', [LegalitasController::class, 'preview'])->name('preview');
-    Route::post('/complete/{unit_id}', [LegalitasController::class, 'markAsComplete'])->name('complete');
-    Route::delete('/document/{document_id}', [LegalitasController::class, 'destroy'])->name('document.destroy');
+    Route::get('/preview/{document_id}',  [LegalitasController::class, 'preview'])->name('preview');
 });
 
 // ============================================================

@@ -19,7 +19,7 @@
          SIDEBAR (Desktop) — matches admin layout
     ══════════════════════════════════════════ --}}
     <nav class="bg-surface-container-low dark:bg-primary-container text-secondary dark:text-secondary-fixed border-r border-outline-variant dark:border-outline fixed left-0 top-0 h-screen flex flex-col p-4 space-y-2 z-50 w-72 md:flex hidden"
-         id="sidebar" role="navigation" aria-label="Marketing navigation">
+         id="sidebar" role="navigation" aria-label="Main navigation">
 
         {{-- Logo / User Area --}}
         <div class="mb-8">
@@ -84,6 +84,17 @@
                 <span class="material-symbols-outlined">description</span>
                 <span class="font-label-md text-label-md">Legality</span>
             </a>
+            @if(Auth::user()->isLegalitas() && !Auth::user()->isAdmin())
+            <form method="POST" action="{{ route('logout') }}" class="pt-2">
+                @csrf
+                <button type="submit"
+                        class="w-full text-left text-error hover:bg-error-container hover:text-on-error-container transition-all flex items-center gap-3 px-4 py-3 rounded-lg font-bold"
+                        id="nav-logout-legalitas">
+                    <span class="material-symbols-outlined">logout</span>
+                    <span class="font-label-md text-label-md">Logout</span>
+                </button>
+            </form>
+            @endif
             @endif
 
             @if(Auth::user()->isAdmin())
@@ -105,8 +116,8 @@
 
         </div>
 
-        {{-- Logout --}}
-        @if(!Auth::user()->isMarketing() || Auth::user()->isAdmin())
+        {{-- Logout (Admin & Produksi only — Marketing & Legalitas have their own inline logout) --}}
+        @if(Auth::user()->isAdmin() || Auth::user()->isProduksi())
         <div class="mt-auto space-y-2 pt-4 border-t border-outline-variant">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
@@ -171,6 +182,18 @@
          MOBILE BOTTOM NAV
     ══════════════════════════════════════════ --}}
     <nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface border-t border-outline-variant flex justify-around p-2 z-50">
+
+        {{-- Admin: Overview --}}
+        @if(Auth::user()->isAdmin())
+        <a class="flex flex-col items-center p-2 {{ request()->routeIs('admin.dashboard') ? 'text-primary' : 'text-on-surface-variant hover:text-primary' }}"
+           href="{{ route('admin.dashboard') }}">
+            <span class="material-symbols-outlined" style="{{ request()->routeIs('admin.dashboard') ? "font-variation-settings: 'FILL' 1;" : '' }}">dashboard</span>
+            <span class="text-[10px] mt-1 {{ request()->routeIs('admin.dashboard') ? 'font-bold' : '' }}">Overview</span>
+        </a>
+        @endif
+
+        {{-- Admin / Marketing: Marketing & Laporan --}}
+        @if(Auth::user()->isAdmin() || Auth::user()->isMarketing())
         <a class="flex flex-col items-center p-2 {{ request()->routeIs('marketing.dashboard') ? 'text-primary' : 'text-on-surface-variant hover:text-primary' }}"
            href="{{ route('marketing.dashboard') }}">
             <span class="material-symbols-outlined" style="{{ request()->routeIs('marketing.dashboard') ? "font-variation-settings: 'FILL' 1;" : '' }}">trending_up</span>
@@ -181,6 +204,27 @@
             <span class="material-symbols-outlined" style="{{ request()->routeIs('marketing.payment.report') ? "font-variation-settings: 'FILL' 1;" : '' }}">receipt_long</span>
             <span class="text-[10px] mt-1 {{ request()->routeIs('marketing.payment.report') ? 'font-bold' : '' }}">Laporan</span>
         </a>
+        @endif
+
+        {{-- Admin / Produksi: Production --}}
+        @if(Auth::user()->isAdmin() || Auth::user()->isProduksi())
+        <a class="flex flex-col items-center p-2 {{ request()->routeIs('production.*') ? 'text-primary' : 'text-on-surface-variant hover:text-primary' }}"
+           href="{{ route('production.dashboard') }}">
+            <span class="material-symbols-outlined" style="{{ request()->routeIs('production.*') ? "font-variation-settings: 'FILL' 1;" : '' }}">construction</span>
+            <span class="text-[10px] mt-1 {{ request()->routeIs('production.*') ? 'font-bold' : '' }}">Production</span>
+        </a>
+        @endif
+
+        {{-- Admin / Legalitas: Legality --}}
+        @if(Auth::user()->isAdmin() || Auth::user()->isLegalitas())
+        <a class="flex flex-col items-center p-2 {{ request()->routeIs('legalitas.*') ? 'text-primary' : 'text-on-surface-variant hover:text-primary' }}"
+           href="{{ route('legalitas.dashboard') }}">
+            <span class="material-symbols-outlined" style="{{ request()->routeIs('legalitas.*') ? "font-variation-settings: 'FILL' 1;" : '' }}">description</span>
+            <span class="text-[10px] mt-1 {{ request()->routeIs('legalitas.*') ? 'font-bold' : '' }}">Legality</span>
+        </a>
+        @endif
+
+        {{-- Logout always visible --}}
         <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form-mobile').submit();" class="flex flex-col items-center p-2 text-on-surface-variant hover:text-error">
             <span class="material-symbols-outlined">logout</span>
             <span class="text-[10px] mt-1">Logout</span>
