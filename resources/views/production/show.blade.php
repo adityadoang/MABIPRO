@@ -1,5 +1,4 @@
-@extends('layouts.admin')
-
+@extends('layouts.production')
 @section('title', 'Unit ' . $unit->unit_number)
 
 @section('content')
