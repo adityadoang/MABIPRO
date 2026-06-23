@@ -13,12 +13,14 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="bg-surface text-on-surface flex h-screen overflow-hidden font-body-md">
+<body class="bg-surface text-on-surface flex h-screen overflow-hidden font-body-md" x-data="{ sidebarOpen: false }">
+
 
     {{-- ══════════════════════════════════════════
          SIDEBAR (Desktop) — matches admin layout
     ══════════════════════════════════════════ --}}
-    <nav class="bg-surface-container-low dark:bg-primary-container text-secondary dark:text-secondary-fixed border-r border-outline-variant dark:border-outline fixed left-0 top-0 h-screen flex flex-col p-4 space-y-2 z-50 w-72 md:flex hidden"
+    <nav class="bg-surface-container-low dark:bg-primary-container text-secondary dark:text-secondary-fixed border-r border-outline-variant dark:border-outline fixed left-0 top-0 h-[100dvh] flex flex-col p-4 space-y-2 z-50 w-72 max-w-[85vw] md:flex"
+         x-bind:class="sidebarOpen ? 'flex' : 'hidden'"
          id="sidebar" role="navigation" aria-label="Marketing navigation">
 
         {{-- Logo / User Area --}}
@@ -58,18 +60,6 @@
                 <span class="material-symbols-outlined">receipt_long</span>
                 <span class="font-label-md text-label-md">Laporan Pembayaran</span>
             </a>
-
-            @if(Auth::user()->isMarketing() && !Auth::user()->isAdmin())
-            <form method="POST" action="{{ route('logout') }}" class="pt-2">
-                @csrf
-                <button type="submit"
-                        class="w-full text-left text-error hover:bg-error-container hover:text-on-error-container transition-all flex items-center gap-3 px-4 py-3 rounded-lg font-bold"
-                        id="nav-logout-marketing">
-                    <span class="material-symbols-outlined">logout</span>
-                    <span class="font-label-md text-label-md">Logout</span>
-                </button>
-            </form>
-            @endif
             @endif
 
             @if(Auth::user()->isAdmin() || Auth::user()->isProduksi())
@@ -106,8 +96,7 @@
         </div>
 
         {{-- Logout --}}
-        @if(!Auth::user()->isMarketing() || Auth::user()->isAdmin())
-        <div class="mt-auto space-y-2 pt-4 border-t border-outline-variant">
+        <div class="mt-auto space-y-2 pt-4 border-t border-outline-variant shrink-0">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit"
@@ -118,18 +107,17 @@
                 </button>
             </form>
         </div>
-        @endif
     </nav>
 
     {{-- ══════════════════════════════════════════
          MAIN CONTENT
     ══════════════════════════════════════════ --}}
-    <main class="flex-1 ml-0 md:ml-72 flex flex-col h-screen overflow-y-auto bg-surface-bright pb-24 md:pb-0">
+    <main class="flex-1 ml-0 md:ml-72 flex flex-col h-[100dvh] overflow-y-auto bg-surface-bright">
 
         {{-- Mobile Header --}}
         <header class="md:hidden bg-surface border-b border-outline-variant p-4 flex justify-between items-center sticky top-0 z-40">
             <h1 class="font-headline-md text-headline-md font-bold text-primary">MABIPRO</h1>
-            <button id="sidebar-mobile-btn" class="text-on-surface-variant p-2 rounded-full hover:bg-surface-container" aria-label="Toggle menu">
+            <button id="sidebar-mobile-btn" @click="sidebarOpen = !sidebarOpen" class="text-on-surface-variant p-2 rounded-full hover:bg-surface-container" aria-label="Toggle menu">
                 <span class="material-symbols-outlined">menu</span>
             </button>
         </header>
@@ -167,53 +155,9 @@
         </footer>
     </main>
 
-    {{-- ══════════════════════════════════════════
-         MOBILE BOTTOM NAV
-    ══════════════════════════════════════════ --}}
-    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface border-t border-outline-variant flex justify-around p-2 z-50">
-        <a class="flex flex-col items-center p-2 {{ request()->routeIs('marketing.dashboard') ? 'text-primary' : 'text-on-surface-variant hover:text-primary' }}"
-           href="{{ route('marketing.dashboard') }}">
-            <span class="material-symbols-outlined" style="{{ request()->routeIs('marketing.dashboard') ? "font-variation-settings: 'FILL' 1;" : '' }}">trending_up</span>
-            <span class="text-[10px] mt-1 {{ request()->routeIs('marketing.dashboard') ? 'font-bold' : '' }}">Marketing</span>
-        </a>
-        <a class="flex flex-col items-center p-2 {{ request()->routeIs('marketing.payment.report') ? 'text-primary' : 'text-on-surface-variant hover:text-primary' }}"
-           href="{{ route('marketing.payment.report') }}">
-            <span class="material-symbols-outlined" style="{{ request()->routeIs('marketing.payment.report') ? "font-variation-settings: 'FILL' 1;" : '' }}">receipt_long</span>
-            <span class="text-[10px] mt-1 {{ request()->routeIs('marketing.payment.report') ? 'font-bold' : '' }}">Laporan</span>
-        </a>
-        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form-mobile').submit();" class="flex flex-col items-center p-2 text-on-surface-variant hover:text-error">
-            <span class="material-symbols-outlined">logout</span>
-            <span class="text-[10px] mt-1">Logout</span>
-        </a>
-        <form id="logout-form-mobile" method="POST" action="{{ route('logout') }}" class="hidden" style="display: none;">
-            @csrf
-        </form>
-    </nav>
-
     {{-- Sidebar Overlay (Mobile) --}}
-    <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black/40 z-40 md:hidden"></div>
+    <div id="sidebar-overlay" x-show="sidebarOpen" @click="sidebarOpen = false" x-transition.opacity class="fixed inset-0 bg-black/40 z-40 md:hidden" style="display: none;"></div>
 
     @livewireScripts
-
-    <script>
-        // Mobile sidebar toggle
-        const sidebarEl  = document.getElementById('sidebar');
-        const overlayEl  = document.getElementById('sidebar-overlay');
-        const mobileBtn  = document.getElementById('sidebar-mobile-btn');
-
-        function openSidebar() {
-            sidebarEl?.classList.remove('hidden');
-            sidebarEl?.classList.add('flex');
-            overlayEl?.classList.remove('hidden');
-        }
-        function closeSidebar() {
-            sidebarEl?.classList.add('hidden');
-            sidebarEl?.classList.remove('flex');
-            overlayEl?.classList.add('hidden');
-        }
-
-        mobileBtn?.addEventListener('click', openSidebar);
-        overlayEl?.addEventListener('click', closeSidebar);
-    </script>
 </body>
 </html>
