@@ -62,6 +62,7 @@ Route::middleware('auth')->prefix('legalitas')->name('legalitas.')->group(functi
 Route::middleware('auth')->prefix('production')->name('production.')->group(function () {
     Route::get('/', function () { return redirect()->route('production.dashboard'); });
     Route::get('/dashboard', [ProductionController::class, 'index'])->name('dashboard');
+    
     Route::get('/{id}', [ProductionController::class, 'show'])->name('show');
     Route::get('/{id}/edit', [ProductionController::class, 'edit'])->name('edit');
     Route::put('/{id}/update', [ProductionController::class, 'updateProgress'])->name('update');
