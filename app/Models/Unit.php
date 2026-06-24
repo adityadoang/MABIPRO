@@ -12,13 +12,30 @@ class Unit extends Model
     protected $fillable = [
         'block_id',
         'unit_number',
+        'customer_name',
+        'customer_phone',
         'status_penjualan',
         'progres_pembangunan',
         'status_legalitas',
-        // ... field lain yang ada di tabel units
+        'tanggal_akhir_progres',
+        'payment_method',
+        'kpr_duration_months',
+        'amount_paid',
+        'payment_proof_path',
+        'harga_unit',
+        'kpr_type',
+        'bank_name',
+        'akad_date',
+        'dp_amount',
+        'dp_percentage',
+        'pokok_kredit',
+        'interest_rate',
+        'interest_type',
+        'monthly_installment',
+        'luas_tanah',
+        'luas_bangunan',
     ];
 
-    // Relasi lain yang sudah ada sebelumnya
     public function legalDocuments()
     {
         return $this->hasMany(LegalDocument::class, 'unit_id');
@@ -29,9 +46,6 @@ class Unit extends Model
         return $this->hasMany(InstallmentPayment::class, 'unit_id');
     }
 
-    // ==========================================
-    // RELASI TAMBAHAN (Construction & Block)
-    // ==========================================
 
     public function constructionProgress()
     {
@@ -53,10 +67,10 @@ class Unit extends Model
         return $this->hasOneThrough(
             ProgressPhoto::class,
             ConstructionProgress::class,
-            'unit_id',           // Foreign key di construction_progress
-            'progress_id',       // Foreign key di progress_photos
-            'id',                // Local key di units
-            'id'                 // Local key di construction_progress
+            'unit_id',          
+            'progress_id',       
+            'id',                //unit
+            'id'                 //construction
         )->latestOfMany();
     }
 }

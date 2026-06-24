@@ -16,14 +16,6 @@ use Illuminate\Support\Facades\Route;
 // PUBLIC ROUTES
 // ============================================================
 
-Route::get('/setup-storage', function() {
-    try {
-        \Illuminate\Support\Facades\Artisan::call('storage:link');
-        return 'Sukses: Storage link berhasil dibuat! Silakan refresh halaman bukti pembayaran Anda.';
-    } catch (\Exception $e) {
-        return 'Gagal: ' . $e->getMessage();
-    }
-});
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -33,7 +25,6 @@ Route::get('/', function () {
             'legalitas' => redirect()->route('legalitas.dashboard'),
             'produksi' => redirect()->route('production.dashboard'),
             'marketing' => redirect()->route('marketing.dashboard'),
-            default => redirect()->route('marketing.dashboard'),
         };
     }
     return redirect()->route('login');
@@ -47,6 +38,8 @@ Route::middleware('auth')->prefix('marketing')->name('marketing.')->group(functi
     Route::get('/', function () { return redirect()->route('marketing.dashboard'); });
     Route::get('/dashboard', MarketingDashboard::class)->name('dashboard');
     Route::get('/laporan-pembayaran', PaymentReport::class)->name('payment.report');
+
+
 });
 
 // ============================================================

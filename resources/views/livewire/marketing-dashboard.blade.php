@@ -97,9 +97,9 @@
             <div class="blocks-list">
                 @forelse($blocks as $block)
                     @php
-                        $blockTotal   = $block->units->count();
-                        $blockTerjual = $block->units->where('status_penjualan', 'Terjual')->count();
-                        $blockDp      = $block->units->where('status_penjualan', 'Sudah DP')->count();
+                        $blockTotal   = $block->units_count ?? 0;
+                        $blockTerjual = $block->units_terjual_count ?? 0;
+                        $blockDp      = $block->units_dp_count ?? 0;
                         $blockSold    = $blockTerjual + $blockDp;
                         $blockPct     = $blockTotal > 0 ? round(($blockTerjual / $blockTotal) * 100) : 0;
                         $isActive     = $selectedBlockId == $block->id;
@@ -191,7 +191,7 @@
                               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                     <input
-                        wire:model.live="searchUnit"
+                        wire:model.live.debounce.300ms="searchUnit"
                         type="text"
                         placeholder="Search Unit ID..."
                         class="unit-search-input"
@@ -429,6 +429,21 @@
                                 </div>
                             </div>
                         </div>
+                    @elseif($paymentMethod === 'Cash')
+                        <div class="form-section mt-4">
+                            <div class="form-section-title">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                Informasi Pembayaran Cash
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="cash-amount">Jumlah Dibayar (Rp) <span class="required-mark">*</span></label>
+                                <div class="input-with-addon bg-surface-container opacity-70">
+                                    <span class="input-addon">Rp</span>
+                                    <input id="cash-amount" type="number" wire:model.live="amountPaid" class="form-input" readonly disabled>
+                                </div>
+                                <p class="form-note">Untuk pembayaran Cash, jumlah dibayar otomatis disesuaikan dengan Harga Unit.</p>
+                            </div>
+                        </div>
                     @endif
                     @if($paymentMethod)
                     <div class="form-group">
@@ -458,7 +473,7 @@
                         @if($unitTemp && $unitTemp->payment_proof_path)
                             <div class="existing-file">
                                 <p class="existing-file-label">Bukti Terlampir:</p>
-                                <a href="{{ Storage::url($unitTemp->payment_proof_path) }}" target="_blank" class="existing-file-link">
+                                <a href="{{ asset('storage/' . $unitTemp->payment_proof_path) }}" target="_blank" class="existing-file-link">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -486,6 +501,7 @@
     </div>
     @endif
 </div>
+@push('styles')
 <style>
 /* ── Wrapper ── */
 .dashboard-wrapper {
@@ -1152,3 +1168,4 @@
 /* sr-only */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
 </style>
+@endpush

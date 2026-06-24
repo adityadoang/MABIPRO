@@ -4,7 +4,6 @@ use Livewire\Component;
 use App\Models\Block;
 use App\Models\Unit;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Computed;
 use Livewire\WithFileUploads;
 #[Layout('layouts.app')] 
 class MarketingDashboard extends Component
@@ -102,7 +101,9 @@ class MarketingDashboard extends Component
         $paid  = (float) ($this->amountPaid ?? 0);
         $n     = (int)   ($this->kprDurationMonths ?? 0); 
         if ($this->paymentMethod === 'Cash') {
-            $this->sisaTagihan = max(0, $harga - $paid);
+            $this->amountPaid = $harga;
+            $paid = $harga;
+            $this->sisaTagihan = 0;
         }
         $pokok = max(0, $harga - $dp);
         $this->pokokKredit = $pokok;
@@ -129,12 +130,12 @@ class MarketingDashboard extends Component
         $this->closePaymentModal();
         session()->flash('message', "Detail pembayaran unit {$unit->unit_number} berhasil disimpan.");
     }
-    public function getStatsProperty(): array
+    public function getStatsProperty($blocks): array
     {
-        $total    = Unit::count();
-        $terjual  = Unit::where('status_penjualan', 'Terjual')->count();
-        $sudahDp  = Unit::where('status_penjualan', 'Sudah DP')->count();
-        $belum    = Unit::where('status_penjualan', 'Belum Terjual')->count();
+        $total    = $blocks->sum('units_count');
+        $terjual  = $blocks->sum('units_terjual_count');
+        $sudahDp  = $blocks->sum('units_dp_count');
+        $belum    = $total - $terjual - $sudahDp;
         return [
             'total'       => $total,
             'terjual'     => $terjual,
@@ -163,12 +164,18 @@ class MarketingDashboard extends Component
                 'dpPercentage'      => 'required|numeric|min:0|max:100',
                 'kprDurationMonths' => 'required|integer|min:12|max:360',
             ]);
+        } elseif ($this->paymentMethod === 'Cash') {
+            $rules = array_merge($rules, [
+                'amountPaid' => 'required|numeric|min:0',
+            ]);
         }
         $this->validate($rules);
     }
     private function saveKprData(Unit $unit, ?string $path)
     {
+        $status = ($this->dpAmount >= $this->hargaUnit) ? 'Terjual' : 'Sudah DP';
         $unit->update([
+            'status_penjualan'    => $status,
             'payment_method'      => 'KPR',
             'amount_paid'         => $this->dpAmount, 
             'payment_proof_path'  => $path,
@@ -187,9 +194,11 @@ class MarketingDashboard extends Component
     }
     private function saveCashData(Unit $unit, ?string $path)
     {
+        $status = ($this->amountPaid >= $this->hargaUnit) ? 'Terjual' : 'Sudah DP';
         $unit->update([
+            'status_penjualan'    => $status,
             'payment_method'      => 'Cash',
-            'amount_paid'         => $this->hargaUnit, 
+            'amount_paid'         => $this->amountPaid, 
             'payment_proof_path'  => $path,
             'harga_unit'          => $this->hargaUnit,
             'kpr_type'            => null,
@@ -225,7 +234,7 @@ class MarketingDashboard extends Component
     }
     public function render()
     {
-        $blocks = Block::with('units')->get();
+        $blocks = Block::withCount(['units', 'unitsTerjual', 'unitsDp'])->get();
         $selectedBlock = null;
         $filteredUnits = collect(); 
         if ($this->selectedBlockId) {
@@ -236,8 +245,7 @@ class MarketingDashboard extends Component
                     $kataKunci = '%' . strtolower($this->searchUnit) . '%';
                     $query->where(function($q) use ($kataKunci) {
                         $q->where('unit_number', 'like', $kataKunci)
-                          ->orWhere('tipe_unit', 'like', $kataKunci)
-                          ->orWhere('facing', 'like', $kataKunci);
+                          ->orWhere('customer_name', 'like', $kataKunci);
                     });
                 }
                 $filteredUnits = $query->get();
@@ -247,7 +255,7 @@ class MarketingDashboard extends Component
             'blocks'        => $blocks,
             'selectedBlock' => $selectedBlock,
             'filteredUnits' => $filteredUnits,
-            'stats'         => $this->getStatsProperty(),
+            'stats'         => $this->getStatsProperty($blocks),
         ]);
     }
 }

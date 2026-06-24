@@ -16,9 +16,18 @@ class Block extends Model
         'status',
     ];
 
-    // Relasi: Blok ini punya banyak unit
     public function units(): HasMany
     {
         return $this->hasMany(Unit::class);
+    }
+
+    public function unitsTerjual(): HasMany
+    {
+        return $this->hasMany(Unit::class)->where('status_penjualan', 'Terjual');
+    }
+
+    public function unitsDp(): HasMany
+    {
+        return $this->hasMany(Unit::class)->where('status_penjualan', 'Sudah DP');
     }
 }

@@ -13,6 +13,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+    @stack('styles')
 </head>
 <body class="bg-surface text-on-surface flex h-screen overflow-hidden font-body-md" x-data="{ sidebarOpen: false }">
 
@@ -172,5 +173,6 @@
     <div id="sidebar-overlay" x-show="sidebarOpen" @click="sidebarOpen = false" x-transition.opacity class="fixed inset-0 bg-black/40 z-40 md:hidden" style="display: none;"></div>
 
     @livewireScripts
+    @stack('scripts')
 </body>
 </html>

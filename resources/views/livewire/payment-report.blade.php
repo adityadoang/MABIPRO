@@ -175,7 +175,7 @@
                             </td>
                             <td class="text-center">
                                 @if($unit->payment_proof_path)
-                                    <a href="{{ Storage::url($unit->payment_proof_path) }}"
+                                    <a href="{{ asset('storage/' . $unit->payment_proof_path) }}"
                                        target="_blank"
                                        class="proof-btn"
                                        title="Lihat Bukti Pembayaran">
@@ -412,7 +412,7 @@
                         @if($unit->payment_proof_path)
                             <div class="mobile-card-row">
                                 <span class="mobile-card-label">Bukti</span>
-                                <a href="{{ Storage::url($unit->payment_proof_path) }}" target="_blank" class="proof-btn-sm">
+                                <a href="{{ asset('storage/' . $unit->payment_proof_path) }}" target="_blank" class="proof-btn-sm">
                                     Lihat Dokumen →
                                 </a>
                             </div>
@@ -567,6 +567,7 @@
     </div>
     @endif
 </div>
+@push('styles')
 <style>
 /* ── Layout ── */
 .page-wrapper { max-width: 1400px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
@@ -840,3 +841,4 @@
 .btn-save:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16,185,129,0.4); }
 .btn-save svg { width: 16px; height: 16px; }
 </style>
+@endpush
