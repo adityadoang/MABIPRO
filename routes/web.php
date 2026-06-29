@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\BlockController;
+use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\UserManager;
+use App\Livewire\Admin\BlockManager;
+use App\Livewire\Admin\UnitManager;
+use App\Livewire\Production\Dashboard as ProductionDashboard;
+use App\Livewire\Production\UnitDetail;
 use App\Http\Controllers\LegalitasController;
 use App\Http\Controllers\ProductionController;
-use App\Http\Controllers\UnitController;
 use App\Livewire\MarketingDashboard;
 use App\Livewire\PaymentReport;
 use App\Livewire\LegalitasDashboard;
@@ -63,11 +65,10 @@ Route::middleware('auth')->prefix('legalitas')->name('legalitas.')->group(functi
 
 Route::middleware('auth')->prefix('production')->name('production.')->group(function () {
     Route::get('/', function () { return redirect()->route('production.dashboard'); });
-    Route::get('/dashboard', [ProductionController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', ProductionDashboard::class)->name('dashboard');
     
-    Route::get('/{id}', [ProductionController::class, 'show'])->name('show');
-    Route::get('/{id}/edit', [ProductionController::class, 'edit'])->name('edit');
-    Route::put('/{id}/update', [ProductionController::class, 'updateProgress'])->name('update');
+    Route::get('/{id}', UnitDetail::class)->name('show');
+    // Keep generate report in controller
     Route::get('/{id}/report', [ProductionController::class, 'generateReport'])->name('report');
 
     // API endpoint untuk ambil unit berdasarkan blok
@@ -91,27 +92,16 @@ Route::middleware(['auth', 'role:Admin'])
         Route::get('/', function () { return redirect()->route('admin.dashboard'); });
 
         // Dashboard Admin
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', Dashboard::class)->name('dashboard');
 
         // CRUD Users
-        Route::resource('users', UserController::class)
-            ->except(['show']);
+        Route::get('/users', UserManager::class)->name('users.index');
 
         // Master Data Blok (dari feature/modul-produksi)
-        Route::get('/blocks', [BlockController::class, 'index'])->name('blocks.index');
-        Route::get('/blocks/create', [BlockController::class, 'create'])->name('blocks.create');
-        Route::post('/blocks', [BlockController::class, 'store'])->name('blocks.store');
-        Route::get('/blocks/{block}/edit', [BlockController::class, 'edit'])->name('blocks.edit');
-        Route::put('/blocks/{block}', [BlockController::class, 'update'])->name('blocks.update');
-        Route::delete('/blocks/{block}', [BlockController::class, 'destroy'])->name('blocks.destroy');
+        Route::get('/blocks', BlockManager::class)->name('blocks.index');
 
         // Master Data Unit (dari feature/modul-produksi)
-        Route::get('/units', [UnitController::class, 'index'])->name('units.index');
-        Route::get('/units/create', [UnitController::class, 'create'])->name('units.create');
-        Route::post('/units', [UnitController::class, 'store'])->name('units.store');
-        Route::get('/units/{unit}/edit', [UnitController::class, 'edit'])->name('units.edit');
-        Route::put('/units/{unit}', [UnitController::class, 'update'])->name('units.update');
-        Route::delete('/units/{unit}', [UnitController::class, 'destroy'])->name('units.destroy');
+        Route::get('/units', UnitManager::class)->name('units.index');
     });
 
 require __DIR__.'/auth.php';

@@ -244,8 +244,7 @@ class MarketingDashboard extends Component
                 if ($this->searchUnit != '') {
                     $kataKunci = '%' . strtolower($this->searchUnit) . '%';
                     $query->where(function($q) use ($kataKunci) {
-                        $q->where('unit_number', 'like', $kataKunci)
-                          ->orWhere('customer_name', 'like', $kataKunci);
+                        $q->where('unit_number', 'like', $kataKunci);
                     });
                 }
                 $filteredUnits = $query->get();

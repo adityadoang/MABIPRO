@@ -118,6 +118,7 @@
             @endif
 
             @yield('content')
+            {{ $slot ?? '' }}
         </div>
 
         <!-- Footer -->

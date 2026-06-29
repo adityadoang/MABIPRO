@@ -8,7 +8,7 @@
             <div class="date-badge" id="date-badge">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2          0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
                 <span id="current-date-label">{{ now()->translatedFormat('M Y') }}</span>
             </div>
@@ -373,7 +373,7 @@
                                     <label class="form-label" for="dp-amount">Nominal DP (Rp) <span class="required-mark">*</span></label>
                                     <div class="input-with-addon">
                                         <span class="input-addon addon-left-label">Rp</span>
-                                        <input id="dp-amount" type="number" wire:model.live="dpAmount"
+                                        <input id="dp-amount" type="number" wire:model.live.debounce.500ms="dpAmount"
                                                class="form-input" placeholder="0" min="0">
                                     </div>
                                     @error('dpAmount') <p class="form-error">{{ $message }}</p> @enderror
@@ -381,7 +381,7 @@
                                 <div class="form-group">
                                     <label class="form-label" for="dp-percentage">Persentase DP (%) <span class="required-mark">*</span></label>
                                     <div class="input-with-addon">
-                                        <input id="dp-percentage" type="number" wire:model.live="dpPercentage"
+                                        <input id="dp-percentage" type="number" wire:model.live.debounce.500ms="dpPercentage"
                                                class="form-input" placeholder="10" min="0" max="100" step="0.01">
                                         <span class="input-addon">%</span>
                                     </div>
