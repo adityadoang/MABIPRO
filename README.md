@@ -143,3 +143,17 @@ php artisan optimize:clear
   php artisan migrate
   npm install
   ```
+
+## Link Aplikasi
+
+http://kelas-c-3.informatika-unjedir.web.id
+
+## Link Youtube Presentasi
+
+https://youtu.be/nvl7AhOi_Ac
+
+## Dokumen Hasil Whitebox dan Blackbox
+
+- https://docs.google.com/document/d/1c7RRfI4dbMVm7yvaMlx8l5R8PPzxornMF4C0W4SHVRo/edit?usp=sharing
+
+- https://docs.google.com/document/d/1ZaM-pZGx1-VRTuvxqsmpuRWrWFyjk2Xh6Iv6UII6msI/edit?usp=sharing\
