@@ -107,7 +107,10 @@
                         <div class="border-l-4 border-primary pl-4 py-2 hover:bg-surface-container-high transition-colors rounded-r-lg" wire:key="prog-{{ $progress->id }}">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <h3 class="font-headline-sm font-semibold text-on-surface">{{ $progress->tahap }}</h3>
+                                    @if($progress->kategori)
+                                        <span class="inline-block bg-primary-container text-on-primary-container font-label-sm text-[10px] font-bold px-2 py-0.5 rounded-full mb-1 align-middle">Produk Sampingan</span>
+                                    @endif
+                                    <h3 class="font-headline-sm font-semibold text-on-surface">{{ $progress->kategori ?? $progress->tahap }}</h3>
                                     <p class="font-body-md text-sm text-on-surface-variant mt-1">{{ $progress->catatan }}</p>
                                     <p class="font-body-sm text-xs text-on-surface-variant mt-2 flex items-center gap-1">
                                         <span class="material-symbols-outlined text-[12px]">person</span> {{ $progress->updater->name ?? 'Unknown' }} 
@@ -146,10 +149,10 @@
                         <span class="material-symbols-outlined text-[18px]">edit</span>
                         Update Progress
                     </button>
-                    <!-- <a href="{{ route('production.report', $unit->id) }}" class="block w-full py-2.5 bg-surface border border-outline-variant text-on-surface rounded-lg font-label-md text-sm text-center hover:bg-surface-container-high transition-colors flex justify-center items-center gap-2">
+                    <a href="{{ route('production.report', $unit->id) }}" class="block w-full py-2.5 bg-surface border border-outline-variant text-on-surface rounded-lg font-label-md text-sm text-center hover:bg-surface-container-high transition-colors flex justify-center items-center gap-2">
                         <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
                         Generate PDF Report
-                    </a> -->
+                    </a>
                 </div>
             </div>
 
@@ -164,7 +167,7 @@
                             <div class="w-2 h-2 rounded-full bg-secondary mt-2 flex-shrink-0"></div>
                             <div class="flex-1">
                                 <p class="font-body-sm text-xs text-on-surface-variant">{{ $activity->created_at->diffForHumans() }}</p>
-                                <p class="font-body-md text-sm text-on-surface font-medium">{{ $activity->tahap }}</p>
+                                <p class="font-body-md text-sm text-on-surface font-medium">{{ $activity->kategori ?? $activity->tahap }}</p>
                                 <p class="font-label-sm text-xs text-primary font-bold mt-1">{{ $activity->persentase }}%</p>
                             </div>
                         </div>
@@ -176,8 +179,8 @@
 
     <!-- Modal Form Update Progress -->
     @if($isModalOpen)
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" x-data @keydown.escape.window="$wire.closeModal()">
-        <div class="bg-surface rounded-2xl border border-outline-variant shadow-lg w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]" @click.outside="$wire.closeModal()">
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" x-data @keydown.escape.window="$wire.closeModal()" wire:click.self="closeModal">
+        <div class="bg-surface rounded-2xl border border-outline-variant shadow-lg w-[92vw] max-w-[520px] mx-4 overflow-hidden flex flex-col max-h-[90vh]">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
                 <h3 class="font-headline-sm text-headline-sm font-bold text-primary">
                     Update Progress: Unit {{ $unit->unit_number }}
@@ -190,17 +193,47 @@
             <div class="p-6 overflow-y-auto">
                 <form wire:submit="saveProgress" class="space-y-4">
                     <div>
-                        <label class="block font-label-md text-on-surface mb-1">Tahap <span class="text-error">*</span></label>
-                        <select wire:model="tahap" class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-on-surface px-4 py-2 focus:ring-primary focus:border-primary transition-colors" required>
-                            <option value="Persiapan Lahan">Persiapan Lahan</option>
-                            <option value="Pondasi">Pondasi</option>
-                            <option value="Struktur & Dinding">Struktur & Dinding</option>
-                            <option value="Pengecatan">Pengecatan</option>
-                            <option value="Finishing">Finishing</option>
-                            <option value="Serah Terima">Serah Terima</option>
+                        <label class="block font-label-md text-on-surface mb-1">Kategori Pekerjaan <span class="text-error">*</span></label>
+                        <select wire:model.live="kategoriProduk" class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-on-surface px-4 py-2 focus:ring-primary focus:border-primary transition-colors" required>
+                            <optgroup label="Tahapan Utama (Rumah)">
+                                <option value="Utama">Tahapan Utama (Rumah)</option>
+                            </optgroup>
+                            <optgroup label="Produk Sampingan / Lainnya">
+                                @foreach(['Jalan', 'Masjid', 'Taman', 'Fasilitas Umum', 'Lainnya'] as $kategori)
+                                    <option value="{{ $kategori }}">{{ $kategori }} {{ $kategori === 'Lainnya' ? '(ketik manual)' : '' }}</option>
+                                @endforeach
+                            </optgroup>
                         </select>
-                        @error('tahap') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
+                        @error('kategoriProduk') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
+
+                    @if($kategoriProduk === 'Utama')
+                        <div>
+                            <label class="block font-label-md text-on-surface mb-1">Tahap <span class="text-error">*</span></label>
+                            <select wire:model="tahap" class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-on-surface px-4 py-2 focus:ring-primary focus:border-primary transition-colors" required>
+                                <option value="Persiapan Lahan">Persiapan Lahan</option>
+                                <option value="Pondasi">Pondasi</option>
+                                <option value="Struktur & Dinding">Struktur & Dinding</option>
+                                <option value="Pengecatan">Pengecatan</option>
+                                <option value="Finishing">Finishing</option>
+                                <option value="Serah Terima">Serah Terima</option>
+                            </select>
+                            @error('tahap') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                    @else
+                        <div>
+                            <label class="block font-label-md text-on-surface mb-1">
+                                {{ $kategoriProduk === 'Lainnya' ? 'Nama Kategori Manual' : 'Kategori: ' . $kategoriProduk }}
+                                @if($kategoriProduk === 'Lainnya')<span class="text-error">*</span>@endif
+                            </label>
+                            @if($kategoriProduk === 'Lainnya')
+                                <input type="text" wire:model="kategoriManual" class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-on-surface px-4 py-2 focus:ring-primary focus:border-primary transition-colors" placeholder="Contoh: Pos Ronda, Balai Warga, ..." required>
+                            @else
+                                <input type="text" value="{{ $kategoriProduk }}" disabled class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-on-surface-variant px-4 py-2 opacity-70">
+                            @endif
+                            @error('kategoriManual') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                    @endif
 
                     <div>
                         <label class="block font-label-md text-on-surface mb-1">Persentase (%) <span class="text-error">*</span></label>

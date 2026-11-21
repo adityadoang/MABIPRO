@@ -4,10 +4,10 @@ namespace App\Livewire\Admin;
 
 use App\Models\Block;
 use App\Models\Unit;
-use Livewire\Component;
-use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.admin')]
 #[Title('Manajemen Unit')]
@@ -16,18 +16,30 @@ class UnitManager extends Component
     use WithPagination;
 
     public $isModalOpen = false;
+
     public $isEditMode = false;
-    
+
     public $unitId;
+
     public $block_id;
+
     public $unit_number;
+
     public $harga_unit;
-    
+
+    public $luas_tanah;
+
+    public $lebar_tanah;
+
+    public $luas_bangunan;
+
+    public $lebar_bangunan;
+
     // Fields for Edit Mode
     public $customer_name;
+
     public $customer_phone;
-    public $luas_tanah;
-    public $luas_bangunan;
+
     public $status_penjualan;
 
     protected function rules()
@@ -36,14 +48,16 @@ class UnitManager extends Component
             'block_id' => ['required', 'exists:blocks,id'],
             'unit_number' => ['required', 'string', 'max:50'],
             'harga_unit' => ['nullable', 'numeric', 'min:0'],
+            'luas_tanah' => ['nullable', 'numeric', 'min:0'],
+            'lebar_tanah' => ['nullable', 'numeric', 'min:0'],
+            'luas_bangunan' => ['nullable', 'numeric', 'min:0'],
+            'lebar_bangunan' => ['nullable', 'numeric', 'min:0'],
         ];
 
         if ($this->isEditMode) {
             $rules = array_merge($rules, [
                 'customer_name' => ['nullable', 'string', 'max:255'],
                 'customer_phone' => ['nullable', 'string', 'max:20'],
-                'luas_tanah' => ['nullable', 'numeric', 'min:0'],
-                'luas_bangunan' => ['nullable', 'numeric', 'min:0'],
                 'status_penjualan' => ['required', 'in:Belum Terjual,Sudah DP,Terjual'],
             ]);
         }
@@ -55,9 +69,9 @@ class UnitManager extends Component
     {
         $this->resetValidation();
         $this->reset([
-            'unitId', 'block_id', 'unit_number', 'harga_unit', 
-            'customer_name', 'customer_phone', 'luas_tanah', 
-            'luas_bangunan', 'status_penjualan'
+            'unitId', 'block_id', 'unit_number', 'harga_unit',
+            'luas_tanah', 'lebar_tanah', 'luas_bangunan', 'lebar_bangunan',
+            'customer_name', 'customer_phone', 'status_penjualan',
         ]);
         $this->isEditMode = false;
         $this->isModalOpen = true;
@@ -75,13 +89,15 @@ class UnitManager extends Component
         $this->block_id = $unit->block_id;
         $this->unit_number = $unit->unit_number;
         $this->harga_unit = $unit->harga_unit;
-        
+
         $this->customer_name = $unit->customer_name;
         $this->customer_phone = $unit->customer_phone;
         $this->luas_tanah = $unit->luas_tanah;
+        $this->lebar_tanah = $unit->lebar_tanah;
         $this->luas_bangunan = $unit->luas_bangunan;
+        $this->lebar_bangunan = $unit->lebar_bangunan;
         $this->status_penjualan = $unit->status_penjualan;
-        
+
         $this->isEditMode = true;
         $this->isModalOpen = true;
     }
@@ -93,15 +109,17 @@ class UnitManager extends Component
         $data = [
             'block_id' => $this->block_id,
             'unit_number' => $this->unit_number,
-            'harga_unit' => $this->harga_unit,
+            'harga_unit' => ($this->harga_unit !== '' && $this->harga_unit !== null) ? $this->harga_unit : null,
+            'luas_tanah' => ($this->luas_tanah !== '' && $this->luas_tanah !== null) ? $this->luas_tanah : null,
+            'lebar_tanah' => ($this->lebar_tanah !== '' && $this->lebar_tanah !== null) ? $this->lebar_tanah : null,
+            'luas_bangunan' => ($this->luas_bangunan !== '' && $this->luas_bangunan !== null) ? $this->luas_bangunan : null,
+            'lebar_bangunan' => ($this->lebar_bangunan !== '' && $this->lebar_bangunan !== null) ? $this->lebar_bangunan : null,
         ];
 
         if ($this->isEditMode) {
             $data = array_merge($data, [
-                'customer_name' => $this->customer_name,
-                'customer_phone' => $this->customer_phone,
-                'luas_tanah' => $this->luas_tanah,
-                'luas_bangunan' => $this->luas_bangunan,
+                'customer_name' => $this->customer_name ?: null,
+                'customer_phone' => $this->customer_phone ?: null,
                 'status_penjualan' => $this->status_penjualan,
             ]);
             Unit::find($this->unitId)->update($data);
@@ -120,7 +138,8 @@ class UnitManager extends Component
     public function delete(Unit $unit)
     {
         if ($unit->status_penjualan !== 'Belum Terjual' || $unit->progres_pembangunan > 0) {
-            session()->flash('error', "Tidak dapat menghapus unit yang sudah terjual atau memiliki progres pembangunan.");
+            session()->flash('error', 'Tidak dapat menghapus unit yang sudah terjual atau memiliki progres pembangunan.');
+
             return;
         }
 
@@ -132,6 +151,7 @@ class UnitManager extends Component
     {
         $units = Unit::with('block')->latest()->paginate(15);
         $blocks = Block::orderBy('nama_blok')->get();
+
         return view('livewire.admin.unit-manager', compact('units', 'blocks'));
     }
 }

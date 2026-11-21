@@ -67,8 +67,8 @@
 
     <!-- Modal Form -->
     @if($isModalOpen)
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" x-data @keydown.escape.window="$wire.closeModal()">
-        <div class="bg-surface rounded-2xl border border-outline-variant shadow-lg w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]" @click.outside="$wire.closeModal()">
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" x-data @keydown.escape.window="$wire.closeModal()" wire:click.self="closeModal">
+        <div class="bg-surface rounded-2xl border border-outline-variant shadow-lg w-[92vw] max-w-[520px] mx-4 overflow-hidden flex flex-col max-h-[90vh]">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
                 <h3 class="font-headline-sm text-headline-sm font-bold text-primary">
                     {{ $isEditMode ? 'Edit Blok' : 'Tambah Blok Baru' }}
