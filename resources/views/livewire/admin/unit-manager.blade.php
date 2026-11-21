@@ -74,8 +74,8 @@
 
     <!-- Modal Form -->
     @if($isModalOpen)
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" x-data @keydown.escape.window="$wire.closeModal()">
-        <div class="bg-surface rounded-2xl border border-outline-variant shadow-lg w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]" @click.outside="$wire.closeModal()">
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" x-data @keydown.escape.window="$wire.closeModal()" wire:click.self="closeModal">
+        <div class="bg-surface rounded-2xl border border-outline-variant shadow-lg w-[94vw] max-w-[680px] mx-4 overflow-hidden flex flex-col max-h-[90vh]">
             <div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
                 <h3 class="font-headline-sm text-headline-sm font-bold text-primary">
                     {{ $isEditMode ? 'Edit Unit' : 'Tambah Unit Baru' }}
@@ -112,6 +112,29 @@
                         @error('harga_unit') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block font-label-md text-on-surface mb-1">Luas Tanah (m&sup2;)</label>
+                            <input type="number" wire:model="luas_tanah" step="0.01" min="0" class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-on-surface px-4 py-2 focus:ring-primary focus:border-primary transition-colors">
+                            @error('luas_tanah') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block font-label-md text-on-surface mb-1">Lebar Tanah (m)</label>
+                            <input type="number" wire:model="lebar_tanah" step="0.01" min="0" class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-on-surface px-4 py-2 focus:ring-primary focus:border-primary transition-colors">
+                            @error('lebar_tanah') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block font-label-md text-on-surface mb-1">Luas Bangunan (m&sup2;)</label>
+                            <input type="number" wire:model="luas_bangunan" step="0.01" min="0" class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-on-surface px-4 py-2 focus:ring-primary focus:border-primary transition-colors">
+                            @error('luas_bangunan') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block font-label-md text-on-surface mb-1">Lebar Bangunan (m)</label>
+                            <input type="number" wire:model="lebar_bangunan" step="0.01" min="0" class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-on-surface px-4 py-2 focus:ring-primary focus:border-primary transition-colors">
+                            @error('lebar_bangunan') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
                     @if($isEditMode)
                     <hr class="border-outline-variant my-4">
                     <h4 class="font-label-lg font-bold text-primary mb-2">Informasi Tambahan (Edit Mode)</h4>
@@ -138,18 +161,6 @@
                             <label class="block font-label-md text-on-surface mb-1">No. HP Konsumen</label>
                             <input type="text" wire:model="customer_phone" class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-on-surface px-4 py-2 focus:ring-primary focus:border-primary transition-colors">
                             @error('customer_phone') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
-                        </div>
-
-                        <div>
-                            <label class="block font-label-md text-on-surface mb-1">Luas Tanah (m&sup2;)</label>
-                            <input type="number" wire:model="luas_tanah" step="0.01" class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-on-surface px-4 py-2 focus:ring-primary focus:border-primary transition-colors">
-                            @error('luas_tanah') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
-                        </div>
-
-                        <div>
-                            <label class="block font-label-md text-on-surface mb-1">Luas Bangunan (m&sup2;)</label>
-                            <input type="number" wire:model="luas_bangunan" step="0.01" class="w-full rounded-lg border-outline-variant bg-surface-container-lowest text-on-surface px-4 py-2 focus:ring-primary focus:border-primary transition-colors">
-                            @error('luas_bangunan') <span class="text-error text-xs mt-1 block">{{ $message }}</span> @enderror
                         </div>
                     </div>
                     @endif

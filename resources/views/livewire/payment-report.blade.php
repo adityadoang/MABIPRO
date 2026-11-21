@@ -146,6 +146,17 @@
                                 @if($isKpr && $unit->dp_percentage)
                                     <div class="dp-pct">{{ $unit->dp_percentage }}% DP</div>
                                 @endif
+                                @if($isKpr && ($unit->sbum_amount > 0 || $unit->sbum_status))
+                                    <div style="margin-top: 4px; font-size: 0.68rem; color: #64748b; line-height: 1.3;">
+                                        <div>Konsumen: Rp {{ number_format($unit->dp_konsumen_amount ?? ($unit->dp_amount - ($unit->sbum_amount ?? 0)), 0, ',', '.') }}</div>
+                                        <div style="display:flex; align-items:center; gap:4px; margin-top:2px;">
+                                            <span>SBUM: Rp {{ number_format($unit->sbum_amount ?? 0, 0, ',', '.') }}</span>
+                                            <span style="font-size: 0.62rem; padding: 1px 5px; border-radius: 4px; font-weight: 700; {{ $unit->sbum_status === 'Cair' ? 'background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;' : 'background:#fffbeb; color:#b45309; border:1px solid #fde68a;' }}">
+                                                {{ $unit->sbum_status === 'Cair' ? '✓ Cair' : '⏳ Belum Cair' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                @endif
                             </td>
                             <td>
                                 @if($isKpr && $unit->pokok_kredit)
@@ -371,6 +382,16 @@
                             <span class="mobile-card-label">{{ $isKpr ? 'DP Terbayar' : 'Terbayar' }}</span>
                             <span class="mobile-amount">Rp {{ number_format($unit->amount_paid ?? 0, 0, ',', '.') }}</span>
                         </div>
+                        @if($isKpr && ($unit->sbum_amount > 0 || $unit->sbum_status))
+                        <div class="mobile-card-row" style="font-size:0.75rem; color:#64748b;">
+                            <span class="mobile-card-label">Rincian DP</span>
+                            <span class="mobile-card-val">
+                                Konsumen: Rp {{ number_format($unit->dp_konsumen_amount ?? ($unit->dp_amount - ($unit->sbum_amount ?? 0)), 0, ',', '.') }} |
+                                SBUM: Rp {{ number_format($unit->sbum_amount ?? 0, 0, ',', '.') }}
+                                ({{ $unit->sbum_status === 'Cair' ? '✓ Cair' : '⏳ Belum Cair' }})
+                            </span>
+                        </div>
+                        @endif
                         @if($isKpr)
                             @if($unit->pokok_kredit)
                             <div class="mobile-card-row">

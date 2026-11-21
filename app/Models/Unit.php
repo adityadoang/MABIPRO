@@ -28,12 +28,20 @@ class Unit extends Model
         'akad_date',
         'dp_amount',
         'dp_percentage',
+        'dp_konsumen_amount',
+        'dp_konsumen_percentage',
+        'sbum_amount',
+        'sbum_percentage',
+        'sbum_status',
+        'sbum_cair_date',
         'pokok_kredit',
         'interest_rate',
         'interest_type',
         'monthly_installment',
         'luas_tanah',
+        'lebar_tanah',
         'luas_bangunan',
+        'lebar_bangunan',
     ];
 
     public function legalDocuments()
@@ -45,7 +53,6 @@ class Unit extends Model
     {
         return $this->hasMany(InstallmentPayment::class, 'unit_id');
     }
-
 
     public function constructionProgress()
     {
@@ -67,10 +74,10 @@ class Unit extends Model
         return $this->hasOneThrough(
             ProgressPhoto::class,
             ConstructionProgress::class,
-            'unit_id',          
-            'progress_id',       
-            'id',                //unit
-            'id'                 //construction
+            'unit_id',
+            'progress_id',
+            'id',                // unit
+            'id'                 // construction
         )->latestOfMany();
     }
 }

@@ -60,7 +60,7 @@ class BlockManager extends Component
 
         $data = [
             'nama_blok' => $this->nama_blok,
-            'deskripsi' => $this->deskripsi,
+            'deskripsi' => $this->deskripsi ?: null,
         ];
 
         if ($this->isEditMode) {

@@ -48,6 +48,26 @@ class PaymentReport extends Component
             ]);
         }
     }
+    public function updateSbumStatus(int $unitId, string $newStatus): void
+    {
+        if (!Auth::check() || (!Auth::user()->isAdmin() && !Auth::user()->isMarketing())) {
+            session()->flash('error', 'Hanya divisi Marketing dan Admin yang dapat mengubah status SBUM.');
+            return;
+        }
+
+        $validStatuses = ['Belum Cair', 'Cair'];
+        if (!in_array($newStatus, $validStatuses)) {
+            return;
+        }
+
+        $unit = Unit::findOrFail($unitId);
+        $unit->update([
+            'sbum_status'    => $newStatus,
+            'sbum_cair_date' => $newStatus === 'Cair' ? now()->toDateString() : null,
+        ]);
+
+        session()->flash('message', "Status SBUM unit {$unit->unit_number} berhasil diperbarui menjadi {$newStatus}.");
+    }
     public function openEditModal(int $unitId, string $month): void
     {
         $this->activeTrackerUnitId = $unitId;

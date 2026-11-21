@@ -185,19 +185,28 @@
                         </p>
                     @endif
                 </div>
-                <div class="unit-search-wrap">
-                    <svg class="unit-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <input
-                        wire:model.live.debounce.300ms="searchUnit"
-                        type="text"
-                        placeholder="Search Unit ID..."
-                        class="unit-search-input"
-                        id="unit-search-input"
-                        aria-label="Cari unit"
-                    >
+                <div class="unit-panel-tools">
+                    <div class="sbum-filter-wrap">
+                        <select wire:model.live="sbumFilter" class="sbum-filter-select" id="sbum-filter-select" aria-label="Filter status pencairan SBUM">
+                            <option value="">Status SBUM: Semua</option>
+                            <option value="Belum Cair">⏳ SBUM: Belum Cair ({{ $sbumStats['belum_cair'] }})</option>
+                            <option value="Cair">✓ SBUM: Cair ({{ $sbumStats['cair'] }})</option>
+                        </select>
+                    </div>
+                    <div class="unit-search-wrap">
+                        <svg class="unit-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <input
+                            wire:model.live.debounce.300ms="searchUnit"
+                            type="text"
+                            placeholder="Cari No. Unit / Nama Pembeli..."
+                            class="unit-search-input"
+                            id="unit-search-input"
+                            aria-label="Cari unit"
+                        >
+                    </div>
                 </div>
             </div>
             <div class="unit-list-wrap">
@@ -235,6 +244,9 @@
                             <div wire:key="unit-{{ $unit->id }}" class="unit-row {{ $rowAccent }}" id="unit-row-{{ $unit->id }}">
                                 <div class="unit-row-id">
                                     <span class="unit-row-number">{{ $unit->unit_number }}</span>
+                                    @if($unit->customer_name)
+                                        <span class="unit-row-buyer" style="font-size:0.7rem;font-weight:600;color:#475569;">Pembeli: {{ $unit->customer_name }}</span>
+                                    @endif
                                     @if($unit->harga_unit)
                                         <span class="unit-row-price">Rp {{ number_format($unit->harga_unit, 0, ',', '.') }}</span>
                                     @else
@@ -246,6 +258,25 @@
                                         <span class="unit-row-method">{{ $unit->payment_method }}</span>
                                         @if($unit->payment_method === 'KPR' && $unit->kpr_duration_months)
                                             <span class="unit-row-tenor">{{ $unit->kpr_duration_months }} bln</span>
+                                        @endif
+                                        @if($unit->payment_method === 'KPR')
+                                            <div class="sbum-checker-badge-wrap" title="Status Pencairan SBUM (Dapat diedit oleh Marketing &amp; Admin)">
+                                                @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isMarketing()))
+                                                    <select
+                                                        wire:change="updateSbumStatus({{ $unit->id }}, $event.target.value)"
+                                                        class="sbum-row-select {{ $unit->sbum_status === 'Cair' ? 'sbum-cair' : 'sbum-belum' }}"
+                                                        id="sbum-status-row-{{ $unit->id }}"
+                                                        aria-label="Status pencairan SBUM unit {{ $unit->unit_number }}"
+                                                    >
+                                                        <option value="Belum Cair" {{ ($unit->sbum_status ?? 'Belum Cair') === 'Belum Cair' ? 'selected' : '' }}>⏳ SBUM: Belum Cair</option>
+                                                        <option value="Cair" {{ $unit->sbum_status === 'Cair' ? 'selected' : '' }}>✓ SBUM: Cair</option>
+                                                    </select>
+                                                @else
+                                                    <span class="sbum-row-badge {{ $unit->sbum_status === 'Cair' ? 'sbum-cair' : 'sbum-belum' }}">
+                                                        {{ $unit->sbum_status === 'Cair' ? '✓ SBUM Cair' : '⏳ SBUM Belum Cair' }}
+                                                    </span>
+                                                @endif
+                                            </div>
                                         @endif
                                     </div>
                                 @else
@@ -316,6 +347,14 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
+                        <label class="form-label" for="customer-name">Nama Pembeli</label>
+                        <input id="customer-name" type="text" wire:model="customerName"
+                               class="form-input" placeholder="Nama pembeli unit ini..."
+                               maxlength="255">
+                        <p class="form-hint">Nama pembeli akan tersimpan setelah unit dibayar (DP atau terjual).</p>
+                        @error('customerName') <p class="form-error">{{ $message }}</p> @enderror
+                    </div>
+                    <div class="form-group">
                         <label class="form-label" for="harga-unit">Harga Unit (Rp) @if(auth()->check() && auth()->user()->isAdmin())<span class="required-mark">*</span>@endif</label>
                         <div class="input-with-addon @if(!auth()->check() || !auth()->user()->isAdmin()) bg-surface-container opacity-70 @endif">
                             <span class="input-addon addon-left-label">Rp</span>
@@ -362,38 +401,103 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-section">
+                        <div class="form-section dp-section-container">
                             <div class="form-section-title">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                Down Payment (DP)
-                                <span class="section-note">Nominal ↔ Persentase dihitung otomatis</span>
+                                <span>Pembagian Uang Muka (DP) &amp; Bantuan SBUM</span>
+                                <span class="section-note">Nominal ↔ Persen terhitung otomatis</span>
                             </div>
-                            <div class="form-grid-2">
-                                <div class="form-group">
-                                    <label class="form-label" for="dp-amount">Nominal DP (Rp) <span class="required-mark">*</span></label>
-                                    <div class="input-with-addon">
-                                        <span class="input-addon addon-left-label">Rp</span>
-                                        <input id="dp-amount" type="number" wire:model.live.debounce.500ms="dpAmount"
-                                               class="form-input" placeholder="0" min="0">
+
+                            <div class="dp-split-wrapper">
+                                <!-- 1. DP Konsumen -->
+                                <div class="dp-subcard">
+                                    <div class="dp-subcard-header">
+                                        <span class="dp-subcard-badge dp-badge-konsumen">Pribadi</span>
+                                        <h4 class="dp-subcard-title">1. DP Konsumen</h4>
                                     </div>
-                                    @error('dpAmount') <p class="form-error">{{ $message }}</p> @enderror
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="dp-percentage">Persentase DP (%) <span class="required-mark">*</span></label>
-                                    <div class="input-with-addon">
-                                        <input id="dp-percentage" type="number" wire:model.live.debounce.500ms="dpPercentage"
-                                               class="form-input" placeholder="10" min="0" max="100" step="0.01">
-                                        <span class="input-addon">%</span>
+                                    <div class="form-grid-2">
+                                        <div class="form-group">
+                                            <label class="form-label" for="dp-konsumen-amount">Nominal DP Konsumen (Rp)</label>
+                                            <div class="input-with-addon">
+                                                <span class="input-addon addon-left-label">Rp</span>
+                                                <input id="dp-konsumen-amount" type="number" wire:model.live.debounce.500ms="dpKonsumenAmount"
+                                                       class="form-input" placeholder="0" min="0">
+                                            </div>
+                                            @error('dpKonsumenAmount') <p class="form-error">{{ $message }}</p> @enderror
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="dp-konsumen-percentage">Persentase DP Konsumen (%)</label>
+                                            <div class="input-with-addon">
+                                                <input id="dp-konsumen-percentage" type="number" wire:model.live.debounce.500ms="dpKonsumenPercentage"
+                                                       class="form-input" placeholder="0" min="0" max="100" step="0.01">
+                                                <span class="input-addon">%</span>
+                                            </div>
+                                            @error('dpKonsumenPercentage') <p class="form-error">{{ $message }}</p> @enderror
+                                        </div>
                                     </div>
-                                    @error('dpPercentage') <p class="form-error">{{ $message }}</p> @enderror
+                                </div>
+
+                                <!-- 2. Bantuan DP (SBUM) -->
+                                <div class="dp-subcard dp-subcard-sbum">
+                                    <div class="dp-subcard-header">
+                                        <span class="dp-subcard-badge dp-badge-sbum">Subsidi Pemerintah</span>
+                                        <h4 class="dp-subcard-title">2. Bantuan DP (SBUM)</h4>
+                                    </div>
+                                    <div class="form-grid-2">
+                                        <div class="form-group">
+                                            <label class="form-label" for="sbum-amount">Nominal Bantuan DP (Rp)</label>
+                                            <div class="input-with-addon">
+                                                <span class="input-addon addon-left-label">Rp</span>
+                                                <input id="sbum-amount" type="number" wire:model.live.debounce.500ms="sbumAmount"
+                                                       class="form-input" placeholder="0" min="0">
+                                            </div>
+                                            @error('sbumAmount') <p class="form-error">{{ $message }}</p> @enderror
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="sbum-percentage">Persentase SBUM (%)</label>
+                                            <div class="input-with-addon">
+                                                <input id="sbum-percentage" type="number" wire:model.live.debounce.500ms="sbumPercentage"
+                                                       class="form-input" placeholder="0" min="0" max="100" step="0.01">
+                                                <span class="input-addon">%</span>
+                                            </div>
+                                            @error('sbumPercentage') <p class="form-error">{{ $message }}</p> @enderror
+                                        </div>
+                                    </div>
+
+                                    <!-- Status Checker SBUM di Modal -->
+                                    <div class="sbum-status-checker-box">
+                                        <div class="sbum-status-checker-info">
+                                            <div class="sbum-status-title-row">
+                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="sbum-status-icon">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                                <span class="sbum-checker-title">Status Checker Pencairan SBUM:</span>
+                                            </div>
+                                            <span class="sbum-checker-subtitle">Dapat diedit oleh divisi Marketing &amp; Admin</span>
+                                        </div>
+                                        <div class="sbum-status-controls">
+                                            <select id="sbum-status" wire:model.live="sbumStatus" class="sbum-status-modal-select {{ $sbumStatus === 'Cair' ? 'status-cair' : 'status-belum' }}">
+                                                <option value="Belum Cair">⏳ Belum Cair</option>
+                                                <option value="Cair">✓ Sudah Cair</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            @if($pokokKredit > 0)
-                            <div class="calc-info-row">
-                                <span class="calc-info-label">Pokok Kredit (Harga − DP)</span>
-                                <span class="calc-info-value">Rp {{ number_format($pokokKredit, 0, ',', '.') }}</span>
+
+                            <!-- Ringkasan Total DP & Pokok Kredit -->
+                            <div class="dp-summary-card">
+                                <div class="dp-summary-row">
+                                    <span class="dp-summary-label">Total Uang Muka (DP Konsumen + SBUM):</span>
+                                    <span class="dp-summary-value">Rp {{ number_format($dpAmount, 0, ',', '.') }} <span class="dp-summary-pct">({{ $dpPercentage }}%)</span></span>
+                                </div>
+                                @if($pokokKredit > 0)
+                                <div class="calc-info-row">
+                                    <span class="calc-info-label">Pokok Kredit (Harga − Total DP)</span>
+                                    <span class="calc-info-value">Rp {{ number_format($pokokKredit, 0, ',', '.') }}</span>
+                                </div>
+                                @endif
                             </div>
-                            @endif
                         </div>
                         <div class="form-section">
                             <div class="form-section-title">
@@ -437,11 +541,11 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="cash-amount">Jumlah Dibayar (Rp) <span class="required-mark">*</span></label>
-                                <div class="input-with-addon bg-surface-container opacity-70">
+                                <div class="input-with-addon">
                                     <span class="input-addon">Rp</span>
-                                    <input id="cash-amount" type="number" wire:model.live="amountPaid" class="form-input" readonly disabled>
+                                    <input id="cash-amount" type="number" wire:model.live="amountPaid" class="form-input" min="1" placeholder="Masukkan nominal pembayaran">
                                 </div>
-                                <p class="form-note">Untuk pembayaran Cash, jumlah dibayar otomatis disesuaikan dengan Harga Unit.</p>
+                                <p class="form-note">Isi nominal pembayaran. Nominal lebih kecil dari harga unit akan berstatus Sudah DP; nominal lunas akan berstatus Terjual.</p>
                             </div>
                         </div>
                     @endif
@@ -1165,6 +1269,207 @@
 .unit-list-wrap::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
 .blocks-list::-webkit-scrollbar-thumb:hover,
 .unit-list-wrap::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+/* ── Unit Header Tools & SBUM Filter ── */
+.unit-panel-tools {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    flex-wrap: wrap;
+}
+.sbum-filter-select {
+    padding: 0.4375rem 0.75rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #475569;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+}
+.sbum-filter-select:focus {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34,197,94,0.1);
+    background: #fff;
+}
+
+/* ── Unit Row SBUM Status Checker ── */
+.sbum-checker-badge-wrap {
+    display: inline-flex;
+    align-items: center;
+}
+.sbum-row-select {
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    outline: none;
+}
+.sbum-row-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+.sbum-cair {
+    background: #ecfdf5 !important;
+    color: #047857 !important;
+    border-color: #a7f3d0 !important;
+}
+.sbum-belum {
+    background: #fffbeb !important;
+    color: #b45309 !important;
+    border-color: #fde68a !important;
+}
+.sbum-row-select:focus {
+    box-shadow: 0 0 0 2px rgba(16,185,129,0.2);
+}
+
+/* ── Modal DP Split & SBUM Section ── */
+.dp-section-container {
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    overflow: hidden;
+}
+.dp-split-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    padding: 0.875rem;
+    background: #f8fafc;
+}
+.dp-subcard {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.875rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+.dp-subcard-sbum {
+    border-color: #fde68a;
+    background: linear-gradient(180deg, #fff 0%, #fffdf7 100%);
+}
+.dp-subcard-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+.dp-subcard-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+.dp-subcard-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.dp-badge-konsumen {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+.dp-badge-sbum {
+    background: #fef3c7;
+    color: #d97706;
+    border: 1px solid #fde68a;
+}
+.sbum-status-checker-box {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: #fff;
+    border: 1.5px dashed #fde68a;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.sbum-status-checker-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+.sbum-status-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+.sbum-status-icon {
+    width: 16px;
+    height: 16px;
+    color: #f59e0b;
+}
+.sbum-checker-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+.sbum-checker-subtitle {
+    font-size: 0.68rem;
+    color: #64748b;
+}
+.sbum-status-modal-select {
+    padding: 0.375rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: all 0.2s;
+}
+.status-cair {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1.5px solid #6ee7b7;
+}
+.status-belum {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1.5px solid #fcd34d;
+}
+.dp-summary-card {
+    background: #f1f5f9;
+    border-top: 1px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+}
+.dp-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.375rem;
+}
+.dp-summary-value {
+    color: #0f172a;
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+.dp-summary-pct {
+    color: #2563eb;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
 /* sr-only */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border-width: 0; }
 </style>

@@ -31,7 +31,7 @@ class UserManager extends Component
         $rules = [
             'name'  => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->userId)],
-            'role'  => ['required', Rule::in(['Admin', 'Marketing', 'Produksi', 'Legalitas'])],
+            'role'  => ['required', Rule::in(['Admin', 'Marketing', 'Produksi', 'Legalitas', 'admin', 'marketing', 'produksi', 'legalitas'])],
         ];
 
         if (!$this->isEditMode || !empty($this->password)) {
@@ -60,7 +60,7 @@ class UserManager extends Component
         $this->userId = $user->id;
         $this->name = $user->name;
         $this->email = $user->email;
-        $this->role = $user->role;
+        $this->role = ucfirst(strtolower($user->role));
         $this->password = '';
         $this->password_confirmation = '';
         
@@ -72,7 +72,9 @@ class UserManager extends Component
     {
         $this->validate();
 
-        if ($this->isEditMode && $this->userId === auth()->id() && $this->role !== 'Admin' && User::where('role', 'Admin')->count() <= 1) {
+        $selectedRole = ucfirst(strtolower($this->role));
+
+        if ($this->isEditMode && $this->userId === auth()->id() && $selectedRole !== 'Admin' && User::where('role', 'Admin')->count() <= 1) {
             $this->addError('role', 'Tidak dapat mengubah role Anda karena Anda adalah satu-satunya Admin.');
             return;
         }
@@ -80,7 +82,7 @@ class UserManager extends Component
         $data = [
             'name'  => $this->name,
             'email' => $this->email,
-            'role'  => $this->role,
+            'role'  => $selectedRole,
         ];
 
         if (!empty($this->password)) {

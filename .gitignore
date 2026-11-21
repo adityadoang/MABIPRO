@@ -25,3 +25,16 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Testing & UAT Files
+/tests/Feature/RiskBasedTestingTest.php
+/tests/uat/
+/reports/
+pytest-uat.ini
+requirements-uat.txt
+generate_uat_docx.py
+/database/seeders/UatAccountSeeder.php
+TESTCASE_SCENARIO_TESTING.*
+LAPORAN_UAT_MABIPRO_REVISI.*
+Laporan_UAT_MABIPRO_Revisi.*
+WBS_MABIPRO*
